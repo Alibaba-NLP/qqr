@@ -103,7 +103,7 @@ ROLLOUT_ARGS=(
 
 EVAL_ARGS=(
    --eval-interval 10
-   --eval-prompt-data search_around ${QQR_PATH}/data/deepresearch/test.jsonl
+   --eval-prompt-data test ${QQR_PATH}/data/deepresearch/test.jsonl
    --n-samples-per-eval-prompt 1
    --eval-max-context-len 32000
    --eval-input-key query
