@@ -6,6 +6,7 @@ import logging
 from argparse import Namespace
 from collections import defaultdict
 from collections.abc import Callable
+from copy import deepcopy
 from typing import Any
 
 import numpy as np
@@ -205,12 +206,13 @@ async def generate(
     video_data = extra_info.get("videos", [])
     multimodal_inputs = extra_info.get("multimodal_inputs", None)
 
-    sampling_params["max_new_tokens"] = min(
+    current_sampling_params = deepcopy(sampling_params)
+    current_sampling_params["max_new_tokens"] = min(
         sampling_params["max_new_tokens"],
         sampling_params["max_context_length"] - len(prompt_ids),
     )
 
-    if sampling_params["max_new_tokens"] <= 10:
+    if current_sampling_params["max_new_tokens"] <= 100:
         sample.response = ""
         sample.tokens = [state.tokenizer.pad_token_id]
         sample.loss_mask = []
@@ -222,12 +224,12 @@ async def generate(
     # Enforce greedy decoding for the first response.
     # Could enable deterministic inference.
     if args.n_samples_per_prompt > 1 and sample.index % args.n_samples_per_prompt == 0:
-        sampling_params["temperature"] = 0.0
-        sampling_params["top_k"] = 1
+        current_sampling_params["temperature"] = 0.0
+        current_sampling_params["top_k"] = 1
 
     # Prepare payload for sglang server
     payload = {
-        "sampling_params": sampling_params,
+        "sampling_params": current_sampling_params,
         "return_logprob": True,
     }
 
