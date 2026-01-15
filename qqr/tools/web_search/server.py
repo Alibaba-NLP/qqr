@@ -7,6 +7,13 @@ from qqr.utils.envs import BAILIAN_WEB_SEARCH_API_KEY
 
 mcp = FastMCP("WebSearch", log_level="WARNING")
 
+"""
+获取环境变量中的 API 密钥, 用于调用联网搜索 API
+环境变量名为: BAILIAN_WEB_SEARCH_API_KEY, 在客户端侧通过配置环境变量进行设置传入
+获取方式请参考: https://help.aliyun.com/zh/model-studio/get-api-key
+API 文档: https://bailian.console.aliyun.com/tab=app#/mcp-market/detail/WebSearch
+"""
+
 
 server_params = MCPServerSseParams(
     url="https://dashscope.aliyuncs.com/api/v1/mcps/WebSearch/sse",

@@ -9,6 +9,13 @@ from qqr.utils.envs import AMAP_MAPS_API_KEY
 
 mcp = FastMCP("AMap", log_level="WARNING")
 
+"""
+获取环境变量中的 API 密钥, 用于调用高德地图 API
+环境变量名为: AMAP_MAPS_API_KEY, 在客户端侧通过配置环境变量进行设置传入
+获取方式请参考: https://lbs.amap.com/api/webservice/create-project-and-key
+API 文档: https://lbs.amap.com/api/webservice/summary
+"""
+
 
 async def reverse_geocode(location: str):
     url = "https://restapi.amap.com/v3/geocode/regeo"

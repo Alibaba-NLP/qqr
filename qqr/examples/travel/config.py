@@ -21,6 +21,7 @@ __all__ = [
 
 
 def mcp_server_config_fn() -> list[MCPServer]:
+    # https://lbs.amap.com/api/webservice/create-project-and-key
     amap_server_params = MCPServerStdioParams(
         command="python",
         args=["-m", "qqr.tools.amap"],
@@ -38,6 +39,7 @@ def mcp_server_config_fn() -> list[MCPServer]:
         concurrency_limit=16,
     )
 
+    # https://help.aliyun.com/zh/model-studio/get-api-key
     transport_server_params = MCPServerStdioParams(
         command="python",
         args=["-m", "qqr.tools.mock_transport"],
@@ -58,6 +60,7 @@ def mcp_server_config_fn() -> list[MCPServer]:
         concurrency_limit=4,
     )
 
+    # https://bailian.console.aliyun.com/tab=app#/mcp-market/detail/WebSearch
     web_search_server_params = MCPServerStdioParams(
         command="python",
         args=["-m", "qqr.tools.web_search"],

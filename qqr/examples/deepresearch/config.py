@@ -19,6 +19,7 @@ __all__ = [
 
 
 def mcp_server_config_fn() -> list[MCPServer]:
+    # https://bailian.console.aliyun.com/tab=app#/mcp-market/detail/WebSearch
     web_search_server_params = MCPServerStdioParams(
         command="python",
         args=["-m", "qqr.tools.web_search"],
