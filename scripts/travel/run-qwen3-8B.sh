@@ -169,9 +169,9 @@ MISC_ARGS=(
 )
 
 CUSTOM_ARGS=(
-   --custom-generate-function-path qqr.examples.amap.generate
-   --custom-rm-path qqr.examples.amap.group_reward
-   --custom-reward-post-process-path qqr.examples.amap.reward_post_process
+   --custom-generate-function-path qqr.examples.travel.generate
+   --custom-rm-path qqr.examples.travel.group_reward
+   --custom-reward-post-process-path qqr.examples.travel.reward_post_process
 )
 
 
