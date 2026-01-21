@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "qqr"
-version = "0.1.0"
+version = "0.1.1"
 authors = [{ name = "boli.cbl", email = "boli.cbl@alibaba-inc.com" }]
 description = "A lightweight and efficient RL framework."
 readme = { file = "README.md", content-type = "text/markdown" }
