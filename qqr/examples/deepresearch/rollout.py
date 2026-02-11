@@ -131,7 +131,7 @@ async def agent_loop(
         samples = [
             Sample(
                 group_index=sample.group_index,
-                index=-1,
+                index=sample.index,
                 tokens=[state.tokenizer.pad_token_id],
                 reward=0.0,
                 loss_mask=[],
