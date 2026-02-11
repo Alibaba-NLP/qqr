@@ -180,17 +180,13 @@ class MCPState(metaclass=SingletonMeta):
             )
 
             result = await target_server.call_tool(tool_name, tool_arguments)
+            tool_content = "\n\n---\n\n".join(
+                item.text for item in result.content if item.type == "text"
+            )
 
-            if len(result.content) == 1:
-                tool_content = result.content[0].model_dump_json()
-            elif len(result.content) > 1:
-                tool_results = [item.model_dump(mode="json") for item in result.content]
-                tool_content = json.dumps(tool_results, ensure_ascii=False, indent=4)
-            else:
-                # Empty content is a valid result (e.g., "no results found")
-                tool_content = "[]"
         except json.JSONDecodeError as e:
             tool_content = f"[Error] Invalid JSON arguments: {e}"
+
         except Exception as e:
             tool_content = f"[Error] Tool execution failed: {e}"
 
@@ -573,15 +569,15 @@ async def generate_rollout_async(
     )
     data = sorted(
         data,
-        key=lambda group: group[0][0].index
-        if isinstance(group[0], list)
-        else group[0].index,
+        key=lambda group: (
+            group[0][0].index if isinstance(group[0], list) else group[0].index
+        ),
     )
     all_samples = sorted(
         all_data,
-        key=lambda group: group[0][0].index
-        if isinstance(group[0], list)
-        else group[0].index,
+        key=lambda group: (
+            group[0][0].index if isinstance(group[0], list) else group[0].index
+        ),
     )
 
     # reset the global state to prevent effects on the next rollout or eval.
