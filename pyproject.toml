@@ -16,7 +16,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
-dependencies = ["openai-agents>=0.6.0", "cachetools"]
+dependencies = ["openai-agents>=0.7.0", "cachetools"]
 
 [project.urls]
 Homepage = "https://alibaba-nlp.github.io/qqr/"

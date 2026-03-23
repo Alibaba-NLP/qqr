@@ -4,7 +4,7 @@ import json
 import logging
 from typing import Any
 
-from agents.mcp.server import MCPServerStdio
+from agents.mcp.server import MCPServerSse, MCPServerStdio
 from cachetools import TTLCache
 from mcp.types import CallToolResult
 
@@ -110,6 +110,14 @@ class MCPServerCacheableMixin:
 
 
 class MCPServerStdioCacheable(MCPServerCacheableMixin, MCPServerStdio):
+    """
+    Cached and Rate-Limited version of MCPServerStdio.
+    """
+
+    pass
+
+
+class MCPServerSseCacheable(MCPServerCacheableMixin, MCPServerSse):
     """
     Cached and Rate-Limited version of MCPServerStdio.
     """
