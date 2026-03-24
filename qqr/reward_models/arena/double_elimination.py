@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 import torch
 
 from qqr import registers
-from qqr.schemas import GroupRewardModel, LLMJudge
+from qqr.schemas import GroupRewardModel, LLMRewardModel
 
 
 @dataclass
@@ -21,7 +21,7 @@ class Player:
 
 @registers.reward_model("double_elimination")
 class DoubleEliminationGroupRewardModel(GroupRewardModel):
-    def __init__(self, llm_judge: LLMJudge):
+    def __init__(self, llm_judge: LLMRewardModel):
         super().__init__()
 
         self.llm_judge = llm_judge
@@ -58,20 +58,18 @@ class DoubleEliminationGroupRewardModel(GroupRewardModel):
         async with asyncio.TaskGroup() as tg:
             tasks = [
                 tg.create_task(
-                    self.llm_judge.bidirectional_compare(
+                    self.llm_judge(
                         predictions[p1.idx],
                         predictions[p2.idx],
                         query=query,
-                        p1=p1,
-                        p2=p2,
                     )
                 )
                 for p1, p2 in pairings
             ]
 
-        for task in tasks:
-            score_1, score_2, metadata = task.result()
-            p1, p2 = metadata["p1"], metadata["p2"]
+        for (p1, p2), task in zip(pairings, tasks):
+            result = task.result()
+            score_1, score_2 = result["prediction"], result["reference"]
             p1.points.append(score_1)
             p2.points.append(score_2)
 

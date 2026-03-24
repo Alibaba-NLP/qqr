@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 import torch
 
 from qqr import registers
-from qqr.schemas import GroupRewardModel, LLMJudge
+from qqr.schemas import GroupRewardModel, LLMRewardModel
 
 
 @dataclass
@@ -19,7 +19,7 @@ class Player:
 
 @registers.reward_model("swiss")
 class SwissSystemGroupRewardModel(GroupRewardModel):
-    def __init__(self, llm_judge: LLMJudge, max_num_rounds: int | None = None):
+    def __init__(self, llm_judge: LLMRewardModel, max_num_rounds: int | None = None):
         super().__init__()
 
         self.llm_judge = llm_judge
@@ -37,15 +37,13 @@ class SwissSystemGroupRewardModel(GroupRewardModel):
             async with asyncio.TaskGroup() as tg:
                 for i, j in pairings:
                     task = tg.create_task(
-                        self.llm_judge.bidirectional_compare(
-                            predictions[i], predictions[j], query=query, i=i, j=j
-                        )
+                        self.llm_judge(predictions[i], predictions[j], query=query)
                     )
                     tasks.append(task)
 
-            for task in tasks:
-                score_i, score_j, metadata = task.result()
-                i, j = metadata["i"], metadata["j"]
+            for (i, j), task in zip(pairings, tasks):
+                result = task.result()
+                score_i, score_j = result["prediction"], result["reference"]
                 if score_i > score_j:
                     players[i].points += 1.0
                 elif score_j > score_i:

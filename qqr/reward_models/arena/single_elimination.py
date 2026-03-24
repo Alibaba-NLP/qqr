@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 import torch
 
 from qqr import registers
-from qqr.schemas import GroupRewardModel, LLMJudge
+from qqr.schemas import GroupRewardModel, LLMRewardModel
 
 
 @dataclass
@@ -20,7 +20,7 @@ class Player:
 
 @registers.reward_model("single_elimination")
 class SingleEliminationGroupRewardModel(GroupRewardModel):
-    def __init__(self, llm_judge: LLMJudge):
+    def __init__(self, llm_judge: LLMRewardModel):
         super().__init__()
 
         self.llm_judge = llm_judge
@@ -53,19 +53,18 @@ class SingleEliminationGroupRewardModel(GroupRewardModel):
         pivot_prediction = predictions[pivot_idx]
         pivot_scores = []
 
+        indices = list(range(1, group_size))
         tasks = []
         async with asyncio.TaskGroup() as tg:
-            for idx in range(1, group_size):
+            for idx in indices:
                 task = tg.create_task(
-                    self.llm_judge.bidirectional_compare(
-                        predictions[idx], pivot_prediction, query=query, idx=idx
-                    )
+                    self.llm_judge(predictions[idx], pivot_prediction, query=query)
                 )
                 tasks.append(task)
 
-        for task in tasks:
-            score_other, score_pivot, metadata = task.result()
-            idx = metadata["idx"]
+        for idx, task in zip(indices, tasks):
+            result = task.result()
+            score_other, score_pivot = result["prediction"], result["reference"]
             players[idx].points.append(score_other)
             pivot_scores.append(score_pivot)
 
@@ -99,20 +98,18 @@ class SingleEliminationGroupRewardModel(GroupRewardModel):
                 for p1, p2 in pairings:
                     tasks.append(
                         tg.create_task(
-                            self.llm_judge.bidirectional_compare(
+                            self.llm_judge(
                                 predictions[p1.idx],
                                 predictions[p2.idx],
                                 query=query,
-                                p1=p1,
-                                p2=p2,
                             )
                         )
                     )
 
             # Process results
-            for task in tasks:
-                score_1, score_2, metadata = task.result()
-                p1, p2 = metadata["p1"], metadata["p2"]
+            for (p1, p2), task in zip(pairings, tasks):
+                result = task.result()
+                score_1, score_2 = result["prediction"], result["reference"]
 
                 p1.points.append(score_1)
                 p2.points.append(score_2)

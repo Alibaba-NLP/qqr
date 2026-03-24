@@ -5,12 +5,12 @@ import pandas as pd
 import torch
 
 from qqr import registers
-from qqr.schemas import GroupRewardModel, LLMJudge
+from qqr.schemas import GroupRewardModel, LLMRewardModel
 
 
 @registers.reward_model("anchor")
 class AnchorBasedRankingGroupRewardModel(GroupRewardModel):
-    def __init__(self, llm_judge: LLMJudge):
+    def __init__(self, llm_judge: LLMRewardModel):
         super().__init__()
 
         self.llm_judge = llm_judge
@@ -22,19 +22,18 @@ class AnchorBasedRankingGroupRewardModel(GroupRewardModel):
         pivot_prediction = predictions[pivot_idx]
         pivot_scores = [5.0] * group_size
         other_scores = [5.0] * group_size
+        indices = list(range(1, group_size))
         tasks = []
         async with asyncio.TaskGroup() as tg:
-            for idx in range(1, group_size):
+            for idx in indices:
                 task = tg.create_task(
-                    self.llm_judge.bidirectional_compare(
-                        predictions[idx], pivot_prediction, query=query, idx=idx
-                    )
+                    self.llm_judge(predictions[idx], pivot_prediction, query=query)
                 )
                 tasks.append(task)
 
-        for task in tasks:
-            other_score, pivot_score, metadata = task.result()
-            idx = metadata["idx"]
+        for idx, task in zip(indices, tasks):
+            result = task.result()
+            other_score, pivot_score = result["prediction"], result["reference"]
             other_scores[idx] = other_score
             pivot_scores[idx] = pivot_score
 

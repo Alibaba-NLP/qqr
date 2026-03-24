@@ -36,11 +36,11 @@ class TravelLLMJudge(LLMRewardModel):
             r'"winner"\s*:\s*"(?P<winner>Agent_A|Agent_B|Tie)"', re.I
         )
 
-    async def compare(
-        self, messages_a: list[dict], messages_b: list[dict], query: str
+    async def _compute_unidirectional(
+        self, prediction: list[dict], reference: list[dict], query: str
     ) -> tuple[float, float]:
-        trajectory_a, answer_a = self.process_messages(messages_a)
-        trajectory_b, answer_b = self.process_messages(messages_b)
+        trajectory_a, answer_a = self.process_messages(prediction)
+        trajectory_b, answer_b = self.process_messages(reference)
 
         prompt = f"""<USER_QUERY>\n{query}\n</USER_QUERY>\n\n<PATH_A>\n{trajectory_a}\n</PATH_A>\n\n<PATH_B>\n{trajectory_b}\n</PATH_B>\n\n<Answer_A>\n{answer_a}\n</Answer_A>\n\n<Answer_B>\n{answer_b}\n</Answer_B>"""
         messages = [
@@ -60,18 +60,18 @@ class TravelLLMJudge(LLMRewardModel):
 
         return score_a, score_b
 
-    async def bidirectional_compare(
-        self, messages_a: list[dict], messages_b: list[dict], query: str, **kwargs
-    ) -> tuple[float, float, dict]:
+    async def compute(
+        self, prediction: list[dict], reference: list[dict], query: str
+    ) -> dict[str, float]:
         results = await asyncio.gather(
-            self.compare(messages_a, messages_b, query=query),
-            self.compare(messages_b, messages_a, query=query),
+            self._compute_unidirectional(prediction, reference, query=query),
+            self._compute_unidirectional(reference, prediction, query=query),
         )
 
-        score_a = results[0][0] + results[1][1]
-        score_b = results[0][1] + results[1][0]
+        score_prediction = results[0][0] + results[1][1]
+        score_reference = results[0][1] + results[1][0]
 
-        return score_a, score_b, kwargs
+        return {"prediction": score_prediction, "reference": score_reference}
 
     def process_messages(self, messages: list[dict]) -> tuple[list[dict], str]:
         step_idx = 0
@@ -124,9 +124,8 @@ async def eval_reward(args: Namespace, sample: Sample, **kwargs):
     else:
         query = sample.prompt[-1]["content"]
 
-    pred_score, ref_score, metadata = await llm_judge.bidirectional_compare(
-        prediction, reference, query=query
-    )
+    result = await llm_judge(prediction, reference, query=query)
+    pred_score, ref_score = result["prediction"], result["reference"]
 
     if pred_score > ref_score:
         sample.reward = 1
