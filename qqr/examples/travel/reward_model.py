@@ -6,6 +6,7 @@ from argparse import Namespace
 from qqr.llms import OpenAI
 from qqr.reward_models import get_reward_model
 from qqr.schemas import LLMRewardModel, Sample
+from qqr.utils import retry
 
 from . import config
 
@@ -36,6 +37,7 @@ class TravelLLMJudge(LLMRewardModel):
             r'"winner"\s*:\s*"(?P<winner>Agent_A|Agent_B|Tie)"', re.I
         )
 
+    @retry(stop_after_attempt=10, wait_fixed=1.0, return_on_failure=(5.0, 5.0))
     async def _compute_unidirectional(
         self, prediction: list[dict], reference: list[dict], query: str
     ) -> tuple[float, float]:
@@ -48,15 +50,8 @@ class TravelLLMJudge(LLMRewardModel):
             {"role": "user", "content": prompt},
         ]
 
-        score_a, score_b = 5.0, 5.0
-        try:
-            response = await self.llm(messages=messages, temperature=0.0)
-            score_a, score_b = self.get_judge_scores(
-                response.choices[0].message.content
-            )
-
-        except Exception as e:
-            logger.warning(f"[LLMJudge] Failed to get result: {e}")
+        response = await self.llm(messages=messages, temperature=0.0)
+        score_a, score_b = self.get_judge_scores(response.choices[0].message.content)
 
         return score_a, score_b
 
@@ -96,18 +91,14 @@ class TravelLLMJudge(LLMRewardModel):
         return trajectory, answer
 
     def get_judge_scores(self, response: str) -> tuple[float, float]:
-        score_a, score_b = 5.0, 5.0
+        match_a = self.score_a_pattern.search(response)
+        match_b = self.score_b_pattern.search(response)
 
-        try:
-            match_a = self.score_a_pattern.search(response)
-            match_b = self.score_b_pattern.search(response)
+        if not (match_a and match_b):
+            raise ValueError(f"Failed to get judge scores in response: {response}")
 
-            if match_a and match_b:
-                score_a = float(match_a.group(1))
-                score_b = float(match_b.group(1))
-
-        except:
-            pass
+        score_a = float(match_a.group(1))
+        score_b = float(match_b.group(1))
 
         return score_a, score_b
 
