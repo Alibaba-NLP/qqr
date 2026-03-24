@@ -3,24 +3,26 @@ import logging
 import re
 from argparse import Namespace
 
-from openai import AsyncOpenAI
-
+from qqr.llms import OpenAI
 from qqr.reward_models import get_reward_model
-from qqr.schemas import LLMJudge, Sample
+from qqr.schemas import LLMRewardModel, Sample
 
 from . import config
 
 logger = logging.getLogger(__name__)
 
 
-class DeepResearchLLMJudge(LLMJudge):
+class DeepResearchLLMJudge(LLMRewardModel):
     def __init__(self):
-        self.system_prompt = config.llm_judge_system_prompt
-        self.model = config.llm_judge_model
-        self._client = None
+        llm = OpenAI(
+            model=config.llm_judge_model,
+            api_key=config.llm_judge_api_key,
+            base_url=config.llm_judge_base_url,
+            concurrency_limit=config.llm_judge_concurrency_limit,
+        )
+        super().__init__(llm)
 
-        self.concurrency_limit = config.llm_judge_concurrency_limit
-        self._semaphore: asyncio.Semaphore | None = None
+        self.system_prompt = config.llm_judge_system_prompt
 
         self.score_a_pattern = re.compile(
             r'"combined_scores"\s*:\s*\{[^{}]*?"Agent_A"\s*:\s*([0-9]+(?:\.[0-9]+)?)',
@@ -33,30 +35,6 @@ class DeepResearchLLMJudge(LLMJudge):
         self.winner_pattern = re.compile(
             r'"winner"\s*:\s*"(?P<winner>Agent_A|Agent_B|Tie)"', re.I
         )
-
-    @property
-    def client(self) -> AsyncOpenAI:
-        if self._client is None:
-            self._client = AsyncOpenAI(
-                api_key=config.llm_judge_api_key,
-                base_url=config.llm_judge_base_url,
-                timeout=60,
-                max_retries=10,
-            )
-        return self._client
-
-    @property
-    def semaphore(self) -> asyncio.Semaphore:
-        """
-        Lazy-initialized semaphore that binds to the current running Event Loop.
-
-        Using lazy initialization prevents "Future attached to a different loop" errors
-        when the server instance persists across multiple asyncio.run() calls or
-        event loop restarts.
-        """
-        if self._semaphore is None:
-            self._semaphore = asyncio.Semaphore(self.concurrency_limit)
-        return self._semaphore
 
     async def compare(
         self, messages_a: list[dict], messages_b: list[dict], query: str
@@ -72,11 +50,7 @@ class DeepResearchLLMJudge(LLMJudge):
 
         score_a, score_b = 5.0, 5.0
         try:
-            async with self.semaphore:
-                response = await self.client.chat.completions.create(
-                    messages=messages, model=self.model, temperature=0.0
-                )
-
+            response = await self.llm(messages=messages, temperature=0.0)
             score_a, score_b = self.get_judge_scores(
                 response.choices[0].message.content
             )

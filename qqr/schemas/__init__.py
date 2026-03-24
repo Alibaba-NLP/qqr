@@ -1,5 +1,5 @@
-from .llm_judge import LLMJudge
-from .reward_model import GroupRewardModel, RewardModel
+from .llm import LLM
+from .reward_model import GroupRewardModel, LLMRewardModel, RewardModel
 from .sample import Sample
 
-__all__ = ["LLMJudge", "RewardModel", "GroupRewardModel", "Sample"]
+__all__ = ["LLM", "RewardModel", "GroupRewardModel", "LLMRewardModel", "Sample"]

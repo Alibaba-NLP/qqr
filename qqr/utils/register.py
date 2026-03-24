@@ -6,7 +6,7 @@ import pkgutil
 from inspect import getmembers
 from typing import Generic, Type, TypeVar
 
-from ..schemas import GroupRewardModel, RewardModel
+from ..schemas import LLM, GroupRewardModel, RewardModel
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +68,7 @@ class registers:
         raise RuntimeError("Registries is not intended to be instantiated")
 
     reward_model = Register[RewardModel | GroupRewardModel]("reward_models")
+    llm = Register[LLM]("llms")
 
 
 def _handle_errors(errors):
