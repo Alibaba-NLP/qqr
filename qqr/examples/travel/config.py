@@ -1,4 +1,4 @@
-from qqr.mcp import MCPServer, MCPServerStdioCacheable, MCPServerStdioParams
+from qqr.mcp import MCPServerManager, MCPServerStdioCacheable, MCPServerStdioParams
 from qqr.utils.envs import (
     AMAP_MAPS_API_KEY,
     BAILIAN_WEB_SEARCH_API_KEY,
@@ -15,76 +15,77 @@ __all__ = [
     "llm_judge_model",
     "llm_judge_concurrency_limit",
     "llm_judge_system_prompt",
-    "mcp_server_config_fn",
+    "mcp_manager",
 ]
 
 
-def mcp_server_config_fn() -> list[MCPServer]:
-    # https://lbs.amap.com/api/webservice/create-project-and-key
-    amap_server_params = MCPServerStdioParams(
-        command="python",
-        args=["-m", "qqr.tools.amap"],
-        env={
-            "AMAP_MAPS_API_KEY": AMAP_MAPS_API_KEY,
-            "PYTHONPATH": PYTHONPATH,
-        },
-    )
-    amap_server = MCPServerStdioCacheable(
-        name="AMap",
-        params=amap_server_params,
-        cache_tools_list=True,
-        client_session_timeout_seconds=60,
-        max_retry_attempts=3,
-        blocklist=[],
-        cache_ttl=600,
-        cache_maxsize=8192,
-        concurrency_limit=16,
-    )
+# https://lbs.amap.com/api/webservice/create-project-and-key
+amap_server_params = MCPServerStdioParams(
+    command="python",
+    args=["-m", "qqr.tools.amap"],
+    env={
+        "AMAP_MAPS_API_KEY": AMAP_MAPS_API_KEY,
+        "PYTHONPATH": PYTHONPATH,
+    },
+)
+amap_server = MCPServerStdioCacheable(
+    name="AMap",
+    params=amap_server_params,
+    cache_tools_list=True,
+    client_session_timeout_seconds=60,
+    max_retry_attempts=3,
+    blocklist=[],
+    cache_ttl=600,
+    cache_maxsize=8192,
+    concurrency_limit=16,
+)
 
-    # https://help.aliyun.com/zh/model-studio/get-api-key
-    transport_server_params = MCPServerStdioParams(
-        command="python",
-        args=["-m", "qqr.tools.mock_transport"],
-        env={
-            "DASHSCOPE_API_KEY": DASHSCOPE_API_KEY,
-            "DASHSCOPE_BASE_URL": DASHSCOPE_BASE_URL,
-            "PYTHONPATH": PYTHONPATH,
-        },
-    )
-    transport_server = MCPServerStdioCacheable(
-        name="Transport",
-        params=transport_server_params,
-        cache_tools_list=True,
-        client_session_timeout_seconds=60,
-        max_retry_attempts=3,
-        blocklist=[],
-        cache_ttl=600,
-        cache_maxsize=8192,
-        concurrency_limit=4,
-    )
+# https://help.aliyun.com/zh/model-studio/get-api-key
+transport_server_params = MCPServerStdioParams(
+    command="python",
+    args=["-m", "qqr.tools.mock_transport"],
+    env={
+        "DASHSCOPE_API_KEY": DASHSCOPE_API_KEY,
+        "DASHSCOPE_BASE_URL": DASHSCOPE_BASE_URL,
+        "PYTHONPATH": PYTHONPATH,
+    },
+)
+transport_server = MCPServerStdioCacheable(
+    name="Transport",
+    params=transport_server_params,
+    cache_tools_list=True,
+    client_session_timeout_seconds=60,
+    max_retry_attempts=3,
+    blocklist=[],
+    cache_ttl=600,
+    cache_maxsize=8192,
+    concurrency_limit=4,
+)
 
-    # https://bailian.console.aliyun.com/tab=app#/mcp-market/detail/WebSearch
-    web_search_server_params = MCPServerStdioParams(
-        command="python",
-        args=["-m", "qqr.tools.web_search"],
-        env={
-            "BAILIAN_WEB_SEARCH_API_KEY": BAILIAN_WEB_SEARCH_API_KEY,
-            "PYTHONPATH": PYTHONPATH,
-        },
-    )
-    web_search_server = MCPServerStdioCacheable(
-        name="WebSearch",
-        params=web_search_server_params,
-        cache_tools_list=True,
-        client_session_timeout_seconds=60,
-        max_retry_attempts=3,
-        blocklist=[],
-        cache_ttl=600,
-        cache_maxsize=8192,
-        concurrency_limit=1,
-    )
+# https://bailian.console.aliyun.com/tab=app#/mcp-market/detail/WebSearch
+web_search_server_params = MCPServerStdioParams(
+    command="python",
+    args=["-m", "qqr.tools.web_search"],
+    env={
+        "BAILIAN_WEB_SEARCH_API_KEY": BAILIAN_WEB_SEARCH_API_KEY,
+        "PYTHONPATH": PYTHONPATH,
+    },
+)
+web_search_server = MCPServerStdioCacheable(
+    name="WebSearch",
+    params=web_search_server_params,
+    cache_tools_list=True,
+    client_session_timeout_seconds=60,
+    max_retry_attempts=3,
+    blocklist=[],
+    cache_ttl=600,
+    cache_maxsize=8192,
+    concurrency_limit=1,
+)
 
-    return [amap_server, transport_server, web_search_server]
+mcp_manager = MCPServerManager(
+    [amap_server, transport_server, web_search_server], connect_in_parallel=True
+)
 
 
 max_steps = 5

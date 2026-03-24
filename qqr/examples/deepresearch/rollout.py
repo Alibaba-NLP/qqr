@@ -22,7 +22,7 @@ async def generate(
     sampling_params: dict[str, Any],
     evaluation: bool = False,
 ) -> Sample | list[Sample]:
-    await MCPState(config.mcp_server_config_fn).get_mcp_servers()
+    await MCPState(config.mcp_manager).get_servers()
 
     if isinstance(sample.prompt, str):
         sample.messages = [{"role": "user", "content": sample.prompt}]
@@ -56,12 +56,12 @@ async def agent_loop(
     max_steps: int = config.max_steps,
 ) -> list[Sample]:
     state = GenerateState(args)
-    mcp_state = MCPState(config.mcp_server_config_fn)
+    mcp_state = MCPState(config.mcp_manager)
     prompter = Qwen3Prompt()
 
     if sample.messages[0]["role"] != "system":
         sample.messages.insert(0, build_system_message(0, max_steps))
-    samples = []
+    samples: list[Sample] = []
 
     for step_idx in range(max_steps):
         samples.append(

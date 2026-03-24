@@ -5,11 +5,13 @@ import json
 import logging
 import uuid
 from argparse import Namespace
+from collections import defaultdict
 from collections.abc import Callable
 from contextlib import contextmanager
 from copy import deepcopy
 from typing import Any
 
+import anyio
 import numpy as np
 import pybase64
 import sglang_router
@@ -30,9 +32,10 @@ from slime.utils.processing_utils import (
 )
 from tqdm.auto import tqdm
 
-from qqr.mcp import MCPServer
+from qqr.mcp import MCPServer, MCPServerManager
 from qqr.mcp.utils import get_mcp_tools
 from qqr.schemas import Sample
+from qqr.utils.envs import RETRY_STOP_AFTER_ATTEMPT, RETRY_WAIT_FIXED
 
 __all__ = ["generate_rollout", "get_model_url"]
 
@@ -139,47 +142,64 @@ class MCPState(metaclass=SingletonMeta):
     The global state for the MCP server.
     """
 
-    def __init__(self, mcp_server_config_fn: callable) -> None:
-        self._mcp_server_config_fn = mcp_server_config_fn
+    def __init__(
+        self,
+        manager: MCPServerManager,
+        max_retry_attempts: int = RETRY_STOP_AFTER_ATTEMPT,
+        retry_backoff_seconds_base: float = RETRY_WAIT_FIXED,
+    ):
+        """
+        Args:
+            max_retry_attempts: Number of times to retry failed list_tools/call_tool calls.
+                Defaults to 3 retries.
+            retry_backoff_seconds_base: The base delay, in seconds, used for exponential
+                backoff between retries.
+        """
 
-        self._mcp_servers: list[MCPServer] = None
-        self._mcp_lock = asyncio.Lock()
+        self._server_lock = asyncio.Lock()
+
+        self.servers: list[MCPServer] = None
+        self.server_versions = defaultdict(int)
+        self.manager = manager
 
         self.tools = []
         self.tool_to_server: dict[str, MCPServer] = {}
 
-    async def get_mcp_servers(self) -> list[MCPServer]:
+        self.max_retry_attempts = max_retry_attempts
+        self.retry_backoff_seconds_base = retry_backoff_seconds_base
+
+    async def get_servers(self) -> list[MCPServer]:
         """
         Thread-safe lazy initialization of the MCP server.
         """
         # Double-checked locking pattern for async init
-        if self._mcp_servers is None:
-            async with self._mcp_lock:
-                if self._mcp_servers is None:
-                    try:
-                        servers = self._mcp_server_config_fn()
-                        for server in servers:
-                            await server.connect()
-                            converted_tools = await get_mcp_tools(server)
-                            self.tools += converted_tools
-                            for tool in converted_tools:
-                                self.tool_to_server[tool["function"]["name"]] = server
+        if self.servers is None:
+            async with self._server_lock:
+                if self.servers is not None:
+                    return self.servers
 
-                            logger.info(
-                                f"MCP Server {server.name} connected successfully."
-                            )
+                try:
+                    await self.manager.connect_all()
+                    for server in self.manager.active_servers:
+                        converted_tools = await get_mcp_tools(server)
+                        self.tools += converted_tools
+                        for tool in converted_tools:
+                            self.tool_to_server[tool["function"]["name"]] = server
 
-                        self._mcp_servers = servers
+                        self.server_versions[server.name] += 1
+                        logger.info(f"MCP Server {server.name} connected successfully.")
 
-                    except Exception as e:
-                        logger.error(f"Failed to initialize MCP Servers: {e}")
-                        self._mcp_servers = None
-                        raise e
+                    self.servers = self.manager.active_servers
 
-        return self._mcp_servers
+                except Exception as e:
+                    logger.error(f"Failed to initialize MCP Servers: {e}")
+                    self.servers = None
+                    raise e
+
+        return self.servers
 
     async def call_tool(self, tool_call: dict) -> dict:
-        await self.get_mcp_servers()
+        await self.get_servers()
 
         tool_name = tool_call["function"]["name"]
         tool_call_id = tool_call["id"]
@@ -194,22 +214,56 @@ class MCPState(metaclass=SingletonMeta):
                 "tool_call_id": tool_call_id,
             }
 
+        tool_arguments_str = tool_call["function"]["arguments"]
         try:
-            tool_arguments_str = tool_call["function"]["arguments"]
             tool_arguments = (
                 json.loads(tool_arguments_str) if tool_arguments_str else {}
             )
-
-            result = await target_server.call_tool(tool_name, tool_arguments)
-            tool_content = "\n\n---\n\n".join(
-                item.text for item in result.content if item.type == "text"
-            )
-
         except json.JSONDecodeError as e:
-            tool_content = f"[Error] Invalid JSON arguments: {e}"
+            return {
+                "role": "tool",
+                "content": f"[Error] Invalid JSON arguments: {e}",
+                "tool_call_id": tool_call_id,
+            }
 
-        except Exception as e:
-            tool_content = f"[Error] Tool execution failed: {e}"
+        for attempts in range(self.max_retry_attempts):
+            server_version = self.server_versions[target_server.name]
+            should_reconnect = False
+
+            try:
+                result = await target_server.call_tool(tool_name, tool_arguments)
+                tool_content = "\n\n---\n\n".join(
+                    item.text for item in result.content if item.type == "text"
+                )
+                break
+
+            except anyio.ClosedResourceError as e:
+                logger.warning(f"[MCP] '{target_server.name}' connection lost: {e}")
+                tool_content = f"[Error] Tool connection lost: {e}"
+                should_reconnect = True
+
+            except Exception as e:
+                tool_content = f"[Error] Tool execution failed: {e}"
+
+            if attempts + 1 >= self.max_retry_attempts:
+                break
+
+            if should_reconnect:
+                async with self._server_lock:
+                    if self.server_versions[target_server.name] > server_version:
+                        continue
+
+                    logger.warning(
+                        f"[MCP] '{target_server.name}' ({server_version}) retrying {attempts + 1}/{self.max_retry_attempts}..."
+                    )
+                    await self.manager._cleanup_server(target_server)
+                    await self.manager._attempt_connect(target_server)
+                    self.manager._refresh_active_servers()
+
+                    self.server_versions[target_server.name] += 1
+
+            backoff = self.retry_backoff_seconds_base * (2**attempts)
+            await asyncio.sleep(backoff)
 
         return {
             "role": "tool",
