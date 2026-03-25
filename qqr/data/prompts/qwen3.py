@@ -2,27 +2,36 @@ import json
 import logging
 import re
 
+from qqr import registers
+from qqr.schemas import Prompt
+
 logger = logging.getLogger(__name__)
 
 
-class Qwen3Prompt:
-    def __init__(self):
-        self.eos_token = "<|im_end|>"
-        self.bot_token = "<tool_call>"
-        self.eot_token = "</tool_call>"
-        self.think_start_token = "<think>"
-        self.think_end_token = "</think>"
+@registers.prompt("qwen3")
+class Qwen3Prompt(Prompt):
+    eos_token = "<|im_end|>"
+    bot_token = "<tool_call>"
+    eot_token = "</tool_call>"
+    think_start_token = "<think>"
+    think_end_token = "</think>"
 
-        self.think_pattern = re.compile(r"<think>(.*?)</think>", re.DOTALL)
-        self.tool_pattern = re.compile(r"<tool_call>(.*?)</tool_call>", re.DOTALL)
+    think_pattern = re.compile(r"<think>(.*?)</think>", re.S)
+    tool_pattern = re.compile(r"<tool_call>(.*?)</tool_call>", re.S)
 
-    def parse_assistant_content(self, assistant_content: str) -> dict:
+    def parse_assistant_content(self, assistant_content: str, **kwargs) -> dict:
         message = {
             "role": "assistant",
             "content": "",
             "reasoning_content": "",
             "tool_calls": [],
         }
+
+        if (
+            self.think_end_token in assistant_content
+            and not assistant_content.startswith(self.think_start_token)
+        ):
+            assistant_content = self.think_start_token + assistant_content
 
         if self.think_start_token in assistant_content:
             think_match = self.think_pattern.search(assistant_content)
@@ -53,10 +62,8 @@ class Qwen3Prompt:
                             "function": {"name": func_name, "arguments": func_args_str},
                         }
                     )
-                except json.JSONDecodeError as e:
-                    logger.warning(
-                        f"Failed to parse tool JSON: {func_json_str[:50]}... Error: {e}"
-                    )
+                except Exception:
+                    logger.exception("Failed to parse tool call from response.")
                     continue
 
             assistant_content = self.tool_pattern.sub("", assistant_content)

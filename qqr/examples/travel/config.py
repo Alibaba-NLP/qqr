@@ -90,7 +90,6 @@ mcp_manager = MCPServerManager(
 
 max_steps = 5
 
-
 # Select topology:
 # - anchor
 # - swiss

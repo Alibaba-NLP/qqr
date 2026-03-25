@@ -44,7 +44,6 @@ mcp_manager = MCPServerManager([web_search_server], connect_in_parallel=True)
 
 max_steps = 10
 
-
 # Select topology:
 # - anchor
 # - swiss

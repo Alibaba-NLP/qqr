@@ -5,7 +5,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any
 
-from qqr.data.prompts.qwen3 import Qwen3Prompt
+from qqr import registers
 from qqr.rollout.agent_rollout import GenerateState, MCPState
 from qqr.rollout.agent_rollout import generate as base_generate
 from qqr.schemas import Sample
@@ -57,7 +57,11 @@ async def agent_loop(
 ) -> list[Sample]:
     state = GenerateState(args)
     mcp_state = MCPState(config.mcp_manager)
-    prompter = Qwen3Prompt()
+
+    if "qwen3.5" in state.args.hf_checkpoint.lower():
+        prompter = registers.prompt["qwen3.5"]()
+    else:
+        prompter = registers.prompt["qwen3"]()
 
     if sample.messages[0]["role"] != "system":
         sample.messages.insert(0, build_system_message(0, max_steps))
@@ -86,7 +90,9 @@ async def agent_loop(
                 "content": sample.response.removesuffix(state.tokenizer.eos_token),
             }
         )
-        sample.response_message = prompter.parse_assistant_content(sample.response)
+        sample.response_message = prompter.parse_assistant_content(
+            sample.response, tools=mcp_state.tools
+        )
         tool_calls = sample.response_message.get("tool_calls") or []
 
         if not tool_calls:
@@ -112,13 +118,16 @@ async def agent_loop(
         sample = samples[-1]
         sample.messages[0] = build_system_message(max_steps, max_steps)
         sample = await base_generate(args, sample, sampling_params)
+
         sample.messages.append(
             {
                 "role": "assistant",
                 "content": sample.response.removesuffix(state.tokenizer.eos_token),
             }
         )
-        sample.response_message = prompter.parse_assistant_content(sample.response)
+        sample.response_message = prompter.parse_assistant_content(
+            sample.response, tools=mcp_state.tools
+        )
 
     sample = samples[-1]
     for i, message in enumerate(sample.messages):
