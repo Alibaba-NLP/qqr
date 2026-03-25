@@ -14,7 +14,7 @@ rm -rf /tmp/ray/*
 set -ex
 
 
-RUN_NAME=Qwen3-8B-ArenaRL
+RUN_NAME=Qwen3.5-9B-ArenaRL
 CKPT_DIR=${RUN_NAME}
 
 QQR_PATH=$(pip list | grep qqr | awk '{print $NF}')
@@ -72,11 +72,11 @@ export TOKENIZERS_PARALLELISM=false
 export no_proxy="127.0.0.1,${MASTER_ADDR}"
 
 
-source "${SLIME_PATH}/scripts/models/qwen3-8B.sh"
+source "${QQR_PATH}/scripts/models/qwen3.5-9B.sh"
 
 CKPT_ARGS=(
-   --hf-checkpoint qwen/Qwen3-8B
-   --ref-load /path/to/Qwen3-8B_torch_dist
+   --hf-checkpoint qwen/Qwen3.5-9B
+   --ref-load /path/to/Qwen3.5-9B_torch_dist
    --load ${CKPT_DIR}
    --save ${CKPT_DIR}
    --save-interval 10

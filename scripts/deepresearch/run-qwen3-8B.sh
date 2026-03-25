@@ -62,7 +62,6 @@ export CUDA_LAUNCH_BLOCKING=1 # Synchronizes CUDA operations
 export NCCL_NVLS_ENABLE=${HAS_NVLINK}
 export NCCL_DEBUG=WARN
 
-export TORCH_CUDA_ARCH_LIST="9.0;9.0a"
 export TORCH_USE_CUDA_DSA=1   # Enables device-side assertions
 export TORCH_NCCL_ASYNC_ERROR_HANDLING=1
 export TORCH_NCCL_BLOCKING_WAIT=1

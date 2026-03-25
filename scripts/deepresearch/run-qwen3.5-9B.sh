@@ -14,7 +14,7 @@ rm -rf /tmp/ray/*
 set -ex
 
 
-RUN_NAME=Qwen3-8B-ArenaRL
+RUN_NAME=Qwen3.5-9B-ArenaRL
 CKPT_DIR=${RUN_NAME}
 
 QQR_PATH=$(pip list | grep qqr | awk '{print $NF}')
@@ -72,11 +72,11 @@ export TOKENIZERS_PARALLELISM=false
 export no_proxy="127.0.0.1,${MASTER_ADDR}"
 
 
-source "${SLIME_PATH}/scripts/models/qwen3-8B.sh"
+source "${QQR_PATH}/scripts/models/qwen3.5-9B.sh"
 
 CKPT_ARGS=(
-   --hf-checkpoint qwen/Qwen3-8B
-   --ref-load /path/to/Qwen3-8B_torch_dist
+   --hf-checkpoint qwen/Qwen3.5-9B
+   --ref-load /path/to/Qwen3.5-9B_torch_dist
    --load ${CKPT_DIR}
    --save ${CKPT_DIR}
    --save-interval 10
@@ -84,7 +84,7 @@ CKPT_ARGS=(
 
 ROLLOUT_ARGS=(
    --rollout-function-path qqr.rollout.agent_rollout.generate_rollout
-   --prompt-data ${QQR_PATH}/data/travel/train.jsonl
+   --prompt-data ${QQR_PATH}/data/deepresearch/train.jsonl
    --input-key query
    --rollout-shuffle
    --num-rollout 200
@@ -102,7 +102,7 @@ ROLLOUT_ARGS=(
 
 EVAL_ARGS=(
    --eval-interval 10
-   --eval-prompt-data search_around ${QQR_PATH}/data/travel/test/search_around.jsonl
+   --eval-prompt-data test ${QQR_PATH}/data/deepresearch/test.jsonl
    --n-samples-per-eval-prompt 1
    --eval-max-context-len 32000
    --eval-input-key query
@@ -168,9 +168,9 @@ MISC_ARGS=(
 )
 
 CUSTOM_ARGS=(
-   --custom-generate-function-path qqr.examples.travel.generate
-   --custom-rm-path qqr.examples.travel.group_reward
-   --custom-reward-post-process-path qqr.examples.travel.reward_post_process
+   --custom-generate-function-path qqr.examples.deepresearch.generate
+   --custom-rm-path qqr.examples.deepresearch.group_reward
+   --custom-reward-post-process-path qqr.examples.deepresearch.reward_post_process
 )
 
 
