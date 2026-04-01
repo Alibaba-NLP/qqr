@@ -7,7 +7,6 @@ import uuid
 from argparse import Namespace
 from collections import defaultdict
 from collections.abc import Callable
-from contextlib import contextmanager
 from copy import deepcopy
 from typing import Any
 
@@ -29,6 +28,11 @@ from slime.utils.processing_utils import (
     encode_image_for_rollout_engine,
     load_processor,
     load_tokenizer,
+)
+from slime.utils.trace_utils import (
+    build_sglang_meta_trace_attrs,
+    trace_function,
+    trace_span,
 )
 from tqdm.auto import tqdm
 
@@ -81,7 +85,6 @@ class GenerateState(metaclass=SingletonMeta):
             temperature=args.rollout_temperature,
             top_p=args.rollout_top_p,
             top_k=args.rollout_top_k,
-            max_context_length=args.rollout_max_context_len,
             max_new_tokens=args.rollout_max_response_len,
             stop=self.tokenizer.eos_token,
             stop_token_ids=[self.tokenizer.eos_token_id],
@@ -96,25 +99,7 @@ class GenerateState(metaclass=SingletonMeta):
                 sampling_seed_base + i for i in range(args.n_samples_per_prompt)
             ]
 
-        # dp rank balancing
-        self.dp_counts = [0] * (args.sglang_dp_size or 1)
-        self.dp_rank = 0
-
         self.reset()
-
-    @contextmanager
-    def dp_rank_context(self):
-        candidates = [
-            i for i, count in enumerate(self.dp_counts) if count == min(self.dp_counts)
-        ]
-        dp_rank = int(np.random.choice(candidates))
-        self.dp_counts[dp_rank] += 1
-        self.dp_rank = dp_rank
-        try:
-            yield dp_rank
-        finally:
-            self.dp_counts[dp_rank] -= 1
-            assert self.dp_counts[dp_rank] >= 0
 
     def reset(self) -> None:
         self.remaining_batch_size = 0
@@ -307,7 +292,7 @@ async def generate(
     current_sampling_params = deepcopy(sampling_params)
     current_sampling_params["max_new_tokens"] = min(
         sampling_params["max_new_tokens"],
-        sampling_params["max_context_length"] - len(prompt_ids),
+        args.rollout_max_context_len - len(prompt_ids),
     )
 
     if current_sampling_params["max_new_tokens"] <= 100:
@@ -334,7 +319,8 @@ async def generate(
     if args.use_rollout_routing_replay:
         payload["return_routed_experts"] = True
 
-    if sample.multimodal_inputs and sample.multimodal_inputs["images"]:
+    has_multimodal = sample.multimodal_inputs and sample.multimodal_inputs.get("images")
+    if has_multimodal:
         image_data = sample.multimodal_inputs["images"]
         payload["image_data"] = [
             encode_image_for_rollout_engine(image) for image in image_data
@@ -343,54 +329,55 @@ async def generate(
     # Use existing tokens for multi-turn or tokenize the new prompt
     if len(sample.response) > 0:
         payload["input_ids"] = sample.tokens
+    elif has_multimodal:
+        # For multimodal first-turn: send text so SGLang handles image token
+        # expansion internally (the processor-expanded input_ids have N patch
+        # tokens per image which would mismatch the image_data count).
+        payload["text"] = prompt_text
+        if not sample.tokens:
+            sample.tokens = prompt_ids
     else:
         payload["input_ids"] = prompt_ids
         if not sample.tokens:  # Initialize sample.tokens for the first turn
             sample.tokens = prompt_ids
 
-    # Use session_id for consistent hashing routing if router uses consistent_hashing policy
+    # Use session_id for consistent hashing routing (SGLang Model Gateway)
     headers = None
-    if (
-        getattr(args, "router_policy", None) == "consistent_hashing"
-        and sample.session_id
-    ):
-        headers = {"X-SMG-Routing-Key": sample.session_id}
+    if sample.session_id:
+        if getattr(args, "router_policy", None) == "consistent_hashing":
+            headers = {"X-SMG-Routing-Key": sample.session_id}
 
-    output = await post(url, payload, headers=headers)
+    with trace_span(
+        sample,
+        "sglang_generate",
+        attrs={"max_new_tokens": sampling_params["max_new_tokens"]},
+    ) as span:
+        output = await post(url, payload, headers=headers)
+        span.update(build_sglang_meta_trace_attrs(output["meta_info"]))
 
-    if (
-        args.use_slime_router
-        and "RadixTreeMiddleware" in args.slime_router_middleware_paths
-    ):
-        from slime.router.middleware_hub.radix_tree_middleware import (
-            postprocess_sample_with_radix_tree,
-        )
-
-        sample = await postprocess_sample_with_radix_tree(args, sample, output)
+    if "output_token_logprobs" in output["meta_info"]:
+        new_response_tokens = [
+            item[1] for item in output["meta_info"]["output_token_logprobs"]
+        ]
+        new_response_log_probs = [
+            item[0] for item in output["meta_info"]["output_token_logprobs"]
+        ]
     else:
-        if "output_token_logprobs" in output["meta_info"]:
-            new_response_tokens = [
-                item[1] for item in output["meta_info"]["output_token_logprobs"]
-            ]
-            new_response_log_probs = [
-                item[0] for item in output["meta_info"]["output_token_logprobs"]
-            ]
-        else:
-            new_response_tokens, new_response_log_probs = [], []
+        new_response_tokens, new_response_log_probs = [], []
 
-        # Update sample with tokens directly - avoiding re-tokenization
-        sample.tokens = sample.tokens + new_response_tokens
-        sample.response_length = len(new_response_tokens)
-        sample.response = output["text"]
+    # Update sample with tokens directly - avoiding re-tokenization
+    sample.tokens = sample.tokens + new_response_tokens
+    sample.response_length = len(new_response_tokens)
+    sample.response = output["text"]
 
-        # When partial rollout and masking off policy is enabled, update the loss mask
-        if sample.loss_mask is not None:
-            assert args.partial_rollout and args.mask_offpolicy_in_partial_rollout
-            sample.loss_mask = [1] * len(new_response_tokens)
+    # When partial rollout and masking off policy is enabled, update the loss mask
+    if sample.loss_mask is not None:
+        assert args.partial_rollout and args.mask_offpolicy_in_partial_rollout
+        sample.loss_mask = [1] * len(new_response_tokens)
 
-        if sample.rollout_log_probs is None:
-            sample.rollout_log_probs = []
-        sample.rollout_log_probs = new_response_log_probs
+    if sample.rollout_log_probs is None:
+        sample.rollout_log_probs = []
+    sample.rollout_log_probs = new_response_log_probs
 
     if "routed_experts" in output["meta_info"]:
         sample.rollout_routed_experts = np.frombuffer(
@@ -407,6 +394,7 @@ async def generate(
     return sample
 
 
+@trace_function("generate_and_rm", target="sample")
 async def generate_and_rm(
     args: Namespace,
     sample: Sample | list[Sample],
@@ -439,24 +427,23 @@ async def generate_and_rm(
             sample.status = Sample.Status.ABORTED
             return sample
 
-        with state.dp_rank_context() as _:
-            # Check sample.generate_function_path for per-sample custom_generate_function_path (e.g., from eval dataset config)
-            custom_func_path = (
-                getattr(sample, "generate_function_path", None)
-                or args.custom_generate_function_path
-            )
+        # Check sample.generate_function_path for per-sample custom_generate_function_path (e.g., from eval dataset config)
+        custom_func_path = (
+            getattr(sample, "generate_function_path", None)
+            or args.custom_generate_function_path
+        )
 
-            if custom_func_path is not None:
-                custom_generate_func = load_function(custom_func_path)
-                # if signature has evaluation, pass evaluation
-                if "evaluation" in inspect.signature(custom_generate_func).parameters:
-                    sample = await custom_generate_func(
-                        args, sample, sampling_params, evaluation=evaluation
-                    )
-                else:
-                    sample = await custom_generate_func(args, sample, sampling_params)
+        if custom_func_path is not None:
+            custom_generate_func = load_function(custom_func_path)
+            # if signature has evaluation, pass evaluation
+            if "evaluation" in inspect.signature(custom_generate_func).parameters:
+                sample = await custom_generate_func(
+                    args, sample, sampling_params, evaluation=evaluation
+                )
             else:
-                sample = await generate(args, sample, sampling_params)
+                sample = await custom_generate_func(args, sample, sampling_params)
+        else:
+            sample = await generate(args, sample, sampling_params)
 
     # for the rm that need the whole group, we will not do the rm here
     if args.group_rm:
@@ -470,7 +457,8 @@ async def generate_and_rm(
 
         # for multi agent system, the reward of some sample is calculated during generation.
         samples_need_reward = [sample for sample in samples if sample.reward is None]
-        rewards = await batched_async_rm(args, samples_need_reward)
+        with trace_span(samples_need_reward, "reward_model"):
+            rewards = await batched_async_rm(args, samples_need_reward)
         for sample, reward in zip(samples_need_reward, rewards, strict=False):
             sample.reward = reward
         return samples
@@ -479,11 +467,19 @@ async def generate_and_rm(
             return sample
         # for multi-turn environment, a reward could be assigned to the agent.
         if sample.reward is None:
-            sample.reward = await async_rm(args, sample)
+            with trace_span(sample, "reward_model"):
+                sample.reward = await async_rm(args, sample)
 
     return sample
 
 
+@trace_function(
+    "generate_and_rm_group",
+    target="group",
+    attrs_getter=lambda args, group, sampling_params, evaluation=False: {
+        "group_size": len(group)
+    },
+)
 async def generate_and_rm_group(
     args: Namespace,
     group: list[Sample],
@@ -518,7 +514,8 @@ async def generate_and_rm_group(
 
     # for the rm that need the whole group, we will do the rm here
     if not state.aborted and args.group_rm:
-        rewards = await batched_async_rm(args, group)
+        with trace_span(group, "group_reward_model"):
+            rewards = await batched_async_rm(args, group)
 
     return group
 
@@ -530,7 +527,7 @@ async def abort(args: Namespace, rollout_id: int) -> list[list[Sample]]:
     assert not state.aborted
     state.aborted = True
 
-    if parse(sglang_router.__version__) <= parse("0.2.1") or args.use_slime_router:
+    if parse(sglang_router.__version__) <= parse("0.2.1"):
         response = await get(
             f"http://{args.sglang_router_ip}:{args.sglang_router_port}/list_workers"
         )
@@ -742,7 +739,6 @@ async def eval_rollout_single_dataset(
         temperature=dataset_cfg.temperature,
         top_p=dataset_cfg.top_p,
         top_k=dataset_cfg.top_k,
-        max_context_length=args.eval_max_context_len,
         max_new_tokens=dataset_cfg.max_response_len,
         stop=args.rollout_stop,
         stop_token_ids=args.rollout_stop_token_ids,
