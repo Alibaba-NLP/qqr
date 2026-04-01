@@ -34,4 +34,4 @@ AMAP_MAPS_API_KEY = os.getenv("AMAP_MAPS_API_KEY")
 
 # endregion
 
-PYTHONPATH = os.getenv("PYTHONPATH")
+PYTHONPATH = os.getenv("PYTHONPATH", "")
