@@ -65,7 +65,7 @@ Due to `slime` version upgrades, specifically regarding rollout changes, please 
 [**openai-agents-python**](https://github.com/openai/openai-agents-python): For providing excellent MCP interfaces.
 
 ## Citation
-
+ 
 If you use `qqr` or the ArenaRL algorithm in your research, please cite our paper:
 
 ```bibtex
