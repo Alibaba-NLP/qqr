@@ -20,6 +20,9 @@
 
 `qqr` 是一个轻量级、非侵入式的 [`slime`](https://github.com/THUDM/slime) 扩展库。集成了 [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol)，通过 **ArenaRL** 算法实现开放域智能体的进化。
 
+## 📰 新闻
+- **[2026.05.01]** 🎉 我们的论文 ArenaRL 被 **ICML 2026** 接收！
+
 ## 🌟 核心特性
 
 - **ArenaRL 算法**: 完整实现了论文中的核心算法。框架内置了锚点法 (Anchor-Based)、循环赛 (Round-Robin)、瑞士轮 (Swiss-System)、双败淘汰 (Double-Elimination) 和种子单败淘汰制 (Seeded Single-Elimination) 等多种锦标赛拓扑。
