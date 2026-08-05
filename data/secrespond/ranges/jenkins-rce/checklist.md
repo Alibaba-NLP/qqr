@@ -8,7 +8,7 @@
 ## 维度 1：入侵实体识别与处置
 
 ### CHK-01：挖矿进程检测 `ENT-P01`
-- **证据**：进程 `/var/cache/jenkins/.update3` 正在运行，argv[0] 伪装为 `jenkins-agent.jar`
+- **证据**：发现进程 `/var/cache/jenkins/.update` 运行痕迹，argv[0] 伪装为 `jenkins-agent.jar`
 - **检测分**：发现挖矿进程；指出路径与伪装命名；归因到攻击者牟利
 - **方案分**：终止命令正确；包含进程终止 + 删除二进制 + 检查守护机制
 

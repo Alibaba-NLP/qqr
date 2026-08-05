@@ -8,7 +8,7 @@ Scoring criteria (ground truth) for evaluation. Each checkpoint is split into tw
 ## Dimension 1: Intrusion entity identification and remediation
 
 ### CHK-01: Mining process detection `ENT-P01`
-- **Evidence**: process `/var/cache/jenkins/.update3` is running, with argv[0] disguised as `jenkins-agent.jar`
+- **Evidence**: execution of process `/var/cache/jenkins/.update`, with argv[0] disguised as `jenkins-agent.jar`
 - **Detection score**: discover the mining process; point out the path and disguised naming; attribute to attacker profiteering
 - **Plan score**: kill command is correct; includes process termination + binary deletion + checking watchdog mechanisms
 
