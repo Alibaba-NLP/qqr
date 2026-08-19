@@ -66,10 +66,10 @@ async def agent_loop(
     if sample.messages[0]["role"] != "system":
         sample.messages.insert(0, build_system_message(0, max_steps))
 
-    # Stamp the same group_id on every fan-out child so slime's loss reducer
-    # aggregates them as one group instead of N
-    # (see _validate_group_id_annotated in slime/ray/rollout.py).
-    group_id = sample.group_id if sample.group_id is not None else sample.index
+    # Stamp the same rollout_id on every fan-out child so slime's loss reducer
+    # aggregates them as one rollout instead of N
+    # (see _validate_rollout_id_annotated in slime/ray/rollout.py).
+    rollout_id = sample.rollout_id if sample.rollout_id is not None else sample.index
     samples: list[Sample] = []
 
     for step_idx in range(max_steps):
@@ -77,7 +77,7 @@ async def agent_loop(
             Sample(
                 group_index=sample.group_index,
                 index=sample.index,
-                group_id=group_id,
+                rollout_id=rollout_id,
                 messages=deepcopy(sample.messages),
                 prompt=sample.prompt,
                 label=sample.label,
@@ -113,7 +113,7 @@ async def agent_loop(
             Sample(
                 group_index=sample.group_index,
                 index=sample.index,
-                group_id=group_id,
+                rollout_id=rollout_id,
                 messages=deepcopy(sample.messages),
                 prompt=sample.prompt,
                 label=sample.label,
@@ -148,7 +148,7 @@ async def agent_loop(
             Sample(
                 group_index=sample.group_index,
                 index=sample.index,
-                group_id=group_id,
+                rollout_id=rollout_id,
                 prompt=sample.prompt,
                 tokens=[state.tokenizer.pad_token_id],
                 reward=0.0,
