@@ -53,15 +53,7 @@ You can configure the experiment in [`qqr/examples/travel/config.py`](qqr/exampl
 
 ## 📋 Compatibility
 
-Due to `slime` version upgrades, specifically regarding rollout changes, please use the following version combinations that we have tested to ensure stability:
-
-| qqr    | slime  |
-| :----- | :----- |
-| v0.2.0 | v0.3.0 |
-| v0.1.3 | v0.2.4 |
-| v0.1.2 | v0.2.3 |
-| v0.1.1 | v0.2.2 |
-| v0.1.0 | v0.2.1 |
+Due to `slime` version upgrades, specifically regarding rollout changes, please use one of the tested version combinations listed in [Compatibility](docs/en/get_started/compatibility.md).
 
 ## Acknowledgements
 

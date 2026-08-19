@@ -56,15 +56,7 @@ bash scripts/travel/run-qwen3-8B.sh
 
 ## 📋 兼容性
 
-由于 `slime` 的版本升级，特别是涉及 rollout 的改动，为了确保功能稳定，请使用以下经过测试的版本组合：
-
-| qqr    | slime  |
-| :----- | :----- |
-| v0.2.0 | v0.3.0 |
-| v0.1.3 | v0.2.4 |
-| v0.1.2 | v0.2.3 |
-| v0.1.1 | v0.2.2 |
-| v0.1.0 | v0.2.1 |
+由于 `slime` 的版本升级，特别是涉及 rollout 的改动，请使用 [兼容性](docs/zh/get_started/compatibility.md) 中列出的经过测试的版本组合。
 
 ## 致谢
 
