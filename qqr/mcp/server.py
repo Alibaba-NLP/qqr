@@ -8,6 +8,8 @@ from agents.mcp.server import MCPServerSse, MCPServerStdio
 from cachetools import TTLCache
 from mcp.types import CallToolResult
 
+from . import _MCP_V2
+
 logger = logging.getLogger(__name__)
 
 
@@ -96,7 +98,7 @@ class MCPServerCacheableMixin:
             result: CallToolResult = await super().call_tool(tool_name, arguments)
 
             # Store only successful results
-            if not result.isError:
+            if not (result.is_error if _MCP_V2 else result.isError):
                 self._tool_cache[cache_key] = result
 
         return result

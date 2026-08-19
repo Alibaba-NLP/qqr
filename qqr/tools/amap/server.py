@@ -1,7 +1,11 @@
 import asyncio
 
 import httpx
-from mcp.server.fastmcp import FastMCP
+
+try:
+    from mcp.server.fastmcp import FastMCP  # mcp < 2
+except ImportError:  # mcp >= 2 replaced FastMCP with MCPServer
+    from mcp.server.mcpserver import MCPServer as FastMCP
 
 from qqr.data.markdown import json2md
 from qqr.data.text import truncate_text

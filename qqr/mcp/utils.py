@@ -3,6 +3,8 @@ from agents.models.chatcmpl_converter import Converter
 from mcp.types import Tool as MCPTool
 from openai.types.chat.chat_completion_tool_param import ChatCompletionToolParam
 
+from . import _MCP_V2
+
 
 async def get_mcp_tools(mcp_server: MCPServer) -> list[ChatCompletionToolParam]:
     server_tools = await mcp_server.list_tools()
@@ -12,8 +14,8 @@ async def get_mcp_tools(mcp_server: MCPServer) -> list[ChatCompletionToolParam]:
                 name=info.name,
                 title=info.title,
                 description=info.description,
-                inputSchema=info.inputSchema,
-                outputSchema=info.outputSchema,
+                inputSchema=info.input_schema if _MCP_V2 else info.inputSchema,
+                outputSchema=info.output_schema if _MCP_V2 else info.outputSchema,
                 annotations=info.annotations,
             ),
             mcp_server,

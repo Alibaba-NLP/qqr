@@ -2,7 +2,10 @@ import asyncio
 import json
 import logging
 
-from mcp.server.fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP  # mcp < 2
+except ImportError:  # mcp >= 2 replaced FastMCP with MCPServer
+    from mcp.server.mcpserver import MCPServer as FastMCP
 from openai import AsyncOpenAI
 
 from qqr.utils.envs import DASHSCOPE_API_KEY, DASHSCOPE_BASE_URL
