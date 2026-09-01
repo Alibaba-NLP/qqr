@@ -28,6 +28,11 @@ BAILIAN_WEB_SEARCH_API_KEY = os.getenv("BAILIAN_WEB_SEARCH_API_KEY")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 SERPER_URL = os.getenv("SERPER_URL", "https://serpapi.com/search")
 
+# Search gateway（ARISE-RL deepresearch / travel 的 web_search 网关，
+# 论文实现基于 Google Custom Search API）
+SEARCH_API_KEY = os.getenv("SEARCH_API_KEY")
+SEARCH_API_URL = os.getenv("SEARCH_API_URL", "")
+
 # Map
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 AMAP_MAPS_API_KEY = os.getenv("AMAP_MAPS_API_KEY")

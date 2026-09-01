@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 
 try:
     from mcp.server.fastmcp import FastMCP  # mcp < 2
@@ -10,12 +11,16 @@ from openai import AsyncOpenAI
 
 from qqr.utils.envs import DASHSCOPE_API_KEY, DASHSCOPE_BASE_URL
 
+MAX_RETRIES = 3
+RETRY_DELAYS = [2, 2, 2]  # 重试间隔（秒）
+# 论文设置：search_flights / search_train_tickets 由 GPT-5-mini 在确定性 prompt 下模拟
+MODELS = os.getenv("MOCK_TRANSPORT_MODELS", "gpt-5-mini-2025-08-07").split(",")
+
 logger = logging.getLogger(__name__)
 
 mcp = FastMCP("MockTransport", log_level="WARNING")
 
 semaphore = asyncio.Semaphore(10)
-model = "qwen-plus"
 client = AsyncOpenAI(
     api_key=DASHSCOPE_API_KEY, base_url=DASHSCOPE_BASE_URL, timeout=60, max_retries=10
 )
@@ -87,15 +92,26 @@ async def search_flights(date: str, from_city: str, to_city: str) -> str:
         {"role": "user", "content": query},
     ]
 
-    try:
-        async with semaphore:
-            response = await client.chat.completions.create(
-                messages=messages, model=model
-            )
-        result = response.choices[0].message.content.strip()
-    except Exception as e:
-        logger.error(f"[search_flights] Failed to get response: {e}")
-        result = ""
+    result = ""
+    for model in MODELS:
+        for attempt in range(MAX_RETRIES):
+            try:
+                async with semaphore:
+                    response = await client.chat.completions.create(
+                        messages=messages, model=model
+                    )
+                result = response.choices[0].message.content.strip()
+                if result:
+                    break
+            except Exception as e:
+                logger.warning(
+                    f"[search_flights] model={model} 第 {attempt + 1}/{MAX_RETRIES} 次调用失败: {e}"
+                )
+                if attempt < MAX_RETRIES - 1:
+                    await asyncio.sleep(RETRY_DELAYS[attempt])
+        if result:
+            break
+        logger.warning(f"[search_flights] model={model} 全部失败，尝试备用模型")
 
     if not result:
         raise ValueError("两地无航班信息")
@@ -167,15 +183,26 @@ DepStation / ArrStation：
         {"role": "user", "content": query},
     ]
 
-    try:
-        async with semaphore:
-            response = await client.chat.completions.create(
-                messages=messages, model=model
-            )
-        result = response.choices[0].message.content.strip()
-    except Exception as e:
-        logger.error(f"[search_train_tickets] Failed to get response: {e}")
-        result = ""
+    result = ""
+    for model in MODELS:
+        for attempt in range(MAX_RETRIES):
+            try:
+                async with semaphore:
+                    response = await client.chat.completions.create(
+                        messages=messages, model=model
+                    )
+                result = response.choices[0].message.content.strip()
+                if result:
+                    break
+            except Exception as e:
+                logger.warning(
+                    f"[search_train_tickets] model={model} 第 {attempt + 1}/{MAX_RETRIES} 次调用失败: {e}"
+                )
+                if attempt < MAX_RETRIES - 1:
+                    await asyncio.sleep(RETRY_DELAYS[attempt])
+        if result:
+            break
+        logger.warning(f"[search_train_tickets] model={model} 全部失败，尝试备用模型")
 
     if not result:
         raise ValueError("两地无直达火车票")
