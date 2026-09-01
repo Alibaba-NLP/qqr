@@ -1,0 +1,1042 @@
+diff --git a/slime/backends/megatron_utils/actor.py b/slime/backends/megatron_utils/actor.py
+index af4880cf..fc48ef15 100644
+--- a/slime/backends/megatron_utils/actor.py
++++ b/slime/backends/megatron_utils/actor.py
+@@ -249,6 +249,14 @@ class MegatronTrainRayActor(TrainRayActor):
+             rollout_data["rollout_routed_experts"] = [
+                 torch.from_numpy(r) for r in rollout_data["rollout_routed_experts"]
+             ]
++
++        # Guided Self-Distillation: move guided_tokens to GPU
++        if "guided_tokens" in rollout_data:
++            rollout_data["guided_tokens"] = [
++                torch.tensor(t, dtype=torch.long, device=torch.cuda.current_device())
++                for t in rollout_data["guided_tokens"]
++            ]
++
+         return rollout_data
+ 
+     def _switch_model(self, target_tag: str) -> None:
+@@ -352,6 +360,52 @@ class MegatronTrainRayActor(TrainRayActor):
+                 store_prefix=store_prefix,
+             )
+ 
++    def _compute_guided_teacher_log_probs(self, rollout_data) -> None:
++        """
++        Guided Self-Distillation: 用 guided_tokens（含 summary 的 prompt + 原 response）
++        做一次额外 forward pass，获取 teacher_log_probs。
++        使用当前 actor 权重（不是 ref 模型），因为 teacher 是"同一模型 + 不同 prompt"。
++        """
++        guided_rollout_data = {}
++        guided_rollout_data["tokens"] = rollout_data["guided_tokens"]
++        guided_rollout_data["total_lengths"] = rollout_data.get(
++            "guided_total_lengths",
++            [len(t) for t in rollout_data["guided_tokens"]],
++        )
++        guided_rollout_data["response_lengths"] = rollout_data["response_lengths"]
++        guided_rollout_data["loss_masks"] = rollout_data["loss_masks"]
++
++        if "max_seq_lens" in rollout_data:
++            max_seq_len = max(guided_rollout_data["total_lengths"])
++            pad_size = mpu.get_tensor_model_parallel_world_size() * self.args.data_pad_size_multiplier
++            max_seq_len = (max_seq_len + pad_size - 1) // pad_size * pad_size
++            guided_rollout_data["max_seq_lens"] = [max_seq_len] * len(guided_rollout_data["tokens"])
++
++        if "multimodal_train_inputs" in rollout_data:
++            guided_rollout_data["multimodal_train_inputs"] = rollout_data["multimodal_train_inputs"]
++        if "metadata" in rollout_data:
++            guided_rollout_data["metadata"] = rollout_data["metadata"]
++
++        try:
++            guided_data_iterator, guided_num_microbatches = get_data_iterator(
++                self.args, self.model, guided_rollout_data
++            )
++            teacher_result = self.compute_log_prob(
++                guided_data_iterator,
++                guided_num_microbatches,
++                store_prefix="teacher_",
++            )
++            rollout_data["teacher_log_probs"] = teacher_result["teacher_log_probs"]
++
++            if is_megatron_main_rank():
++                logger.info(
++                    f"[guided_distill] Computed teacher_log_probs for "
++                    f"{len(rollout_data['teacher_log_probs'])} samples"
++                )
++        except Exception as e:
++            if is_megatron_main_rank():
++                logger.warning(f"[guided_distill] Failed to compute teacher_log_probs: {e}")
++
+     def train(self, rollout_id: int, rollout_data_ref: Box) -> None:
+         if self.args.debug_rollout_only:
+             return
+@@ -455,6 +509,39 @@ class MegatronTrainRayActor(TrainRayActor):
+                 if self._active_model_tag != "actor":
+                     self._switch_model("actor")
+ 
++                # Memory-Guided Off-Policy GRPO: swap tokens with guided_tokens so the training
++                # forward pass computes pi_theta(resp | p_s) for teacher samples. Combined with
++                # --use-rollout-logprobs (old_log_probs = pi_theta_old(resp | p_m)), the standard
++                # PPO IS ratio naturally becomes pi_theta(resp | p_s) / pi_theta_old(resp | p_m),
++                # pushing the student to produce teacher trajectories under the no-memory prompt.
++                # For student samples guided_tokens == tokens so behavior is unchanged.
++                if (
++                    getattr(self.args, "use_guided_tokens_for_training", False)
++                    and "guided_tokens" in rollout_data
++                    and rollout_data["guided_tokens"]
++                ):
++                    rollout_data["tokens"] = rollout_data["guided_tokens"]
++                    rollout_data["total_lengths"] = rollout_data.get(
++                        "guided_total_lengths",
++                        [len(t) for t in rollout_data["guided_tokens"]],
++                    )
++                    if "max_seq_lens" in rollout_data:
++                        max_seq_len = max(rollout_data["total_lengths"])
++                        pad_size = (
++                            mpu.get_tensor_model_parallel_world_size()
++                            * self.args.data_pad_size_multiplier
++                        )
++                        max_seq_len = (max_seq_len + pad_size - 1) // pad_size * pad_size
++                        rollout_data["max_seq_lens"] = [max_seq_len] * len(rollout_data["tokens"])
++                    if is_megatron_main_rank():
++                        logger.info(
++                            f"[memory_guided_offpolicy] Swapped tokens with guided_tokens for "
++                            f"{len(rollout_data['tokens'])} samples (training forward on p_s)."
++                        )
++                # Legacy: old Guided Self-Distillation extra forward pass (keep for backward compat)
++                elif "guided_tokens" in rollout_data and rollout_data["guided_tokens"]:
++                    self._compute_guided_teacher_log_probs(rollout_data)
++
+                 # Calculate adv and returns. Need to performed before training (instead of on the fly),
+                 # because we may need normalize the whole rollout.
+                 compute_advantages_and_returns(self.args, rollout_data)
+diff --git a/slime/backends/megatron_utils/data.py b/slime/backends/megatron_utils/data.py
+index 19be99f3..91b567e4 100644
+--- a/slime/backends/megatron_utils/data.py
++++ b/slime/backends/megatron_utils/data.py
+@@ -449,7 +449,7 @@ def log_rollout_data(
+                         )
+                         val = cp_size * sum_of_sample_mean(val) / len(loss_masks)
+                     else:
+-                        val = torch.cat(val).clone().detach()
++                        val = torch.cat(val).clone().detach().float()
+                         val = val.mean() * cp_size
+                 else:
+                     val = sum(val) / len(val)
+diff --git a/slime/backends/megatron_utils/loss.py b/slime/backends/megatron_utils/loss.py
+index db7b6098..b9f145d1 100644
+--- a/slime/backends/megatron_utils/loss.py
++++ b/slime/backends/megatron_utils/loss.py
+@@ -1,8 +1,11 @@
++import logging
+ from argparse import Namespace
+ from collections.abc import Callable, Iterator
+ from typing import Any
+ 
+ import torch
++
++logger = logging.getLogger(__name__)
+ import torch.distributed as dist
+ import torch.nn.functional as F
+ from megatron.core import mpu
+@@ -356,6 +359,109 @@ def get_values(
+     return torch.empty((0,), device=logits.device), res
+ 
+ 
++def apply_rg_kl_to_advantages(
++    args: Namespace,
++    rollout_data: RolloutBatch,
++    advantages: list[torch.Tensor],
++    student_log_probs: list[torch.Tensor] | None,
++) -> None:
++    """Reward-Gated Reverse KL (RG-KL) — additive distillation penalty.
++
++    For each student sample:
++        reverse_kl[t] = student_log_probs[t] - teacher_log_probs[t]   # at sampled token, estimator of D_KL(π_θ(·|p_s) || π_θ(·|p_m))
++        reverse_kl[t] = clamp(reverse_kl[t], max=rg_kl_clip_value)
++        advantages[i] -= rg_kl_coef[i] * reverse_kl
++
++    Where:
++        - teacher_log_probs comes from _compute_guided_teacher_log_probs forward pass on guided_tokens
++          (which for student samples = [p_m_prompt, tau_s_response]).
++        - rg_kl_coef[i] is precomputed on rollout side: λ_0 · σ((Δ_r − τ)/T) · warmup · decay
++          For teacher samples (or samples where memory was ineffective) coef is 0.
++        - The per-sample coefficient handles Δ_r gating, warmup, cosine decay — all done in rollout/reward.
++
++    This function is independent from apply_opd_kl_to_advantages and only runs when args.use_rg_kl is set.
++    """
++    if student_log_probs is None:
++        return
++
++    teacher_log_probs = rollout_data.get("teacher_log_probs")
++    if teacher_log_probs is None:
++        if torch.distributed.get_rank() == 0:
++            logger.warning(
++                "[rg_kl] use_rg_kl=True but teacher_log_probs missing. "
++                "Did rollout populate guided_tokens for student samples? Skipping RG-KL term."
++            )
++        return
++
++    rg_kl_coef_per_sample = rollout_data.get("rg_kl_coef_per_sample")
++    if rg_kl_coef_per_sample is None:
++        if torch.distributed.get_rank() == 0:
++            logger.warning(
++                "[rg_kl] rg_kl_coef_per_sample missing from rollout_data; assuming zero coefficient. Skipping."
++            )
++        return
++
++    device = student_log_probs[0].device
++    teacher_log_probs = [t.to(device=device) for t in teacher_log_probs]
++
++    clip_value = float(getattr(args, "rg_kl_clip_value", 10.0))
++    loss_masks = rollout_data.get("loss_masks", None)
++
++    n_active = 0
++    sum_kl = 0.0
++    sum_mask = 0
++    sum_coef_weighted_kl = 0.0
++    n_clipped = 0
++    n_kl_elements = 0
++
++    for i, adv in enumerate(advantages):
++        coef = float(rg_kl_coef_per_sample[i]) if rg_kl_coef_per_sample[i] is not None else 0.0
++        if coef <= 0.0:
++            continue
++        s_lp = student_log_probs[i]
++        t_lp = teacher_log_probs[i]
++        if s_lp.numel() == 0 or t_lp.numel() == 0:
++            continue
++        min_len = min(s_lp.shape[0], t_lp.shape[0])
++        reverse_kl = s_lp[:min_len] - t_lp[:min_len]
++        # Track clipping ratio before clamp
++        n_clipped += int((reverse_kl > clip_value).sum().item())
++        n_kl_elements += int(reverse_kl.numel())
++        reverse_kl = torch.clamp(reverse_kl, max=clip_value)
++        # Align with advantage length
++        adv_len = adv.shape[0]
++        if reverse_kl.shape[0] < adv_len:
++            pad = torch.zeros(adv_len - reverse_kl.shape[0], device=device, dtype=reverse_kl.dtype)
++            reverse_kl_full = torch.cat([reverse_kl, pad])
++        else:
++            reverse_kl_full = reverse_kl[:adv_len]
++        advantages[i] = adv - coef * reverse_kl_full
++        n_active += 1
++        if loss_masks is not None and i < len(loss_masks):
++            mask = loss_masks[i].float()
++            mlen = min(mask.shape[0], reverse_kl.shape[0])
++            if mlen > 0 and mask[:mlen].sum() > 0:
++                sum_kl += (reverse_kl[:mlen] * mask[:mlen]).sum().item()
++                sum_mask += int(mask[:mlen].sum().item())
++                sum_coef_weighted_kl += coef * (reverse_kl[:mlen] * mask[:mlen]).sum().item()
++
++    if torch.distributed.get_rank() == 0:
++        mean_kl = sum_kl / sum_mask if sum_mask > 0 else 0.0
++        clip_frac = n_clipped / n_kl_elements if n_kl_elements > 0 else 0.0
++        active_coefs = [c for c in rg_kl_coef_per_sample if c is not None and c > 0]
++        mean_coef = sum(active_coefs) / len(active_coefs) if active_coefs else 0.0
++        logger.info(
++            f"[rg_kl] active={n_active}/{len(advantages)} samples, "
++            f"mean_kl={mean_kl:.4f}, clip_frac={clip_frac:.3f}, "
++            f"mean_active_coef={mean_coef:.4f}, "
++            f"weighted_kl_sum={sum_coef_weighted_kl:.4f}"
++        )
++    # NOTE: Don't write scalars to rollout_data — slime's data.py logger only
++    # accepts list[Tensor] / list[int] / list[float] / list[str]. Pure scalars
++    # crash with "Unsupported type". If we want to track these metrics in
++    # swanlab, we should write a list (one per sample). For now, log only.
++
++
+ def apply_opd_kl_to_advantages(
+     args: Namespace,
+     rollout_data: RolloutBatch,
+@@ -488,6 +594,58 @@ def compute_advantages_and_returns(args: Namespace, rollout_data: RolloutBatch)
+         )
+         returns = advantages
+ 
++    elif args.advantage_estimator == "grpo_guided_distillation":
++        # Guided Self-Distillation: GRPO advantage + λ(Δ) · distillation advantage
++        rewards_tensor = torch.tensor(rewards, dtype=torch.float32, device=kl[0].device)
++        grpo_returns = get_grpo_returns(rewards_tensor, kl)
++
++        teacher_log_probs = rollout_data.get("teacher_log_probs")
++        if teacher_log_probs is not None and len(teacher_log_probs) == len(log_probs):
++            device = log_probs[0].device
++            teacher_log_probs = [t.to(device=device) for t in teacher_log_probs]
++            teacher_log_probs = [
++                t[-r:] for t, r in zip(teacher_log_probs, response_lengths, strict=False)
++            ]
++
++            # SNR Gating: compute Δ and λ(Δ)
++            distill_deltas = []
++            for t_lp, s_lp, mask in zip(teacher_log_probs, log_probs, loss_masks, strict=False):
++                mask_f = mask.float()
++                if mask_f.numel() > 0 and mask_f.sum() > 0 and t_lp.numel() > 0 and s_lp.numel() > 0:
++                    min_len = min(t_lp.shape[0], s_lp.shape[0], mask_f.shape[0])
++                    delta_per_sample = ((t_lp[:min_len] - s_lp[:min_len]) * mask_f[:min_len]).sum() / mask_f[:min_len].sum()
++                    distill_deltas.append(delta_per_sample.reshape(1))
++                else:
++                    distill_deltas.append(torch.zeros(1, device=device))
++
++            # Filter out empty tensors and ensure all are [1]-shaped
++            distill_deltas = [d if d.numel() > 0 else torch.zeros(1, device=device) for d in distill_deltas]
++            mean_delta = torch.stack(distill_deltas).mean()
++            sigma2 = torch.stack(distill_deltas).var()
++            n = len(distill_deltas)
++
++            distill_lambda_0 = getattr(args, "distill_lambda_0", 0.1)
++            signal = torch.clamp(mean_delta, min=0.0)
++            noise = sigma2 / max(n, 1)
++            lam = distill_lambda_0 * signal / (signal + noise + 1e-8)
++            lam = lam.item()
++
++            advantages = []
++            for i in range(len(grpo_returns)):
++                distill_adv = teacher_log_probs[i] - log_probs[i]
++                combined = grpo_returns[i] + lam * distill_adv
++                advantages.append(combined)
++
++            if torch.distributed.get_rank() == 0:
++                logger.info(
++                    f"[grpo_guided_distillation] Δ={mean_delta.item():.4f} "
++                    f"σ²={sigma2.item():.4f} λ={lam:.4f}"
++                )
++        else:
++            advantages = grpo_returns
++
++        returns = advantages
++
+     else:
+         raise NotImplementedError(f"advantage_estimator {args.advantage_estimator} is not supported. ")
+ 
+@@ -500,6 +658,15 @@ def compute_advantages_and_returns(args: Namespace, rollout_data: RolloutBatch)
+             student_log_probs=log_probs,
+         )
+ 
++    # Apply Reward-Gated Reverse KL (RG-KL) — independent of OPD, gated by per-sample coef
++    if getattr(args, "use_rg_kl", False):
++        apply_rg_kl_to_advantages(
++            args=args,
++            rollout_data=rollout_data,
++            advantages=advantages,
++            student_log_probs=log_probs,
++        )
++
+     # TODO: OpenRLHF always does advantages normalization but veRL doesn't seem to do it.
+     if args.normalize_advantages:
+         all_advs = torch.cat(advantages)
+diff --git a/slime/ray/rollout.py b/slime/ray/rollout.py
+index 7ea0d12b..de4bdc7d 100644
+--- a/slime/ray/rollout.py
++++ b/slime/ray/rollout.py
+@@ -464,6 +464,7 @@ class RolloutManager:
+         if self.args.ci_test and self.args.use_fault_tolerance and rollout_id >= 2:
+             self._try_ci_fault_injection()
+         data, metrics = self._get_rollout_data(rollout_id=rollout_id)
++        self._save_rollout_data(data, rollout_id=rollout_id, evaluation=False)
+         self._save_debug_rollout_data(data, rollout_id=rollout_id, evaluation=False)
+         _log_rollout_data(rollout_id, self.args, data, metrics, time.time() - start_time)
+         if self.args.debug_rollout_only:
+@@ -480,6 +481,7 @@ class RolloutManager:
+ 
+         result = call_rollout_fn(self.eval_generate_rollout, self.args, rollout_id, self.data_source, evaluation=True)
+         data = result.data
++        self._save_rollout_data(data, rollout_id=rollout_id, evaluation=True)
+         self._save_debug_rollout_data(data, rollout_id=rollout_id, evaluation=True)
+         _log_eval_rollout_data(rollout_id, self.args, data, result.metrics)
+ 
+@@ -615,6 +617,53 @@ class RolloutManager:
+ 
+         return dynamic_gbs
+ 
++    def _save_rollout_data(self, data, rollout_id, evaluation: bool):
++        if not self.args.save or not getattr(self.args, "save_rollout_data", False):
++            return
++
++        import json as _json
++
++        def _write_jsonl(items, filepath):
++            Path(filepath).parent.mkdir(parents=True, exist_ok=True)
++            with open(filepath, "w") as f:
++                for item in items:
++                    f.write(_json.dumps(item, ensure_ascii=False) + "\n")
++
++        path = Path(self.args.save)
++        if evaluation:
++            logger.info(f"Save evaluation rollout iter_{rollout_id} data to {path}")
++            for dataset_name, info in data.items():
++                dump_data = [sample.to_dict() for sample in info["samples"]]
++                _write_jsonl(dump_data, path / f"rollout/evaluation/iter_{rollout_id}/{dataset_name}.jsonl")
++        else:
++            logger.info(f"Save training rollout iter_{rollout_id} data to {path}")
++            # data 已被 flatten，按 (group_index, index) 分组，每组只保留最后一条（完整对话）
++            from collections import OrderedDict
++            last_by_key = OrderedDict()
++            for group in data:
++                if not isinstance(group, list):
++                    idx = getattr(group, "index", -1)
++                    gidx = getattr(group, "group_index", -1)
++                    if idx == -1 or not getattr(group, "messages", None):
++                        continue
++                    last_by_key[(gidx, idx)] = group.to_dict()
++                    continue
++                for sample_group in group:
++                    if isinstance(sample_group, list):
++                        dump = sample_group[-1]
++                        idx = getattr(dump, "index", -1)
++                        gidx = getattr(dump, "group_index", -1)
++                        if idx != -1:
++                            last_by_key[(gidx, idx)] = dump.to_dict()
++                    else:
++                        idx = getattr(sample_group, "index", -1)
++                        gidx = getattr(sample_group, "group_index", -1)
++                        if idx == -1 or not getattr(sample_group, "messages", None):
++                            continue
++                        last_by_key[(gidx, idx)] = sample_group.to_dict()
++            dump_data = list(last_by_key.values())
++            _write_jsonl(dump_data, path / f"rollout/train/iter_{rollout_id}.jsonl")
++
+     def _save_debug_rollout_data(self, data, rollout_id, evaluation: bool):
+         # TODO to be refactored (originally Buffer._set_data)
+         if (path_template := self.args.save_debug_rollout_data) is not None:
+@@ -710,7 +759,11 @@ class RolloutManager:
+ 
+         # Add rollout log probabilities for off-policy correction
+         if samples[0].rollout_log_probs is not None:
+-            train_data["rollout_log_probs"] = [sample.rollout_log_probs for sample in samples]
++            train_data["rollout_log_probs"] = [
++                sample.rollout_log_probs if sample.rollout_log_probs is not None
++                else [0.0] * sample.response_length
++                for sample in samples
++            ]
+ 
+         if samples[0].rollout_routed_experts is not None:
+             train_data["rollout_routed_experts"] = [sample.rollout_routed_experts for sample in samples]
+@@ -724,6 +777,21 @@ class RolloutManager:
+         if samples[0].teacher_log_probs is not None:
+             train_data["teacher_log_probs"] = [sample.teacher_log_probs for sample in samples]
+ 
++        # Guided Self-Distillation: pass guided_tokens for teacher forward on train side
++        if all(hasattr(s, "guided_tokens") and s.guided_tokens is not None for s in samples):
++            train_data["guided_tokens"] = [sample.guided_tokens for sample in samples]
++            train_data["guided_total_lengths"] = [
++                getattr(sample, "guided_total_length", len(sample.tokens))
++                for sample in samples
++            ]
++
++        # RG-KL: per-sample reward-gated KL coefficient (set by rollout-side group_reward)
++        # Coef = 0 means no RG-KL penalty for this sample (e.g. teacher samples, or gap<thresh groups)
++        if any(getattr(s, "rg_kl_coef", None) is not None for s in samples):
++            train_data["rg_kl_coef_per_sample"] = [
++                float(getattr(s, "rg_kl_coef", 0.0) or 0.0) for s in samples
++            ]
++
+         return train_data
+ 
+     def set_train_parallel_config(self, config: dict):
+@@ -763,6 +831,9 @@ class RolloutManager:
+                 "rollout_routed_experts",
+                 "prompt",
+                 "teacher_log_probs",
++                "guided_tokens",
++                "guided_total_lengths",
++                "rg_kl_coef_per_sample",
+             ]:
+                 if key not in data:
+                     continue
+diff --git a/slime/rollout/sft_rollout.py b/slime/rollout/sft_rollout.py
+index 6b914a96..49b4912e 100644
+--- a/slime/rollout/sft_rollout.py
++++ b/slime/rollout/sft_rollout.py
+@@ -43,21 +43,33 @@ def generate_rollout(args, rollout_id, data_buffer, evaluation=False):
+ 
+     for i, sample in enumerate(samples):
+         (sample,) = sample
+-        messages = sample.prompt
+-        tools = sample.metadata.get("tools", None)
+ 
+-        token_ids, loss_mask = MASK_GENERATOR.get_loss_mask(messages, tools=tools)
+-
+-        response_length = MASK_GENERATOR.get_response_lengths([loss_mask])[0]
++        # 预 tokenize 数据（.bin）：直接从 input_ids + labels 计算 loss_mask
++        if hasattr(sample, "input_ids") and sample.input_ids is not None:
++            token_ids = sample.input_ids
++            labels = sample.labels
++            loss_mask = [0 if l == -100 else 1 for l in labels]
++            if len(token_ids) != len(loss_mask):
++                raise ValueError(
++                    f"SFT rollout produced mismatched token_ids/loss_mask lengths: "
++                    f"{len(token_ids)=}, {len(loss_mask)=}"
++                )
++            response_length = sum(loss_mask)
++        else:
++            # 在线 tokenize（JSONL with messages + tools）
++            messages = sample.prompt
++            tools = sample.metadata.get("tools", None) if sample.metadata else None
++            token_ids, loss_mask = MASK_GENERATOR.get_loss_mask(messages, tools=tools)
++            response_length = MASK_GENERATOR.get_response_lengths([loss_mask])[0]
+ 
+         sample.tokens = token_ids
+         sample.response_length = response_length
+         sample.reward = 0
+-        sample.loss_mask = loss_mask[-response_length:]
++        sample.loss_mask = loss_mask[-response_length:] if response_length > 0 else []
+ 
+         if i == 0 and not SAMPLE_PRINTED:
+             logger.info(
+-                f"sft_rollout::generate_rollout example data: {sample=} (raw){messages=} (raw){token_ids=} (raw){loss_mask=} {response_length=}"
++                f"sft_rollout::generate_rollout example data: {sample=} {response_length=}"
+             )
+             SAMPLE_PRINTED = True
+ 
+diff --git a/slime/utils/arguments.py b/slime/utils/arguments.py
+index d8da881e..195f9f5c 100644
+--- a/slime/utils/arguments.py
++++ b/slime/utils/arguments.py
+@@ -812,6 +812,7 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
+                     "reinforce_plus_plus",
+                     "reinforce_plus_plus_baseline",
+                     "ppo",
++                    "grpo_guided_distillation",
+                 ],
+                 default="grpo",
+                 help=(
+@@ -819,6 +820,30 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
+                     "to the advantage estimator. Use --opd-kl-coef > 0 to enable OPD on top of any estimator."
+                 ),
+             )
++            parser.add_argument(
++                "--distill-lambda-0",
++                type=float,
++                default=0.1,
++                help="Guided Self-Distillation: baseline coefficient λ_0 for SNR Gating",
++            )
++            # Reward-Gated Reverse KL (RG-KL) — additive, does not affect existing flows
++            parser.add_argument(
++                "--use-rg-kl",
++                action="store_true",
++                default=False,
++                help=(
++                    "Enable Reward-Gated Reverse KL distillation. "
++                    "Requires per-sample rg_kl_coef populated on rollout side and guided_tokens "
++                    "populated for student samples (= [p_m_prompt, tau_s_response]). "
++                    "Applies reverse KL penalty (student_logp - teacher_logp) * rg_kl_coef to advantages."
++                ),
++            )
++            parser.add_argument(
++                "--rg-kl-clip-value",
++                type=float,
++                default=10.0,
++                help="RG-KL: clamp per-token reverse-KL value (student_logp - teacher_logp) at this max to prevent gradient blow-up.",
++            )
+             parser.add_argument(
+                 "--disable-compute-advantages-and-returns",
+                 action="store_false",
+@@ -899,6 +924,19 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
+                     "If not set, we will use the logprobs from the actor model."
+                 ),
+             )
++            # Memory-Guided Off-Policy GRPO
++            parser.add_argument(
++                "--use-guided-tokens-for-training",
++                action="store_true",
++                default=False,
++                help=(
++                    "Memory-Guided Off-Policy: replace `tokens` with `guided_tokens` before the "
++                    "training forward pass. Combined with --use-rollout-logprobs, the PPO importance "
++                    "sampling ratio naturally becomes pi_theta(resp | p_s) / pi_theta_old(resp | p_m), "
++                    "pushing student to internalize teacher trajectories without needing memory at inference. "
++                    "For student samples guided_tokens == tokens so behavior is unchanged."
++                ),
++            )
+             # Off-Policy Correction using Importance Sampling: https://fengyao.notion.site/off-policy-rl
+             parser.add_argument(
+                 "--use-tis",
+@@ -1106,6 +1144,20 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
+             parser.add_argument("--wandb-run-id", type=str, default=None)
+             return parser
+ 
++        # swanlab
++        def add_swanlab_arguments(parser):
++            parser.add_argument("--use-swanlab", action="store_true", default=False)
++            parser.add_argument("--swanlab-mode", type=str, default=None, choices=["cloud", "offline", "local", "disabled"])
++            parser.add_argument("--swanlab-dir", type=str, default=None)
++            parser.add_argument("--swanlab-key", type=str, default=None)
++            parser.add_argument("--swanlab-host", type=str, default=None)
++            parser.add_argument("--swanlab-team", type=str, default=None)
++            parser.add_argument("--swanlab-group", type=str, default=None)
++            reset_arg(parser, "--swanlab-project", type=str, default=None)
++            parser.add_argument("--disable-swanlab-random-suffix", action="store_false", dest="swanlab_random_suffix", default=True)
++            parser.add_argument("--swanlab-run-id", type=str, default=None)
++            return parser
++
+         # tensorboard
+         def add_tensorboard_arguments(parser):
+             # tb_project_name, tb_experiment_name
+@@ -1122,6 +1174,7 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
+ 
+         # debug
+         def add_debug_arguments(parser):
++            parser.add_argument("--save-rollout-data", action="store_true", default=False)
+             parser.add_argument(
+                 "--save-debug-rollout-data",
+                 type=str,
+@@ -1276,7 +1329,7 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
+                 "--loss-mask-type",
+                 type=str,
+                 default="qwen",
+-                choices=["qwen", "qwen3", "distill_qwen"],
++                choices=["qwen", "qwen3", "qwen3_5", "distill_qwen"],
+                 help="Loss mask type",
+             )
+             parser.add_argument(
+@@ -1390,6 +1443,7 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
+         parser = add_algo_arguments(parser)
+         parser = add_on_policy_distillation_arguments(parser)
+         parser = add_wandb_arguments(parser)
++        parser = add_swanlab_arguments(parser)
+         parser = add_tensorboard_arguments(parser)
+         parser = add_router_arguments(parser)
+         parser = add_debug_arguments(parser)
+diff --git a/slime/utils/data.py b/slime/utils/data.py
+index 4bb81e56..dbc9c771 100644
+--- a/slime/utils/data.py
++++ b/slime/utils/data.py
+@@ -210,51 +210,66 @@ class Dataset:
+         apply_chat_template_kwargs=None,
+     ):
+         origin_samples = []
+-        for data in read_file(path):
+-            # Both chat templates and multimodal inputs require conversation format (list of message dicts)
+-            as_conversation = apply_chat_template or (multimodal_keys is not None)
+-            prompt = _build_messages(data, prompt_key, as_conversation, multimodal_keys)
+-
+-            metadata = data.get(metadata_key) or {}
+-            tools = None
+-            if tool_key is not None and tool_key in data:
+-                tools = data[tool_key]
+-                if isinstance(tools, str):
+-                    tools = json.loads(tools)
+-                elif isinstance(tools, np.ndarray):
+-                    tools = tools.tolist()
+-                assert isinstance(tools, list), f"tools must be a list, got {type(tools)} instead"
+-                metadata["tools"] = tools
+-
+-            if apply_chat_template:
+-                output_prompt = tokenizer.apply_chat_template(
+-                    prompt,
+-                    tools=tools,
+-                    tokenize=False,
+-                    add_generation_prompt=True,
+-                    **(apply_chat_template_kwargs or {}),
+-                )
+-            else:
+-                output_prompt = prompt
+-
+-            if processor:
+-                from slime.utils.processing_utils import process_vision_info
+ 
+-                assert isinstance(
+-                    prompt, list
+-                ), f"prompt must be a list when processor is not None, got {type(prompt)} instead"
+-                multimodal_inputs = process_vision_info(prompt, processor)
+-            else:
+-                multimodal_inputs = None
+-
+-            origin_samples.append(
+-                Sample(
+-                    prompt=output_prompt,
+-                    label=data[label_key] if label_key is not None else None,
+-                    metadata=metadata,
+-                    multimodal_inputs=multimodal_inputs,
++        # 预 tokenize 的 .bin (parquet) 文件：直接读 input_ids + labels
++        if path.endswith(".bin"):
++            try:
++                from datasets import Dataset as hf_ds
++                reader = hf_ds.from_parquet(path)
++                for data in reader:
++                    origin_samples.append(
++                        Sample(input_ids=data["input_ids"], labels=data["labels"])
++                    )
++                logger.info(f"Loaded {len(origin_samples)} pre-tokenized samples from {path}")
++            except Exception as e:
++                raise RuntimeError(f"Failed to load .bin file {path}: {e}")
++
++        if not origin_samples:
++            for data in read_file(path):
++                # Both chat templates and multimodal inputs require conversation format (list of message dicts)
++                as_conversation = apply_chat_template or (multimodal_keys is not None)
++                prompt = _build_messages(data, prompt_key, as_conversation, multimodal_keys)
++
++                metadata = data.get(metadata_key) or {}
++                tools = None
++                if tool_key is not None and tool_key in data:
++                    tools = data[tool_key]
++                    if isinstance(tools, str):
++                        tools = json.loads(tools)
++                    elif isinstance(tools, np.ndarray):
++                        tools = tools.tolist()
++                    assert isinstance(tools, list), f"tools must be a list, got {type(tools)} instead"
++                    metadata["tools"] = tools
++
++                if apply_chat_template:
++                    output_prompt = tokenizer.apply_chat_template(
++                        prompt,
++                        tools=tools,
++                        tokenize=False,
++                        add_generation_prompt=True,
++                        **(apply_chat_template_kwargs or {}),
++                    )
++                else:
++                    output_prompt = prompt
++
++                if processor and multimodal_keys is not None:
++                    from slime.utils.processing_utils import process_vision_info
++
++                    assert isinstance(
++                        prompt, list
++                    ), f"prompt must be a list when processor is not None, got {type(prompt)} instead"
++                    multimodal_inputs = process_vision_info(prompt, processor)
++                else:
++                    multimodal_inputs = None
++
++                origin_samples.append(
++                    Sample(
++                        prompt=output_prompt,
++                        label=data[label_key] if label_key is not None else None,
++                        metadata=metadata,
++                        multimodal_inputs=multimodal_inputs,
++                    )
+                 )
+-            )
+ 
+         if max_length is not None:
+             self.origin_samples = filter_long_prompt(origin_samples, tokenizer, processor, max_length)
+diff --git a/slime/utils/logging_utils.py b/slime/utils/logging_utils.py
+index 1fc3d94b..faca94d9 100644
+--- a/slime/utils/logging_utils.py
++++ b/slime/utils/logging_utils.py
+@@ -2,6 +2,12 @@ import logging
+ 
+ import wandb
+ 
++try:
++    import swanlab
++    HAS_SWANLAB = True
++except ImportError:
++    HAS_SWANLAB = False
++
+ from . import wandb_utils
+ from .tensorboard_utils import _TensorboardAdapter
+ 
+@@ -40,6 +46,12 @@ def finish_tracking(args):
+     except Exception:
+         logging.getLogger(__name__).exception("Failed to finish wandb run")
+ 
++    if getattr(args, "use_swanlab", False) and HAS_SWANLAB:
++        try:
++            swanlab.finish()
++        except Exception:
++            pass
++
+ 
+ # TODO further refactor, e.g. put TensorBoard init to the "init" part
+ def log(args, metrics, step_key: str):
+diff --git a/slime/utils/mask_utils.py b/slime/utils/mask_utils.py
+index 0ddb3a14..efe5e159 100644
+--- a/slime/utils/mask_utils.py
++++ b/slime/utils/mask_utils.py
+@@ -9,8 +9,11 @@ def get_response_lengths(loss_masks: list[list[int]]) -> list[int]:
+ class MultiTurnLossMaskGenerator:
+     def __init__(self, tokenizer: AutoTokenizer, tokenizer_type: str = "qwen"):
+         self.tokenizer = tokenizer
+-        self.system_message_length, self.gen_token_length = self.get_system_message_length()
+         self.tokenizer_type = tokenizer_type
++        self.system_message_length = 0
++        self.gen_token_length = 0
++        if self.tokenizer_type in ("qwen", "qwen3"):
++            self.system_message_length, self.gen_token_length = self.get_system_message_length()
+ 
+     def get_response_lengths(self, loss_masks: list[list[int]]) -> list[int]:
+         return get_response_lengths(loss_masks)
+@@ -38,7 +41,11 @@ class MultiTurnLossMaskGenerator:
+         end_interval = len(chat_template_token_ids) - len(raw_token_ids) - idx_2
+         gen_token_length = len(
+             self.tokenizer.apply_chat_template(
+-                test_messages, add_special_tokens=False, tokenize=True, add_generation_prompt=True
++                test_messages,
++                add_special_tokens=False,
++                tokenize=True,
++                add_generation_prompt=True,
++                return_dict=False,
+             )
+         ) - len(chat_template_token_ids)
+ 
+@@ -53,9 +60,11 @@ class MultiTurnLossMaskGenerator:
+ 
+         for i, message in enumerate(messages):
+             if i == 0:
+-                message_ids = self.tokenizer.apply_chat_template([message], tokenize=True, tools=tools)
++                message_ids = self.tokenizer.apply_chat_template(
++                    [message], tokenize=True, tools=tools, return_dict=False
++                )
+             else:
+-                message_ids = self.tokenizer.apply_chat_template([message], tokenize=True)
++                message_ids = self.tokenizer.apply_chat_template([message], tokenize=True, return_dict=False)
+ 
+             if message["role"] != "system" and i > 0:
+                 message_ids = message_ids[self.system_message_length :]
+@@ -80,16 +89,23 @@ class MultiTurnLossMaskGenerator:
+         all_token_ids = []
+ 
+         prefix_message = {"role": "user", "content": "FOR CALCULATING LOSS MASK ONLY"}
+-        prefix_token_ids = self.tokenizer.apply_chat_template([prefix_message], tokenize=True)
++        prefix_token_ids = self.tokenizer.apply_chat_template([prefix_message], tokenize=True, return_dict=False)
+ 
+         for i, message in enumerate(messages):
+             if i == 0:
+                 tailed_message_ids = self.tokenizer.apply_chat_template(
+-                    [message, prefix_message], tokenize=True, tools=tools
++                    [message, prefix_message],
++                    tokenize=True,
++                    tools=tools,
++                    return_dict=False,
+                 )
+                 message_ids = tailed_message_ids[: -len(prefix_token_ids)]
+             else:
+-                prefixed_message_ids = self.tokenizer.apply_chat_template([prefix_message, message], tokenize=True)
++                prefixed_message_ids = self.tokenizer.apply_chat_template(
++                    [prefix_message, message],
++                    tokenize=True,
++                    return_dict=False,
++                )
+                 message_ids = prefixed_message_ids[len(prefix_token_ids) :]
+ 
+             if message["role"] != "system" and i > 0:
+@@ -108,6 +124,77 @@ class MultiTurnLossMaskGenerator:
+ 
+         return all_token_ids, all_loss_masks
+ 
++    def gen_multi_turn_loss_mask_qwen3_5(
++        self, messages: list[dict], tools: list[dict] = None
++    ) -> tuple[list[int], list[int]]:
++        rendered_text = self.tokenizer.apply_chat_template(messages, tokenize=False, tools=tools, return_dict=False)
++        tokenized = self.tokenizer(rendered_text, add_special_tokens=False, return_offsets_mapping=True)
++        token_ids = tokenized["input_ids"]
++        offset_mapping = tokenized.get("offset_mapping")
++
++        if offset_mapping is None:
++            raise ValueError(
++                "Qwen3.5 loss mask generation requires a fast tokenizer " "with `return_offsets_mapping` support."
++            )
++
++        expected_token_ids = self.tokenizer.apply_chat_template(
++            messages, tokenize=True, tools=tools, return_dict=False
++        )
++        if token_ids != expected_token_ids:
++            raise ValueError(
++                "Qwen3.5 rendered text tokenization does not match "
++                "`apply_chat_template(..., tokenize=True)` output."
++            )
++
++        assistant_header = "<|im_start|>assistant\n"
++        think_prefix = "<think>\n"
++        end_marker = "<|im_end|>"
++
++        char_mask = [0] * len(rendered_text)
++        cursor = 0
++
++        for message in messages:
++            if message["role"] != "assistant":
++                continue
++
++            header_pos = rendered_text.find(assistant_header, cursor)
++            if header_pos < 0:
++                raise ValueError("Failed to locate assistant message in rendered Qwen3.5 chat template output.")
++
++            content_start = header_pos + len(assistant_header)
++            end_pos = rendered_text.find(end_marker, content_start)
++            if end_pos < 0:
++                raise ValueError("Failed to locate <|im_end|> for assistant message in rendered text.")
++
++            span_end = end_pos + len(end_marker)
++            if span_end < len(rendered_text) and rendered_text[span_end] == "\n":
++                span_end += 1
++            cursor = span_end
++
++            if message.get("step_loss_mask", 1) != 1:
++                continue
++
++            if rendered_text[content_start : content_start + len(think_prefix)] == think_prefix:
++                mask_start = content_start + len(think_prefix)
++            else:
++                mask_start = content_start
++
++            for pos in range(mask_start, span_end):
++                char_mask[pos] = 1
++
++        char_mask_prefix_sum = [0]
++        for value in char_mask:
++            char_mask_prefix_sum.append(char_mask_prefix_sum[-1] + value)
++
++        loss_mask = []
++        for start, end in offset_mapping:
++            if end <= start:
++                loss_mask.append(0)
++            else:
++                loss_mask.append(1 if char_mask_prefix_sum[end] - char_mask_prefix_sum[start] > 0 else 0)
++
++        return token_ids, loss_mask
++
+     def gen_multi_turn_loss_mask_distill_qwen(
+         self, messages: list[dict], tools: list[dict] = None
+     ) -> tuple[list[int], list[int]]:
+@@ -134,6 +221,8 @@ class MultiTurnLossMaskGenerator:
+             return self.gen_multi_turn_loss_mask_qwen(messages, tools)
+         elif self.tokenizer_type == "qwen3":
+             return self.gen_multi_turn_loss_mask_qwen3(messages, tools)
++        elif self.tokenizer_type == "qwen3_5":
++            return self.gen_multi_turn_loss_mask_qwen3_5(messages, tools)
+         elif self.tokenizer_type == "distill_qwen":
+             return self.gen_multi_turn_loss_mask_distill_qwen(messages, tools)
+         else:
+diff --git a/slime/utils/types.py b/slime/utils/types.py
+index 0681c184..f98bf2e5 100644
+--- a/slime/utils/types.py
++++ b/slime/utils/types.py
+@@ -14,6 +14,9 @@ class Sample:
+     # prompt
+     prompt: str | list[dict[str, str]] = ""
+     tokens: list[int] = field(default_factory=list)
++    # pre-tokenized SFT data
++    input_ids: list[int] | None = None
++    labels: list[int] | None = None
+     multimodal_inputs: dict[str, Any] | None = None  # raw multimodal data, e.g. images, videos, etc.
+     multimodal_train_inputs: dict[str, Any] | None = None  # processed multimodal data, e.g. pixel_values, etc.
+     # response
+diff --git a/slime/utils/wandb_utils.py b/slime/utils/wandb_utils.py
+index bb491d1b..0e6c7810 100644
+--- a/slime/utils/wandb_utils.py
++++ b/slime/utils/wandb_utils.py
+@@ -4,6 +4,12 @@ from copy import deepcopy
+ 
+ import wandb
+ 
++try:
++    import swanlab
++    HAS_SWANLAB = True
++except ImportError:
++    HAS_SWANLAB = False
++
+ logger = logging.getLogger(__name__)
+ 
+ 
+@@ -20,10 +26,26 @@ def _is_offline_mode(args) -> bool:
+ 
+ 
+ def init_wandb_primary(args):
++    # SwanLab: 自动启用 wandb 兼容模式
++    if getattr(args, "use_swanlab", False):
++        args.use_wandb = True
++        logger.info("SwanLab enabled. Automatically setting 'use_wandb' to True.")
++        has_swanlab_key = getattr(args, "swanlab_key", None) or os.getenv("SWANLAB_API_KEY")
++        if not has_swanlab_key:
++            args.swanlab_mode = "local"
++            logger.warning("SwanLab API Key not found. Switching swanlab_mode to 'local'.")
++        args.wandb_random_suffix = False
++        args.wandb_group = getattr(args, "swanlab_group", None) or args.wandb_group
++        _init_swanlab_primary(args)
++
+     if not args.use_wandb:
+         args.wandb_run_id = None
+         return
+ 
++    # SwanLab 模式下强制 wandb offline（swanlab 已接管上传，不需要 wandb API key）
++    if getattr(args, "use_swanlab", False):
++        args.wandb_mode = "offline"
++
+     # Set W&B mode if specified (overrides WANDB_MODE env var)
+     if args.wandb_mode:
+         os.environ["WANDB_MODE"] = args.wandb_mode
+@@ -93,6 +115,8 @@ def _compute_config_for_logging(args):
+ 
+ # https://docs.wandb.ai/guides/track/log/distributed-training/#track-all-processes-to-a-single-run
+ def init_wandb_secondary(args, router_addr=None):
++    _init_swanlab_secondary(args)
++
+     wandb_run_id = getattr(args, "wandb_run_id", None)
+     if wandb_run_id is None:
+         return
+@@ -157,3 +181,73 @@ def _init_wandb_common():
+     wandb.define_metric("eval/step")
+     wandb.define_metric("eval/*", step_metric="eval/step")
+     wandb.define_metric("perf/*", step_metric="rollout/step")
++
++
++# ── SwanLab ──
++
++def _init_swanlab_primary(args):
++    if not HAS_SWANLAB:
++        logger.warning("swanlab not installed. pip install swanlab")
++        return
++
++    if getattr(args, "swanlab_mode", None):
++        os.environ["SWANLAB_MODE"] = args.swanlab_mode
++
++    swanlab_key = getattr(args, "swanlab_key", None) or os.getenv("SWANLAB_API_KEY")
++    if swanlab_key:
++        swanlab.login(api_key=swanlab_key, host=getattr(args, "swanlab_host", None))
++
++    group = getattr(args, "swanlab_group", None) or ""
++    if getattr(args, "swanlab_random_suffix", True):
++        group = group + "_" + wandb.util.generate_id()
++        args.swanlab_group = args.wandb_group = group
++
++    init_kwargs = {
++        "project": getattr(args, "swanlab_project", None),
++        "workspace": getattr(args, "swanlab_team", None),
++        "group": group,
++        "name": group,
++        "config": args.__dict__,
++    }
++
++    swanlab_dir = getattr(args, "swanlab_dir", None)
++    if swanlab_dir:
++        os.makedirs(swanlab_dir, exist_ok=True)
++        init_kwargs["logdir"] = swanlab_dir
++
++    run = swanlab.init(**init_kwargs)
++    swanlab.sync_wandb()
++    args.swanlab_run_id = run.id
++    logger.info(f"SwanLab initialized: project={init_kwargs['project']}, group={group}")
++
++
++def _init_swanlab_secondary(args, name="Secondary"):
++    if not HAS_SWANLAB or not getattr(args, "use_swanlab", False):
++        return
++
++    swanlab_run_id = getattr(args, "swanlab_run_id", None)
++    if swanlab_run_id is None:
++        return
++
++    if getattr(args, "swanlab_mode", None):
++        os.environ["SWANLAB_MODE"] = args.swanlab_mode
++
++    swanlab_key = getattr(args, "swanlab_key", None) or os.getenv("SWANLAB_API_KEY")
++    if swanlab_key:
++        swanlab.login(api_key=swanlab_key, host=getattr(args, "swanlab_host", None))
++
++    init_kwargs = {
++        "project": getattr(args, "swanlab_project", None),
++        "workspace": getattr(args, "swanlab_team", None),
++        "group": getattr(args, "swanlab_group", None),
++        "name": f"{getattr(args, 'swanlab_group', '')}-{name}",
++        "config": args.__dict__,
++    }
++
++    swanlab_dir = getattr(args, "swanlab_dir", None)
++    if swanlab_dir:
++        os.makedirs(swanlab_dir, exist_ok=True)
++        init_kwargs["logdir"] = swanlab_dir
++
++    swanlab.init(**init_kwargs)
++    swanlab.sync_wandb()

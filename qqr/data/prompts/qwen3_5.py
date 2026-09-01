@@ -180,6 +180,8 @@ class Qwen3_5Prompt(Prompt):
         param_dict = {}
 
         for match_text in self.parameter_pattern.findall(parameters):
+            if ">" not in match_text:
+                continue
             idx = match_text.index(">")
             param_name = match_text[:idx]
             param_value = str(match_text[idx + 1 :])
