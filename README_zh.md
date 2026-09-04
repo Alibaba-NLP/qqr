@@ -21,7 +21,7 @@
 `qqr` 是一个轻量级、非侵入式的 [`slime`](https://github.com/THUDM/slime) 扩展库。集成了 [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol)，通过 **ArenaRL** 算法实现开放域智能体的进化。
 
 ## 📰 新闻
-- **[2026.08.28]** 🔥 我们发布了 **ARISE-RL**（Agentic Rubric-Grounded Iterative Self-Evolution with RL），一个面向开放式智能体的全流程自进化 RL 框架，开源了[出题者/做题者训练代码](qqr/examples/)与专家校准 rubric 基准 [**ECR-Bench**](data/)（ECR-DeepResearch + ECR-Travel）。
+- **[2026.08.28]** 🔥 我们发布了 [**ARISE-RL**](https://arxiv.org/abs/2609.01058)（Agentic Rubric-Grounded Iterative Self-Evolution with RL），一个面向开放式智能体的全流程自进化 RL 框架，开源了[出题者/做题者训练代码](qqr/examples/)与专家校准 rubric 基准 [**ECR-Bench**](data/)（ECR-DeepResearch + ECR-Travel）。
 - **[2026.07.30]** 🔥 我们发布了 [**SecRespond**](https://arxiv.org/abs/2607.26791)，一个面向真实世界入侵后事件响应的智能体评测基准，并开源了[数据与评测脚本](data/secrespond/)。
 - **[2026.05.01]** 🎉 我们的论文 ArenaRL 被 **ICML 2026** 接收！
 
@@ -97,7 +97,7 @@ bash scripts/arise_rl_generator/travel/run-qwen3.5-9B.sh
 
 ## 引用
 
-如果您在研究中使用了 `qqr` 或 ArenaRL 算法，请引用我们的论文：
+如果您在研究中使用了 `qqr`、ArenaRL 算法或相关基准，请引用我们的论文：
 
 ```bibtex
 @misc{zhang2026arenarlscalingrlopenended,
@@ -108,5 +108,25 @@ bash scripts/arise_rl_generator/travel/run-qwen3.5-9B.sh
       archivePrefix={arXiv},
       primaryClass={cs.LG},
       url={https://arxiv.org/abs/2601.06487}, 
+}
+
+@article{wang2026secrespond,
+  title={SecRespond: Benchmarking AI Agents for Real-World Post-Compromise Incident Response},
+  author={Wang, Lehan and Chen, Boli and Ding, Ruixue and Xie, Pengjun and Huang, Jinwei and Liu, Zhendong and Wang, Shuo and Lei, Tao and Ouyang, Xin and Li, Xiaomeng},
+  journal={arXiv preprint arXiv:2607.26791},
+  year={2026}
+}
+
+@misc{zhang2026ariserl,
+  title={ARISE-RL: Agentic Rubric-Grounded Iterative Self-Evolution with Reinforcement Learning},
+  author={Zhang, Fanrui and Ding, Ruixue and Zhang, Qiang and Chen, Xi
+          and Chen, Boli and Wang, Shihang and Wang, Qiuchen
+          and Zhan, Hongmin and Bian, Jinxin and Li, Xingchao
+          and Zheng, Peijin and Cheng, Hao and Xie, Pengjun
+          and Zhang, Kaipeng and Liu, Jiawei and Zha, Zheng-Jun},
+  year={2026},
+  eprint={2609.01058},
+  archivePrefix={arXiv},
+  primaryClass={cs.AI}
 }
 ```

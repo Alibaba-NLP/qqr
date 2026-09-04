@@ -21,7 +21,7 @@
 `qqr` (a.k.a. hilichurl) is a lightweight, non-intrusive extension for [`slime`](https://github.com/THUDM/slime). It seamlessly integrates the [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol) standard to enable the evolution of open-ended agents via [**ArenaRL**](https://arxiv.org/abs/2601.06487).
 
 ## 📰 News
-- **[2026.08.28]** 🔥 We release **ARISE-RL** (Agentic Rubric-Grounded Iterative Self-Evolution with RL), a full-cycle self-evolution RL framework for open-ended agents, together with the [Generator/Solver training code](qqr/examples/) and the expert-calibrated rubric benchmark suite [**ECR-Bench**](data/) (ECR-DeepResearch + ECR-Travel).
+- **[2026.08.28]** 🔥 We release [**ARISE-RL**](https://arxiv.org/abs/2609.01058) (Agentic Rubric-Grounded Iterative Self-Evolution with RL), a full-cycle self-evolution RL framework for open-ended agents, together with the [Generator/Solver training code](qqr/examples/) and the expert-calibrated rubric benchmark suite [**ECR-Bench**](data/) (ECR-DeepResearch + ECR-Travel).
 - **[2026.07.30]** 🔥 We release [**SecRespond**](https://arxiv.org/abs/2607.26791), a benchmark for real-world post-compromise incident response, together with its [dataset and evaluation scripts](data/secrespond/).
 - **[2026.05.01]** 🎉 Our paper ArenaRL has been accepted by **ICML 2026**!
 
@@ -94,7 +94,7 @@ Due to `slime` version upgrades, specifically regarding rollout changes, please 
 
 ## Citation
  
-If you use `qqr` or the ArenaRL algorithm in your research, please cite our paper:
+If you use `qqr` or the ArenaRL algorithm in your research, please cite our papers:
 
 ```bibtex
 @misc{zhang2026arenarlscalingrlopenended,
@@ -105,5 +105,25 @@ If you use `qqr` or the ArenaRL algorithm in your research, please cite our pape
       archivePrefix={arXiv},
       primaryClass={cs.LG},
       url={https://arxiv.org/abs/2601.06487}, 
+}
+
+@article{wang2026secrespond,
+  title={SecRespond: Benchmarking AI Agents for Real-World Post-Compromise Incident Response},
+  author={Wang, Lehan and Chen, Boli and Ding, Ruixue and Xie, Pengjun and Huang, Jinwei and Liu, Zhendong and Wang, Shuo and Lei, Tao and Ouyang, Xin and Li, Xiaomeng},
+  journal={arXiv preprint arXiv:2607.26791},
+  year={2026}
+}
+
+@misc{zhang2026ariserl,
+  title={ARISE-RL: Agentic Rubric-Grounded Iterative Self-Evolution with Reinforcement Learning},
+  author={Zhang, Fanrui and Ding, Ruixue and Zhang, Qiang and Chen, Xi
+          and Chen, Boli and Wang, Shihang and Wang, Qiuchen
+          and Zhan, Hongmin and Bian, Jinxin and Li, Xingchao
+          and Zheng, Peijin and Cheng, Hao and Xie, Pengjun
+          and Zhang, Kaipeng and Liu, Jiawei and Zha, Zheng-Jun},
+  year={2026},
+  eprint={2609.01058},
+  archivePrefix={arXiv},
+  primaryClass={cs.AI}
 }
 ```
