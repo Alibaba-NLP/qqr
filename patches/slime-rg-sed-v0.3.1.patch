@@ -1,0 +1,478 @@
+diff --git a/slime/backends/megatron_utils/actor.py b/slime/backends/megatron_utils/actor.py
+index 9bd65336..3d3769c9 100644
+--- a/slime/backends/megatron_utils/actor.py
++++ b/slime/backends/megatron_utils/actor.py
+@@ -254,6 +254,11 @@ class MegatronTrainRayActor(TrainRayActor):
+         rollout_data["loss_masks"] = [
+             t.to(device=device, dtype=torch.int, non_blocking=True) for t in rollout_data["loss_masks"]
+         ]
++        # RG-SED: guided_tokens 一并上 GPU(legacy teacher 前向用)
++        if "guided_tokens" in rollout_data:
++            rollout_data["guided_tokens"] = [
++                t.to(device=device, dtype=torch.long, non_blocking=True) for t in rollout_data["guided_tokens"]
++            ]
+         if "rollout_mask_sums" in rollout_data:
+             # Promote precomputed per-rollout mask totals to GPU tensors here
+             # (matching loss_masks) so the loss reducer can just divide.
+@@ -347,6 +352,41 @@ class MegatronTrainRayActor(TrainRayActor):
+         for iterator in data_iterator:
+             iterator.reset()
+ 
++    def _compute_guided_teacher_log_probs(self, rollout_data) -> None:
++        """
++        Guided Self-Distillation: 用 guided_tokens(含 memory 的 prompt + 原 response)
++        做一次额外 forward pass,获取 teacher_log_probs。
++        使用当前 actor 权重(不是 ref 模型),因为 teacher 是"同一模型 + 不同 prompt"。
++
++        v0.3.1 适配: guided batch 与原 batch 样本完全一致(仅每条 token 内容不同),
++        故共享同一 per-rank schedule(micro_batch_indices/num_microbatches)。
++        """
++        from slime.utils.misc import Box as _Box  # noqa: F401
++
++        guided_rollout_data = dict(rollout_data)
++        guided_rollout_data["tokens"] = rollout_data["guided_tokens"]
++        guided_rollout_data["total_lengths"] = rollout_data.get(
++            "guided_total_lengths",
++            [len(t) for t in rollout_data["guided_tokens"]],
++        )
++
++        # 不用 try/except: 若额外前向在某 rank 失败而其他 rank 成功,
++        # TP/CP 集合通信序列失配会把整个组拖死(直到分布式超时)。
++        # 失败必须响亮抛出,任务快速失败,不允许静默继续。
++        guided_data_iterator = get_data_iterator(guided_rollout_data)
++        teacher_result = self.compute_log_prob(
++            guided_data_iterator,
++            rollout_data["num_microbatches"],
++            store_prefix="teacher_",
++        )
++        rollout_data["teacher_log_probs"] = teacher_result["teacher_log_probs"]
++
++        if dist.get_rank() == 0:
++            logger.info(
++                f"[guided_distill] Computed teacher_log_probs for "
++                f"{len(rollout_data['teacher_log_probs'])} samples"
++            )
++
+     def compute_log_prob(
+         self,
+         data_iterator: list[DataIterator],
+@@ -416,6 +456,16 @@ class MegatronTrainRayActor(TrainRayActor):
+         return {}
+ 
+     def train_actor(self, rollout_id: int, rollout_data: RolloutBatch, external_data=None) -> None:
++        # RG-SED 挂钩(必须在建 data iterator 与 compute_advantages 之前):
++        # - swap 路径已在 rollout 侧(ray/rollout.py)完成,这里无需处理
++        # - legacy 路径: 额外 teacher 前向,供 apply_rg_kl_to_advantages 使用
++        if (
++            not getattr(self.args, "use_guided_tokens_for_training", False)
++            and getattr(self.args, "use_rg_kl", False)
++            and rollout_data.get("guided_tokens")
++        ):
++            self._compute_guided_teacher_log_probs(rollout_data)
++
+         # Create data iterator for log_probs and train.
+         data_iterator = get_data_iterator(rollout_data)
+         num_microbatches = rollout_data["num_microbatches"]
+diff --git a/slime/backends/megatron_utils/data.py b/slime/backends/megatron_utils/data.py
+index 51b008d1..5496f44e 100644
+--- a/slime/backends/megatron_utils/data.py
++++ b/slime/backends/megatron_utils/data.py
+@@ -279,6 +279,9 @@ def log_rollout_data(
+         for key, val in rollout_data.items():
+             if key in [
+                 "tokens",
++                "guided_tokens",
++                "guided_total_lengths",
++                "teacher_log_probs",
+                 "multimodal_train_inputs",
+                 "loss_masks",
+                 "sample_indices",
+@@ -308,10 +311,9 @@ def log_rollout_data(
+                         "returns",
+                         "advantages",
+                         "values",
+-                        "teacher_log_probs",
+                         "opd_reverse_kl",
+                     ]:
+-                        tensor = torch.cat(val).clone().detach()
++                        tensor = torch.cat(val).clone().detach().float()
+                         sum_of_sample_mean = get_sum_of_sample_mean(
+                             total_lengths,
+                             response_lengths,
+diff --git a/slime/backends/megatron_utils/loss.py b/slime/backends/megatron_utils/loss.py
+index adfa5d67..2a60d247 100644
+--- a/slime/backends/megatron_utils/loss.py
++++ b/slime/backends/megatron_utils/loss.py
+@@ -1,9 +1,12 @@
++import logging
+ from argparse import Namespace
+ from collections.abc import Callable, Iterator
+ from typing import Any
+ 
+ import torch
+ import torch.distributed as dist
++
++logger = logging.getLogger(__name__)
+ import torch.nn.functional as F
+ from megatron.core import mpu
+ from torch.utils.checkpoint import checkpoint
+@@ -617,6 +620,130 @@ def get_values(
+     return torch.empty((0,), device=logits.device), res
+ 
+ 
++def apply_rg_kl_to_advantages(
++    args: Namespace,
++    rollout_data: RolloutBatch,
++    advantages: list[torch.Tensor],
++    student_log_probs: list[torch.Tensor] | None,
++) -> None:
++    """Reward-Gated Reverse KL (RG-KL) — additive distillation penalty.
++
++    For each student sample:
++        reverse_kl[t] = student_log_probs[t] - teacher_log_probs[t]   # D_KL(π_θ(·|p_s) || π_θ(·|p_m)) 的采样估计
++        reverse_kl[t] = clamp(reverse_kl[t], max=rg_kl_clip_value)
++        advantages[i] -= rg_kl_coef[i] * reverse_kl
++
++    - teacher_log_probs 来自 _compute_guided_teacher_log_probs 对 guided_tokens 的额外前向
++      (student 样本 = [p_m_prompt, tau_s_response]);
++    - rg_kl_coef[i] 由 rollout 侧预计算: λ_0 · σ((Δ_r − τ)/T) · warmup · decay;
++      teacher 样本(或 memory 无效的组)coef 为 0;
++    - 仅在 args.use_rg_kl 时由 compute_advantages_and_returns 调用。
++    """
++    if student_log_probs is None:
++        return
++
++    teacher_log_probs = rollout_data.get("teacher_log_probs")
++    if teacher_log_probs is None:
++        if torch.distributed.get_rank() == 0:
++            logger.warning(
++                "[rg_kl] use_rg_kl=True but teacher_log_probs missing. "
++                "Did rollout populate guided_tokens for student samples? Skipping RG-KL term."
++            )
++        return
++
++    rg_kl_coef_per_sample = rollout_data.get("rg_kl_coef_per_sample")
++    if rg_kl_coef_per_sample is None:
++        if torch.distributed.get_rank() == 0:
++            logger.warning(
++                "[rg_kl] rg_kl_coef_per_sample missing from rollout_data; assuming zero coefficient. Skipping."
++            )
++        return
++
++    device = student_log_probs[0].device
++    teacher_log_probs = [t.to(device=device) for t in teacher_log_probs]
++
++    clip_value = float(getattr(args, "rg_kl_clip_value", 10.0))
++    loss_masks = rollout_data.get("loss_masks", None)
++    total_lengths = rollout_data.get("total_lengths")
++    guided_total_lengths = rollout_data.get("guided_total_lengths", total_lengths)
++    response_lengths = rollout_data.get("response_lengths")
++    cp_size = mpu.get_context_parallel_world_size()
++
++    n_active = 0
++    sum_kl = 0.0
++    sum_mask = 0
++    sum_coef_weighted_kl = 0.0
++    n_clipped = 0
++    n_kl_elements = 0
++
++    for i, adv in enumerate(advantages):
++        coef = float(rg_kl_coef_per_sample[i]) if rg_kl_coef_per_sample[i] is not None else 0.0
++        if coef <= 0.0:
++            continue
++        s_lp = student_log_probs[i]
++        t_lp = teacher_log_probs[i]
++        response_length = response_lengths[i]
++
++        # CP 对齐: student 分块按原序列 zigzag 切, teacher 分块按 guided 序列切,
++        # 二者边界不同,直接逐元素相减会比较到不同 token 上(且长度不等,metrics 路径直接炸)。
++        # 先在 CP 组内 all_gather 成完整 response 再对齐相减,然后切回本 rank 的 student 分块。
++        # 注意: 空分块也必须参与 gather(all_gather_with_cp 内部对空块有 zero 分支),
++        # 否则会集体通信失配死锁——coef/response_length 在 CP 对等 rank 间一致,跳过逻辑安全。
++        if cp_size > 1:
++            s_full = all_gather_with_cp(s_lp, total_lengths[i], response_length)
++            t_full = all_gather_with_cp(t_lp, guided_total_lengths[i], response_length)
++        else:
++            s_full, t_full = s_lp, t_lp
++        min_len = min(s_full.shape[0], t_full.shape[0])
++        reverse_kl_full = s_full[:min_len] - t_full[:min_len]
++        n_clipped += int((reverse_kl_full > clip_value).sum().item())
++        n_kl_elements += int(reverse_kl_full.numel())
++        reverse_kl_full = torch.clamp(reverse_kl_full, max=clip_value)
++
++        # 切回本 rank 的 student 分块(response 空间两段 zigzag)
++        if cp_size > 1:
++            prompt_length = total_lengths[i] - response_length
++            _, _, _, tok_off = get_logits_and_tokens_offset_with_cp(total_lengths[i], response_length)
++            res_s0, res_e0 = max(0, tok_off[0][0] - prompt_length), max(0, tok_off[0][1] - prompt_length)
++            res_s1, res_e1 = max(0, tok_off[1][0] - prompt_length), max(0, tok_off[1][1] - prompt_length)
++            parts = []
++            if res_e0 > res_s0:
++                parts.append(reverse_kl_full[res_s0:res_e0])
++            if res_e1 > res_s1:
++                parts.append(reverse_kl_full[res_s1:res_e1])
++            reverse_kl = torch.cat(parts) if parts else torch.zeros(0, device=device, dtype=reverse_kl_full.dtype)
++        else:
++            reverse_kl = reverse_kl_full
++
++        adv_len = adv.shape[0]
++        if reverse_kl.shape[0] < adv_len:
++            pad = torch.zeros(adv_len - reverse_kl.shape[0], device=device, dtype=reverse_kl.dtype)
++            reverse_kl_local = torch.cat([reverse_kl, pad])
++        else:
++            reverse_kl_local = reverse_kl[:adv_len]
++        advantages[i] = adv - coef * reverse_kl_local
++        n_active += 1
++        if loss_masks is not None and i < len(loss_masks):
++            mask = loss_masks[i].float()
++            mlen = min(mask.shape[0], reverse_kl.shape[0])
++            if mlen > 0 and mask[:mlen].sum() > 0:
++                sum_kl += (reverse_kl[:mlen] * mask[:mlen]).sum().item()
++                sum_mask += int(mask[:mlen].sum().item())
++                sum_coef_weighted_kl += coef * (reverse_kl[:mlen] * mask[:mlen]).sum().item()
++
++    if torch.distributed.get_rank() == 0:
++        mean_kl = sum_kl / sum_mask if sum_mask > 0 else 0.0
++        clip_frac = n_clipped / n_kl_elements if n_kl_elements > 0 else 0.0
++        active_coefs = [c for c in rg_kl_coef_per_sample if c is not None and c > 0]
++        mean_coef = sum(active_coefs) / len(active_coefs) if active_coefs else 0.0
++        logger.info(
++            f"[rg_kl] active={n_active}/{len(advantages)} samples, "
++            f"mean_kl={mean_kl:.4f}, clip_frac={clip_frac:.3f}, "
++            f"mean_active_coef={mean_coef:.4f}, "
++            f"weighted_kl_sum={sum_coef_weighted_kl:.4f}"
++        )
++
++
+ def apply_opd_kl_to_advantages(
+     args: Namespace,
+     rollout_data: RolloutBatch,
+@@ -772,6 +899,15 @@ def compute_advantages_and_returns(args: Namespace, rollout_data: RolloutBatch)
+             student_log_probs=log_probs,
+         )
+ 
++    # Apply Reward-Gated Reverse KL (RG-KL) — independent of OPD, gated by per-sample coef
++    if getattr(args, "use_rg_kl", False):
++        apply_rg_kl_to_advantages(
++            args=args,
++            rollout_data=rollout_data,
++            advantages=advantages,
++            student_log_probs=log_probs,
++        )
++
+     # TODO: OpenRLHF always does advantages normalization but veRL doesn't seem to do it.
+     if args.normalize_advantages:
+         all_advs = torch.cat(advantages)
+diff --git a/slime/ray/rollout.py b/slime/ray/rollout.py
+index 8ef7a0c2..3626d6bd 100644
+--- a/slime/ray/rollout.py
++++ b/slime/ray/rollout.py
+@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
+ 
+ _ROLLOUT_DATA_TENSOR_DTYPES = {
+     "tokens": torch.long,
++    "guided_tokens": torch.long,
+     "loss_masks": torch.int,
+     "rollout_log_probs": torch.float32,
+     "rollout_top_p_token_ids": torch.int32,
+@@ -558,6 +559,7 @@ class RolloutManager:
+         if self.args.ci_test and self.args.use_fault_tolerance and rollout_id >= 2:
+             self._try_ci_fault_injection()
+         data, metrics = self._get_rollout_data(rollout_id=rollout_id)
++        self._save_rollout_data(data, rollout_id=rollout_id, evaluation=False)
+         self._save_debug_rollout_data(data, rollout_id=rollout_id, evaluation=False)
+         _log_rollout_data(rollout_id, self.args, data, metrics, time.time() - start_time)
+         if self.args.debug_rollout_only:
+@@ -575,6 +577,7 @@ class RolloutManager:
+ 
+         result = call_rollout_fn(self.eval_generate_rollout, self.args, rollout_id, self.data_source, evaluation=True)
+         data = result.data
++        self._save_rollout_data(data, rollout_id=rollout_id, evaluation=True)
+         self._save_debug_rollout_data(data, rollout_id=rollout_id, evaluation=True)
+         _log_eval_rollout_data(rollout_id, self.args, data, result.metrics)
+ 
+@@ -663,6 +666,53 @@ class RolloutManager:
+ 
+         return data, metrics
+ 
++    def _save_rollout_data(self, data, rollout_id, evaluation: bool):
++        if not self.args.save or not getattr(self.args, "save_rollout_data", False):
++            return
++
++        import json as _json
++
++        def _write_jsonl(items, filepath):
++            Path(filepath).parent.mkdir(parents=True, exist_ok=True)
++            with open(filepath, "w") as f:
++                for item in items:
++                    f.write(_json.dumps(item, ensure_ascii=False) + "\n")
++
++        path = Path(self.args.save)
++        if evaluation:
++            logger.info(f"Save evaluation rollout iter_{rollout_id} data to {path}")
++            for dataset_name, info in data.items():
++                dump_data = [sample.to_dict() for sample in info["samples"]]
++                _write_jsonl(dump_data, path / f"rollout/evaluation/iter_{rollout_id}/{dataset_name}.jsonl")
++        else:
++            logger.info(f"Save training rollout iter_{rollout_id} data to {path}")
++            # data 已被 flatten,按 (group_index, index) 分组,每组只保留最后一条(完整对话)
++            from collections import OrderedDict
++            last_by_key = OrderedDict()
++            for group in data:
++                if not isinstance(group, list):
++                    idx = getattr(group, "index", -1)
++                    gidx = getattr(group, "group_index", -1)
++                    if idx == -1 or not getattr(group, "messages", None):
++                        continue
++                    last_by_key[(gidx, idx)] = group.to_dict()
++                    continue
++                for sample_group in group:
++                    if isinstance(sample_group, list):
++                        dump = sample_group[-1]
++                        idx = getattr(dump, "index", -1)
++                        gidx = getattr(dump, "group_index", -1)
++                        if idx != -1:
++                            last_by_key[(gidx, idx)] = dump.to_dict()
++                    else:
++                        idx = getattr(sample_group, "index", -1)
++                        gidx = getattr(sample_group, "group_index", -1)
++                        if idx == -1 or not getattr(sample_group, "messages", None):
++                            continue
++                        last_by_key[(gidx, idx)] = sample_group.to_dict()
++            dump_data = list(last_by_key.values())
++            _write_jsonl(dump_data, path / f"rollout/train/iter_{rollout_id}.jsonl")
++
+     def _save_debug_rollout_data(self, data, rollout_id, evaluation: bool):
+         # TODO to be refactored (originally Buffer._set_data)
+         if (path_template := self.args.save_debug_rollout_data) is not None:
+@@ -731,8 +781,19 @@ class RolloutManager:
+                 rollout_ids[i] = tmp_id
+                 existed_rollout_id_values.add(tmp_id)
+ 
++        # Memory-Guided Off-Policy GRPO: 用 guided_tokens 替换 tokens。
++        # 必须在这里(计算 total_lengths 和 DP schedule 之前)替换,训练侧前向即 pi_theta(resp | p_s),
++        # 配合 --use-rollout-logprobs,IS ratio 自然成为 pi_theta(resp|p_s)/pi_theta_old(resp|p_m)。
++        # student 样本 guided_tokens == tokens 时行为不变。
++        _use_guided = getattr(self.args, "use_guided_tokens_for_training", False) and all(
++            getattr(sample, "guided_tokens", None) for sample in samples
++        )
++        if _use_guided:
++            logger.info(f"[memory_guided_offpolicy] Swapped tokens with guided_tokens for {len(samples)} samples.")
+         train_data = {
+-            "tokens": [sample.tokens for sample in samples],
++            "tokens": [
++                (sample.guided_tokens if _use_guided else sample.tokens) for sample in samples
++            ],
+             "response_lengths": [sample.response_length for sample in samples],
+             # some reward model, e.g. remote rm, may return multiple rewards,
+             # we could use key to select the reward.
+@@ -790,7 +851,11 @@ class RolloutManager:
+ 
+         # Add rollout log probabilities for off-policy correction
+         if samples[0].rollout_log_probs is not None:
+-            train_data["rollout_log_probs"] = [sample.rollout_log_probs for sample in samples]
++            train_data["rollout_log_probs"] = [
++                sample.rollout_log_probs if sample.rollout_log_probs is not None
++                else [0.0] * sample.response_length
++                for sample in samples
++            ]
+ 
+         if getattr(self.args, "rollout_top_p", 1.0) != 1.0:
+             for sample in samples:
+@@ -820,6 +885,19 @@ class RolloutManager:
+         if samples[0].teacher_log_probs is not None:
+             train_data["teacher_log_probs"] = [sample.teacher_log_probs for sample in samples]
+ 
++        # RG-SED: 透传 guided_tokens 给训练侧(legacy 额外 teacher 前向用)
++        if all(getattr(s, "guided_tokens", None) is not None for s in samples):
++            train_data["guided_tokens"] = [sample.guided_tokens for sample in samples]
++            train_data["guided_total_lengths"] = [
++                getattr(sample, "guided_total_length", None) or len(sample.tokens) for sample in samples
++            ]
++
++        # RG-KL: per-sample 系数(rollout 侧 group_reward 写入);0 = 该样本不加惩罚(如 teacher 样本)
++        if any(getattr(s, "rg_kl_coef", None) is not None for s in samples):
++            train_data["rg_kl_coef_per_sample"] = [
++                float(getattr(s, "rg_kl_coef", None) or 0.0) for s in samples
++            ]
++
+         if samples[0].metadata is not None:
+             train_data["source_names"] = [get_source(sample) for sample in samples]
+ 
+@@ -875,6 +953,9 @@ class RolloutManager:
+                 "source_names",
+                 "prompt",
+                 "teacher_log_probs",
++                "guided_tokens",
++                "guided_total_lengths",
++                "rg_kl_coef_per_sample",
+             ]:
+                 if key not in data:
+                     continue
+diff --git a/slime/utils/arguments.py b/slime/utils/arguments.py
+index b80990ee..706c2f74 100644
+--- a/slime/utils/arguments.py
++++ b/slime/utils/arguments.py
+@@ -1045,7 +1045,36 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
+                     "If not set, we will use the logprobs from the actor model."
+                 ),
+             )
+-            # Off-Policy Correction using Importance Sampling: https://fengyao.notion.site/off-policy-rl
++            parser.add_argument(
++                "--use-rg-kl",
++                action="store_true",
++                default=False,
++                help=(
++                    "Enable Reward-Gated Reverse KL distillation. "
++                    "Requires per-sample rg_kl_coef populated on rollout side and guided_tokens "
++                    "populated for student samples (= [p_m_prompt, tau_s_response]). "
++                    "Applies reverse KL penalty (student_logp - teacher_logp) * rg_kl_coef to advantages."
++                ),
++            )
++            parser.add_argument(
++                "--rg-kl-clip-value",
++                type=float,
++                default=10.0,
++                help="RG-KL: clamp per-token reverse-KL value (student_logp - teacher_logp) at this max to prevent gradient blow-up.",
++            )
++            # Memory-Guided Off-Policy GRPO
++            parser.add_argument(
++                "--use-guided-tokens-for-training",
++                action="store_true",
++                default=False,
++                help=(
++                    "Memory-Guided Off-Policy: replace `tokens` with `guided_tokens` for the "
++                    "training forward pass (rollout side, before DP schedule is built). Combined "
++                    "with --use-rollout-logprobs, the PPO importance sampling ratio naturally becomes "
++                    "pi_theta(resp | p_s) / pi_theta_old(resp | p_m). "
++                    "For student samples guided_tokens == tokens so behavior is unchanged."
++                ),
++            )
+             parser.add_argument(
+                 "--use-tis",
+                 action="store_true",
+@@ -1234,6 +1263,7 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
+ 
+         # debug
+         def add_debug_arguments(parser):
++            parser.add_argument("--save-rollout-data", action="store_true", default=False)
+             parser.add_argument(
+                 "--save-debug-rollout-data",
+                 type=str,
+diff --git a/slime/utils/types.py b/slime/utils/types.py
+index df4b1006..b4eae711 100644
+--- a/slime/utils/types.py
++++ b/slime/utils/types.py
+@@ -126,6 +126,12 @@ class Sample:
+     rollout_routed_experts: list[list[int]] | torch.Tensor | None = None  # Routed experts from rollout engine
+     remove_sample: bool = False
+     teacher_log_probs: list[float] | None = None  # Log probabilities from teacher model for OPD
++    # ── RG-SED (RG-KL) guided distillation ──
++    # guided_tokens = [p_m_prompt, tau_response]: teacher prompt 条件化(memory 增强)的完整序列
++    guided_tokens: list[int] | None = None
++    guided_total_length: int | None = None
++    # per-sample λ_t,rollout 侧预计算: λ_0 · σ((Δ_r − τ)/T) · warmup · decay;0/None = 不加 RG-KL 惩罚
++    rg_kl_coef: float | None = None
+ 
+     class Status(Enum):
+         PENDING = "pending"

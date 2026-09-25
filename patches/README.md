@@ -25,3 +25,23 @@ cd /path/to/slime
 git checkout 8d9378e54aa548a431c00619a19b0dbbdb4f5cd8   # verified base commit
 git apply /path/to/qqr/patches/slime-rg-sed.patch
 ```
+
+### slime v0.3.1 variant
+
+`slime-rg-sed-v0.3.1.patch` is a port of `slime-rg-sed.patch` to slime v0.3.1
+(the version pinned for qqr v0.2.1 in the compatibility matrix). The original
+patch's verified base `8d9378e` is 243 commits behind v0.3.1 and no longer
+applies (verified: all 9 files fail on both direct and 3-way apply).
+
+```bash
+cd /path/to/slime
+git checkout v0.3.1   # a6272da0
+git apply /path/to/qqr/patches/slime-rg-sed-v0.3.1.patch
+```
+
+Key adaptations (v0.3.1 pre-computes the DP microbatch schedule on the rollout
+side): the token-swap path is applied before scheduling; the legacy teacher
+forward shares the per-rank schedule to avoid divergence deadlocks; and
+`apply_rg_kl_to_advantages` is CP-aware (`all_gather_with_cp` before
+subtraction, then slice back to the local student chunk). Validated end-to-end
+with a full 120-rollout GRPO+RG-KL training run (2x8 H20, qwen3.5-9B agent).
