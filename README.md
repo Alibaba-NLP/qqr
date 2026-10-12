@@ -128,16 +128,6 @@ Due to `slime` version upgrades, specifically regarding rollout changes, please 
 If you use `qqr` or the ArenaRL algorithm in your research, please cite our papers:
 
 ```bibtex
-@misc{chen2026rollouttimeinterventionunlockingagentic,
-      title={Rollout-Time Intervention: Unlocking Agentic Reinforcement Learning Beyond Policy Limits}, 
-      author={Xi Chen and Ruixue Ding and Zhigaoyuan Wang and Fanrui Zhang and Qiang Zhang and Boli Chen and Shihang Wang and Tianfu Wang and Ailin Ren and Pengyong Wang and Pengjun Xie and Hui Xiong},
-      year={2026},
-      eprint={2610.13438},
-      archivePrefix={arXiv},
-      primaryClass={cs.AI},
-      url={https://arxiv.org/abs/2610.13438}, 
-}
-
 @misc{zhang2026arenarlscalingrlopenended,
       title={ArenaRL: Scaling RL for Open-Ended Agents via Tournament-based Relative Ranking}, 
       author={Qiang Zhang and Boli Chen and Fanrui Zhang and Ruixue Ding and Shihang Wang and Qiuchen Wang and Yinfeng Huang and Haonan Zhang and Rongxiang Zhu and Pengyong Wang and Ailin Ren and Xin Li and Pengjun Xie and Jiawei Liu and Ning Guo and Jingren Zhou and Zheng-Jun Zha},
@@ -167,4 +157,15 @@ If you use `qqr` or the ArenaRL algorithm in your research, please cite our pape
   archivePrefix={arXiv},
   primaryClass={cs.AI}
 }
+
+@misc{chen2026rollouttimeinterventionunlockingagentic,
+      title={Rollout-Time Intervention: Unlocking Agentic Reinforcement Learning Beyond Policy Limits}, 
+      author={Xi Chen and Ruixue Ding and Zhigaoyuan Wang and Fanrui Zhang and Qiang Zhang and Boli Chen and Shihang Wang and Tianfu Wang and Ailin Ren and Pengyong Wang and Pengjun Xie and Hui Xiong},
+      year={2026},
+      eprint={2610.13438},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2610.13438}, 
+}
+
 ```
