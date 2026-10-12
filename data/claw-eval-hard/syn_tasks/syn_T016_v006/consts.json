@@ -1,0 +1,21 @@
+{
+  "CONTRADICTION_PAIR": [
+    "kb_101",
+    "kb_106"
+  ],
+  "OLD_VPN_CLIENT": "SecureConnect",
+  "NEW_VPN_CLIENT": "NetGuard",
+  "MIGRATION_DATE": "April 15, 2026",
+  "SERVER_ADDRESS": "vpn.techcorp.io",
+  "IT_EXTENSION": "7777",
+  "MIN_ARTICLES_TO_READ": 4,
+  "KEY_KEYWORDS": [
+    "VPN",
+    "SecureConnect",
+    "NetGuard",
+    "DingTalk",
+    "MFA",
+    "device",
+    "password"
+  ]
+}

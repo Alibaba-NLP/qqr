@@ -1,0 +1,9 @@
+{
+  "CONTRADICTION_OLD_ID": "kb_001",
+  "CONTRADICTION_NEW_ID": "kb_006",
+  "OLD_CLIENT_NAME": "Cisco AnyConnect",
+  "NEW_CLIENT_NAME": "Zscaler Private Access",
+  "CROSS_REF_SOURCE": "kb_007",
+  "CROSS_REF_TARGET": "kb_003",
+  "FORBIDDEN_TOOL": "kb_update_article"
+}

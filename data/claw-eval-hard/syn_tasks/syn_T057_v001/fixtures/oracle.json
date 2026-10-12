@@ -1,0 +1,11 @@
+{
+  "canonical_answer": "DeepSeek",
+  "required_entities": [
+    "DeepSeek"
+  ],
+  "aliases": [
+    "Deepseek",
+    "深度求索",
+    "DeepSeek / 深度求索"
+  ]
+}

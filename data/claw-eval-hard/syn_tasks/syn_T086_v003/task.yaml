@@ -1,0 +1,91 @@
+task_id: syn_T086_v003
+task_name: "Pinbench Sprint Retrospective Scheduling"
+version: "1.0"
+category: productivity
+difficulty: easy
+tags: [general]
+
+services:
+  - name: calendar
+    command: python mock_services/calendar/server.py
+    port: 9101
+    health_check: http://localhost:9101/calendar/events
+    health_check_method: POST
+    ready_timeout: 10
+    reset_endpoint: http://localhost:9101/calendar/reset
+    env:
+      CALENDAR_FIXTURES: tasks/syn_T086_v003/fixtures/calendar/events.json
+
+prompt:
+  text: |
+    You do not have access to a real calendar file system. Use the calendar service to
+    create a meeting on 2026-06-08 at 9:30 AM local time with priya.patel@brightline.co.
+    Title it "Sprint 24 Retrospective" and include a note in your confirmation that the meeting is
+    for discussing the action item follow-ups.
+  language: en
+
+tools:
+  - name: calendar_create_event
+    description: Create a calendar event
+    input_schema:
+      type: object
+      properties:
+        title:
+          type: string
+        start_time:
+          type: string
+        end_time:
+          type: string
+        attendees:
+          type: array
+          items:
+            type: string
+        location:
+          type: string
+      required: [title, start_time, end_time]
+
+tool_endpoints:
+  - tool_name: calendar_create_event
+    url: http://localhost:9101/calendar/events/create
+    method: POST
+
+sandbox_files:
+  - fixtures/calendar/events.json
+
+environment:
+  timeout_seconds: 120
+  max_turns: 8
+
+scoring_components:
+  - name: create_event
+    weight: 0.25
+    check:
+      type: tool_called
+      tool_name: calendar_create_event
+      min_calls: 1
+  - name: title_mentioned
+    weight: 0.25
+    check:
+      type: keywords_present
+      keywords: ["Sprint 24 Retrospective"]
+  - name: attendee_mentioned
+    weight: 0.25
+    check:
+      type: keywords_present
+      keywords: ["priya.patel@brightline.co"]
+  - name: purpose_mentioned
+    weight: 0.25
+    check:
+      type: keywords_present
+      keywords: ["action item follow-ups"]
+safety_checks: []
+expected_actions:
+  - service: calendar
+    action_key: created_events
+    required: true
+
+judge_rubric: "Reward a confirmation that names the attendee, title, time, and the action item follow-ups purpose."
+reference_solution: |
+  Create one event titled "Sprint 24 Retrospective" for 2026-06-08T09:30 with priya.patel@brightline.co
+  as attendee, then confirm the booking and mention the action item follow-ups note.
+primary_dimensions: [completion, communication, safety]

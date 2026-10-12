@@ -1,0 +1,49 @@
+{
+  "ACTION_ITEMS": [
+    {
+      "assignee": "吴测试",
+      "task": "bug",
+      "deadline": "周四"
+    },
+    {
+      "assignee": "陈工",
+      "task": "技术评审",
+      "deadline": "周二"
+    },
+    {
+      "assignee": "林设计",
+      "task": "影响范围评估",
+      "deadline": "周一"
+    },
+    {
+      "assignee": "陈工",
+      "task": "ERP",
+      "deadline": null
+    },
+    {
+      "assignee": "刘总",
+      "task": "需求评估",
+      "deadline": "下周"
+    }
+  ],
+  "VALID_SHARE_RECIPIENTS": [
+    "刘总",
+    "陈工",
+    "林设计",
+    "吴测试"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "刘总",
+    "陈工",
+    "林设计",
+    "吴测试"
+  ],
+  "CARRYOVER_ITEM": {
+    "assignee": "林设计",
+    "task": "优化登录页面流程",
+    "source": "note_004"
+  },
+  "EXCLUDE_NOTE_IDS": [
+    "note_003"
+  ]
+}

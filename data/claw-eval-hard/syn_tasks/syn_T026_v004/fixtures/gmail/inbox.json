@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "sjones@corp.com",
+    "to": "me@corp.com",
+    "subject": "Q3 Headcount Planning",
+    "date": "2026-03-01T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi, for the Q3 hiring plan discussion on Monday at 10 AM, please have Director Chen join us. We need to finalize the headcount allocation for the new projects.\n\nPlease notify Director Chen.\n\nSarah Jones"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "wangjun@corp.com",
+    "to": "me@corp.com",
+    "subject": "Product Roadmap Update",
+    "date": "2026-03-01T11:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hello, the product roadmap for Q3 has been updated. Please review the attached document.\n\nAlso, we need to schedule a demo with the sales team next week.\n\nJun Wang"
+  }
+]

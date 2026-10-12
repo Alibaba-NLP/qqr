@@ -1,0 +1,12 @@
+{
+  "PROBLEM_IDS": [
+    "INT-004",
+    "INT-006",
+    "INT-007"
+  ],
+  "TOTAL_INTEGRATIONS": 7,
+  "HARDCODED_SECRET": "R00tP@ss2025!",
+  "DEGRADED_ID": "INT-004",
+  "EXPIRED_ID": "INT-006",
+  "SECURITY_RISK_ID": "INT-007"
+}

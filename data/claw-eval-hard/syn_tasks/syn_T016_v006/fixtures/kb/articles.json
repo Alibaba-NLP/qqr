@@ -1,0 +1,93 @@
+[
+  {
+    "article_id": "kb_101",
+    "title": "TechCorp VPN Setup Instructions",
+    "category": "IT Support",
+    "tags": [
+      "VPN",
+      "remote work",
+      "network"
+    ],
+    "content": "## VPN Connection Steps\n\n1. Download and install the SecureConnect VPN client\n2. Open SecureConnect and click [Connect to Workspace]\n3. Enter server address: vpn.techcorp.io\n4. Log in with your TechCorp email and password\n5. Select [Split Tunnel Mode] to connect\n\n## Common Issues\n- Connection timeout: Verify network connectivity and ensure firewall allows VPN port (443)\n- Authentication failure: Check password expiration; reset at https://auth.techcorp.io\n- Cannot reach internal resources: Try reconnecting or call IT support ext.7777\n\n## Important Notes\n- VPN password syncs with email password, expires every 60 days\n- International travel requires advance VPN permission request",
+    "last_updated": "2026-01-10",
+    "views": 1834
+  },
+  {
+    "article_id": "kb_102",
+    "title": "New Hire Technology Equipment Request",
+    "category": "IT Support",
+    "tags": [
+      "device",
+      "onboarding",
+      "request"
+    ],
+    "content": "## Request Workflow\n\n1. Access HR Portal - Equipment - New Device Request\n2. Complete form (requires manager sign-off)\n3. IT processes within 3 business days\n4. Notification sent when device is ready for pickup\n\n## Standard Equipment Package\n- Laptop: Dell Latitude 15 or MacBook Pro 13-inch\n- Monitor: LG 24-inch Full HD\n- Peripherals: Keyboard and mouse (budget up to 400 CNY)\n- Mobile: Based on role requirements\n\n## Important Notes\n- All equipment must be returned upon termination\n- Report damaged equipment through repair workflow\n- Software installation requires IT approval",
+    "last_updated": "2026-01-28",
+    "views": 967
+  },
+  {
+    "article_id": "kb_103",
+    "title": "Working From Home Policy and Tools",
+    "category": "Workplace Guidelines",
+    "tags": [
+      "remote work",
+      "tools",
+      "guidelines"
+    ],
+    "content": "## Remote Work Requirements\n\n1. Connect via company VPN for internal system access (refer to VPN Setup kb_101)\n2. Maintain availability on DingTalk during core hours\n3. Participate in daily team check-in (09:30)\n\n## Approved Tools\n- Messaging: DingTalk (mandatory), Slack (optional)\n- Documents: SharePoint + Office 365\n- Development: GitHub Enterprise (VPN required for internal repos)\n- Meetings: Microsoft Teams (preferred), WebEx (external meetings)\n\n## Network Standards\n- Minimum bandwidth: Download 30Mbps+ / Upload 5Mbps+\n- Video calls need stable connection\n- Unstable home network? Apply for hotspot allowance (80 CNY/month)\n\n## Security Guidelines\n- Avoid sensitive work on public networks\n- Enable auto-lock after 3 minutes\n- No recording of internal meetings without authorization",
+    "last_updated": "2026-02-08",
+    "views": 2489
+  },
+  {
+    "article_id": "kb_104",
+    "title": "Time Off and Leave Management",
+    "category": "HR Policies",
+    "tags": [
+      "leave",
+      "vacation",
+      "sick leave"
+    ],
+    "content": "## Vacation Allowance\n- 1 year tenure: 7 days\n- 3 years tenure: 12 days\n- 5 years tenure: 18 days\n\n## Request Procedure\n1. Submit via HR Portal\n2. Manager approval required\n3. 5+ days needs director approval\n\n## Key Points\n- Submit vacation requests 5 business days ahead\n- Carry over maximum 3 unused days annually\n- Medical leave requires doctor's note",
+    "last_updated": "2026-01-15",
+    "views": 4102
+  },
+  {
+    "article_id": "kb_105",
+    "title": "Account Security and Password Management",
+    "category": "IT Security",
+    "tags": [
+      "password",
+      "security",
+      "reset"
+    ],
+    "content": "## Password Requirements\n- Minimum length: 14 characters\n- Must contain: uppercase, lowercase, digits, symbols\n- Expiration: 60 days\n- History: Cannot repeat last 6 passwords\n\n## Reset Options\n1. Self-service: Go to https://auth.techcorp.io\n2. Through DingTalk IT assistant\n3. Call IT support ext.7777\n\n## Two-Factor Authentication\n- 2FA required for all corporate systems\n- Preferred app: Google Authenticator\n- Fallback: Email verification code\n\n## Lockout Policy\n- 3 failed attempts locks account for 15 minutes\n- Self-unlock available or contact IT support",
+    "last_updated": "2026-02-03",
+    "views": 2156
+  },
+  {
+    "article_id": "kb_106",
+    "title": "VPN Client Migration Announcement",
+    "category": "IT Support",
+    "tags": [
+      "VPN",
+      "update",
+      "client"
+    ],
+    "content": "## Critical Update\n\nPer IT Security Board decision, SecureConnect VPN client will be discontinued effective April 15, 2026.\n\n**New Client:**\nMigrate to NetGuard VPN client (Cisco AnyConnect).\n\n**Migration Process:**\n1. Remove SecureConnect\n2. Install NetGuard from https://vpn.techcorp.io/client\n3. Use same server address and login credentials\n\n**Important:** This announcement supersedes the SecureConnect guide in kb_101. For assistance, contact IT support ext.7777.\n\nNote: kb_101 will be revised once migration concludes.",
+    "last_updated": "2026-02-20",
+    "views": 523
+  },
+  {
+    "article_id": "kb_107",
+    "title": "Remote Work Troubleshooting Guide",
+    "category": "IT Support",
+    "tags": [
+      "remote work",
+      "troubleshooting",
+      "network"
+    ],
+    "content": "## Common Remote Work Issues\n\n### VPN Connection Problems\n- Verify internet connectivity first\n- Check if VPN client is latest version\n- Try switching between WiFi and ethernet\n- See VPN Setup (kb_101) and Migration Notice (kb_106)\n\n### Application Access Issues\n- Confirm VPN is actively connected\n- Clear browser cache and cookies\n- Try incognito/private browsing mode\n- Reference Remote Work Policy (kb_103)\n\n### Audio/Video Problems\n- Test microphone and camera in settings\n- Close unnecessary applications\n- Reduce video quality if bandwidth is limited\n\n## When to Contact IT\n- Issues persist after following troubleshooting steps\n- Error messages you don't understand\n- Need emergency access during off-hours\n\nContact: IT support ext.7777 or email itsupport@techcorp.io",
+    "last_updated": "2026-02-12",
+    "views": 1678
+  }
+]

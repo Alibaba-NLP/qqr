@@ -1,0 +1,12 @@
+{
+  "subject": "识别 Cohere Logo",
+  "oracle": {
+    "canonical_answer": "Cohere",
+    "required_entities": [
+      "Cohere"
+    ],
+    "aliases": [
+      "Cohere"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "RELEVANT_ARTICLES": [
+    "kb_101",
+    "kb_103",
+    "kb_105",
+    "kb_106",
+    "kb_107"
+  ],
+  "TOTAL_ARTICLES": 7,
+  "CONTRADICTION_PAIR": [
+    "kb_101",
+    "kb_106"
+  ],
+  "CROSS_REF_PAIR": [
+    "kb_107",
+    "kb_103"
+  ]
+}

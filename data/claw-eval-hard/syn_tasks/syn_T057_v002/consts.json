@@ -1,0 +1,13 @@
+{
+  "subject": "识别 OpenAI Logo",
+  "oracle": {
+    "canonical_answer": "OpenAI",
+    "required_entities": [
+      "OpenAI"
+    ],
+    "aliases": [
+      "OpenAI",
+      "Open AI"
+    ]
+  }
+}

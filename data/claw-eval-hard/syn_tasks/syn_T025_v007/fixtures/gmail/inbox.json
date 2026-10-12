@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "zhaomin@corp.com",
+    "to": "me@corp.com",
+    "subject": "Q3 财务报告会议",
+    "date": "2026-03-01T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi，周三下午三点的 Q3 财务报告会议，请王经理一起参加，我们要讨论下一季度的预算分配。\n\n请帮忙通知一下王经理。\n\n赵敏"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "chenxi@corp.com",
+    "to": "me@corp.com",
+    "subject": "年度团建安排",
+    "date": "2026-03-01T11:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "你好，下个月的年度团建活动开始报名了，请统计各部门人数。\n\n另外，团建预算需要跟王经理确认一下，他那边的部门还没提交。\n\n陈曦"
+  }
+]

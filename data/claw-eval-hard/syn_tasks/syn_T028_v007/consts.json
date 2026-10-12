@@ -1,0 +1,42 @@
+{
+  "PROBLEM_INTEGRATIONS": {
+    "INT-004": {
+      "name": "Vonage",
+      "issue": "degraded",
+      "keywords": [
+        "degraded",
+        "error rate",
+        "18%",
+        "0.18"
+      ]
+    },
+    "INT-006": {
+      "name": "GitLab",
+      "issue": "expired",
+      "keywords": [
+        "expired",
+        "reauthorize",
+        "renew"
+      ]
+    },
+    "INT-007": {
+      "name": "Database Backup",
+      "issue": "hardcoded_password",
+      "keywords": [
+        "password",
+        "security risk",
+        "hardcoded",
+        "plaintext"
+      ]
+    }
+  },
+  "ALL_SERVICES": [
+    "PayPal",
+    "Mailgun",
+    "Azure",
+    "Vonage",
+    "Anthropic",
+    "GitLab",
+    "Database"
+  ]
+}

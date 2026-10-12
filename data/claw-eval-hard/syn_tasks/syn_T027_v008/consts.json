@@ -1,0 +1,9 @@
+{
+  "PROBLEM_IDS": [
+    "INT-004",
+    "INT-006",
+    "INT-007"
+  ],
+  "RISKY_INTEGRATION_ID": "INT-007",
+  "TOTAL_INTEGRATIONS": 7
+}

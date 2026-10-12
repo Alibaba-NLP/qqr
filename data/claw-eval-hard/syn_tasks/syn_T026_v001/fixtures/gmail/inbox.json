@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "sarah.j@company.com",
+    "to": "me@company.com",
+    "subject": "Security Audit Kickoff",
+    "date": "2026-03-01T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi, for the security audit kickoff meeting next Tuesday at 10 AM, please have Director Wang join us. We need to discuss the compliance requirements.\n\nPlease invite Director Wang.\n\nSarah Jenkins"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "hr@company.com",
+    "to": "me@company.com",
+    "subject": "Holiday Schedule Update",
+    "date": "2026-03-01T11:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hello, the public holiday schedule for Q2 has been updated. Please check the attached document and inform your team.\n\nHR Department"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "PROBLEM_IDS": [
+    "INT-004",
+    "INT-006",
+    "INT-007"
+  ],
+  "HARDCODED_PASSWORD": "DbP@ssw0rd2026!",
+  "DEGRADED_SERVICE": "MessageBird",
+  "EXPIRED_SERVICE": "GitLab",
+  "TOTAL_INTEGRATIONS": 7
+}

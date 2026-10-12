@@ -232,3 +232,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+.trash
+outputs
+.vscode
+.github
+# local working files / script backups
+docs/progress.md
+*.bak
+*.bak_*

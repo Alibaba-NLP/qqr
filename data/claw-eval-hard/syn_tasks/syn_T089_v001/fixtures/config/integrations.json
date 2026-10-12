@@ -1,0 +1,81 @@
+[
+  {
+    "integration_id": "LW-101",
+    "name": "Meridian Pay Gateway",
+    "service": "meridian_pay",
+    "status": "active",
+    "api_key": "sk_live_7Kd9mQ2xRt4vBn8zLp3wYs6j",
+    "api_secret": "whsec_9fT2kQ7mZ4xR8vN3pL6yD0jH",
+    "webhook_url": "https://api.ledgerworks.example.com/webhooks/meridian",
+    "last_verified": "2026-08-12T09:00:00Z",
+    "monthly_calls": 152300,
+    "error_rate": 0.008,
+    "notes": "Production payment key — PCI scope, rotate quarterly"
+  },
+  {
+    "integration_id": "LW-102",
+    "name": "PostBox Mail Relay",
+    "service": "postbox_mail",
+    "status": "active",
+    "api_key": "SG.pQ3wE8rT5yU2iO9pA1sD4fG7hJ0kL6zM",
+    "api_secret": null,
+    "webhook_url": "https://api.ledgerworks.example.com/webhooks/postbox",
+    "last_verified": "2026-08-10T14:30:00Z",
+    "monthly_calls": 88400,
+    "error_rate": 0.002,
+    "notes": "Transactional email relay for payment receipts"
+  },
+  {
+    "integration_id": "LW-103",
+    "name": "CloudVault Object Storage",
+    "service": "cloudvault_s3",
+    "status": "active",
+    "api_key": "CVAKI7X2P9Q4M6Z3N8B1V5C0",
+    "api_secret": "cvsec_5W8y2B4N6M9Q1T3Z7X5C8V2",
+    "webhook_url": null,
+    "last_verified": "2026-08-08T06:15:00Z",
+    "monthly_calls": 1240000,
+    "error_rate": 0.0004,
+    "notes": "Primary archive bucket for settlement documents"
+  },
+  {
+    "integration_id": "LW-104",
+    "name": "Teamline Chat Ops",
+    "service": "teamline_chat",
+    "status": "degraded",
+    "api_key": "xoxb-882134765-998877665-AbCdEfGhIjKlMnOpQr",
+    "api_secret": null,
+    "webhook_url": "https://api.ledgerworks.example.com/webhooks/teamline",
+    "last_verified": "2026-07-02T11:45:00Z",
+    "monthly_calls": 18400,
+    "error_rate": 0.15,
+    "notes": "Alert delivery latency is high; on-call rota misses pages"
+  },
+  {
+    "integration_id": "LW-105",
+    "name": "NightWatch Monitoring",
+    "service": "nightwatch_mon",
+    "status": "active",
+    "api_key": "nw_live_4R7U1I3O5P8A2S6D0F9G",
+    "api_secret": "nwsec_6Y7T5G4R3E2W1Q9M8N7B6V",
+    "webhook_url": "https://api.ledgerworks.example.com/webhooks/nightwatch",
+    "last_verified": "2026-08-14T20:00:00Z",
+    "monthly_calls": 46200,
+    "error_rate": 0.01,
+    "notes": "Synthetic uptime probes for the payments dashboard"
+  },
+  {
+    "integration_id": "LW-106",
+    "name": "Ledger DB Warehouse",
+    "service": "ledger_db",
+    "status": "active",
+    "api_key": null,
+    "api_secret": null,
+    "webhook_url": null,
+    "last_verified": "2026-08-15T02:00:00Z",
+    "monthly_calls": 30,
+    "error_rate": 0.0,
+    "notes": "Nightly settlement warehouse sync",
+    "connection_string": "postgresql://svc_ledger:R3pl1c4_2026_Sync@db-warehouse.internal:5432/settlements"
+  }
+]

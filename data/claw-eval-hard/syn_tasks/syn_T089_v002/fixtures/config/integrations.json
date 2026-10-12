@@ -1,0 +1,81 @@
+[
+  {
+    "integration_id": "FH-101",
+    "name": "CargoTrack Fleet API",
+    "service": "cargotrack",
+    "status": "active",
+    "api_key": "ct_live_9b2Y4n6M8q1W3e5R7t9U0i",
+    "api_secret": "ctsec_0P8O7I6U5Y3T2R1E9W0Q",
+    "webhook_url": "https://api.freighthub.example.com/webhooks/cargotrack",
+    "last_verified": "2026-08-05T08:20:00Z",
+    "monthly_calls": 234500,
+    "error_rate": 0.006,
+    "notes": "Live GPS pings from the truck fleet"
+  },
+  {
+    "integration_id": "FH-102",
+    "name": "RoutePlanner Maps",
+    "service": "routemap",
+    "status": "active",
+    "api_key": "rp_live_2W4E6R8T0Y3U5I7O9P1A",
+    "api_secret": null,
+    "webhook_url": "https://api.freighthub.example.com/webhooks/routemap",
+    "last_verified": "2026-08-11T16:40:00Z",
+    "monthly_calls": 67300,
+    "error_rate": 0.003,
+    "notes": "Multi-stop route optimization for last-mile delivery"
+  },
+  {
+    "integration_id": "FH-103",
+    "name": "DutyCalculator",
+    "service": "duty_calc",
+    "status": "expired",
+    "api_key": "dc_test_1a3S5D7F9G2H4J6K8L0z",
+    "api_secret": "dcsec_0L9K8J7H6G5F4D3S2A1",
+    "webhook_url": null,
+    "last_verified": "2026-01-15T10:00:00Z",
+    "monthly_calls": 0,
+    "error_rate": 1.0,
+    "notes": "Customs duty quotes; contract lapsed in January"
+  },
+  {
+    "integration_id": "FH-104",
+    "name": "CustomsDocs OCR",
+    "service": "customs_ocr",
+    "status": "active",
+    "api_key": "cd_live_5T6Y7U8I9O0P1A2S3D4F",
+    "api_secret": "cdsec_4R5F6G7H8J9K0L1Z2X3C",
+    "webhook_url": "https://api.freighthub.example.com/webhooks/customsdocs",
+    "last_verified": "2026-08-13T12:10:00Z",
+    "monthly_calls": 91800,
+    "error_rate": 0.012,
+    "notes": "Digitizes customs declarations for EU lanes"
+  },
+  {
+    "integration_id": "FH-105",
+    "name": "FleetFuel Cards",
+    "service": "fleetfuel",
+    "status": "degraded",
+    "api_key": "ff_live_8I7U6Y5T4R3E2W1Q0P9O",
+    "api_secret": null,
+    "webhook_url": "https://api.freighthub.example.com/webhooks/fleetfuel",
+    "last_verified": "2026-07-28T07:55:00Z",
+    "monthly_calls": 12000,
+    "error_rate": 0.18,
+    "notes": "Fuel card transactions are lagging behind by hours"
+  },
+  {
+    "integration_id": "FH-106",
+    "name": "Manifest Store",
+    "service": "manifest_store",
+    "status": "active",
+    "api_key": null,
+    "api_secret": null,
+    "webhook_url": null,
+    "last_verified": "2026-08-15T03:30:00Z",
+    "monthly_calls": 55,
+    "error_rate": 0.0,
+    "notes": "Archived shipping manifests",
+    "connection_string": "postgresql://svc_manifest:Fr8hub_2026_Archve@db-manifest.internal:5432/manifests"
+  }
+]

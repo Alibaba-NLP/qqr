@@ -1,0 +1,11 @@
+{
+  "DUPLICATE_PAIR": [
+    "txn_002",
+    "txn_003"
+  ],
+  "NEAR_DUPLICATE": "txn_011",
+  "REFUND_TRANSACTION": "txn_012",
+  "TOTAL_AMOUNT_RAW": 11794.99,
+  "TOTAL_AMOUNT": 11734.99,
+  "VALID_TRANSACTION_COUNT": 12
+}

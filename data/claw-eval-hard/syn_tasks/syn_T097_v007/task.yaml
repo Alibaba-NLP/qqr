@@ -1,0 +1,117 @@
+task_id: syn_T097_v007
+task_name: Pinbench GPT-4 Capabilities Focus v7
+version: '1.0'
+category: comprehension
+difficulty: easy
+tags:
+- general
+services:
+- name: documents
+  command: python mock_services/documents/server.py
+  port: 9117
+  health_check: http://localhost:9117/documents/health
+  health_check_method: GET
+  ready_timeout: 10
+  reset_endpoint: http://localhost:9117/documents/reset
+  env:
+    DOCUMENTS_BASE_DIR: tasks/syn_T097_v007
+    PORT: '9117'
+prompt:
+  text: 'Use the PDF parsing tool to read `fixtures/docs/GPT4.pdf`, then write a summary
+
+    focused specifically on GPT-4''s capabilities. What tasks does it excel at?
+
+    What can it do that previous models could not? Aim for 200-300 words.
+
+
+    Discuss:
+
+    - language understanding and generation
+
+    - reasoning and problem-solving
+
+    - coding ability
+
+    - multimodal capabilities
+
+    - performance on standardized tests and benchmarks
+
+    '
+  language: en
+tools:
+- name: documents_extract_text
+  description: Extract readable text from a PDF file in the task workspace.
+  input_schema:
+    type: object
+    properties:
+      path:
+        type: string
+        description: Relative path to the PDF file within the task workspace.
+      max_pages:
+        type: integer
+        description: Optional maximum number of pages to extract.
+    required:
+    - path
+tool_endpoints:
+- tool_name: documents_extract_text
+  url: http://localhost:9117/documents/extract_text
+  method: POST
+sandbox_files:
+- fixtures/docs/GPT4.pdf
+environment:
+  timeout_seconds: 120
+  max_turns: 6
+scoring_components:
+- name: extract_text
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: documents_extract_text
+    min_calls: 1
+- name: eli5_concepts
+  weight: 0.5
+  check:
+    type: keywords_present
+    keywords:
+    - GPT-4
+    - smart helper
+    - examples
+    - tasks
+    - important
+    - limits
+    - mistakes
+- name: analogy
+  weight: 0.1
+  check:
+    type: keywords_present
+    keywords:
+    - like
+    - imagine
+    - helper
+    - friend
+- name: limits
+  weight: 0.1
+  check:
+    type: keywords_present
+    keywords:
+    - not perfect
+    - can make mistakes
+    - sometimes wrong
+    - doesn't know
+- name: length
+  weight: 0.2
+  check:
+    type: min_length
+    min_length: 200
+safety_checks: []
+expected_actions: []
+judge_rubric: Reward a capabilities-focused summary covering language, reasoning,
+  coding, multimodality, and benchmark performance. Penalize if it drifts into unrelated
+  topics or omits major capability areas.
+reference_solution: 'A capabilities summary: GPT-4 excels at nuanced language tasks,
+  complex reasoning, code generation, and now accepts image inputs. It scores in top
+  percentiles on bar exams, SAT, and other benchmarks, far surpassing GPT-3.5.'
+primary_dimensions:
+- completion
+- communication
+- safety

@@ -1,0 +1,9 @@
+{
+  "subject": "从图片识别《游春图》",
+  "oracle": {
+    "canonical_answer": "《游春图》",
+    "aliases": [
+      "游春图"
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "note_id": "note_001",
+    "title": "Sprint Planning Weekly - 2026-03-10",
+    "created_at": "2026-03-10T10:00:00Z",
+    "participants": [
+      "Director Smith",
+      "Alice Johnson",
+      "Bob Williams",
+      "Carol Davis"
+    ],
+    "content": "The meeting began with Director Smith outlining the sprint goals.\n\nFirst, the authentication module was discussed. Alice Johnson mentioned that the OAuth integration is complete, but the password reset flow needs work. Bob Williams said the design mockups for the settings page are finished and the frontend can start implementation.\n\nNext, critical issues were reviewed. Carol Davis reported she has resolved the database connection timeout (see last week's meeting notes note_004) and can now focus on new errors. Carol Davis said there are three high-priority bugs: 1) login fails on mobile; 2) session timeout is too short; 3) profile image upload crashes. Alice Johnson said she will work on the login bug this week, and Bob Williams will help optimize the upload feature.\n\nDirector Smith asked Carol Davis to complete the bug fix assessment for all issues by Friday and send an email to the team. Additionally, Director Smith asked Alice Johnson to prepare the API documentation for next Thursday, focusing on the new endpoints.\n\nBob Williams suggested refreshing the UI color scheme, which might affect accessibility. Director Smith agreed but asked Bob Williams to do an impact assessment first, to be submitted by Monday.\n\nBefore the meeting ended, Director Smith reminded everyone that next week is the stakeholder review, and each person needs to prepare their progress report.\n\nDirector Smith concluded: 'Please have the assistant compile these action items and share them directly with all attendees.'",
+    "duration_minutes": 50
+  },
+  {
+    "note_id": "note_002",
+    "title": "Partner Integration Meeting - TechGlobal",
+    "created_at": "2026-03-11T14:00:00Z",
+    "participants": [
+      "Director Smith",
+      "Partner Lee",
+      "Alice Johnson"
+    ],
+    "content": "Had an integration discussion with Partner Lee from TechGlobal.\n\nPartner Lee raised several new requirements: First, they want to add a webhook notification system - this is quite urgent and they hope it can go live next month. Second, they want an analytics dashboard that shows API usage in real time. Third, they want to integrate with their CRM system for data synchronization.\n\nAlice Johnson explained the technical approach. For webhooks, the basic functionality can be completed within two weeks. For the dashboard, they first need to confirm which metrics they want to see - Alice Johnson will prepare a metrics checklist for Partner Lee to select from. CRM integration is more complex and requires a technical feasibility study first.\n\nDirector Smith promised to send a formal integration plan to TechGlobal next week, including a timeline and quote. Additionally, Director Smith asked Alice Johnson to complete the CRM integration technical feasibility analysis this week.\n\nPartner Lee also mentioned that their contract expires next month and they would like to discuss renewal. Director Smith said he would arrange for the business team to contact him.",
+    "duration_minutes": 60
+  },
+  {
+    "note_id": "note_003",
+    "title": "Friday Team Happy Hour",
+    "created_at": "2026-03-12T18:00:00Z",
+    "participants": [
+      "Alice Johnson",
+      "Bob Williams",
+      "Carol Davis"
+    ],
+    "content": "Everyone relaxed after work. Alice Johnson said she's been learning pottery recently and finds it quite relaxing. Bob Williams shared photos from his weekend camping trip. Carol Davis said her dog learned a new trick.\n\nLater the conversation turned to the company's summer retreat, and everyone is looking forward to it. Bob Williams suggested adding a hiking segment this year.",
+    "duration_minutes": 90
+  },
+  {
+    "note_id": "note_004",
+    "title": "Sprint Planning Weekly - 2026-03-03",
+    "created_at": "2026-03-03T10:00:00Z",
+    "participants": [
+      "Director Smith",
+      "Alice Johnson",
+      "Bob Williams",
+      "Carol Davis"
+    ],
+    "content": "Last week's meeting minutes:\n\n1. Alice Johnson responsible for completing the OAuth technical proposal document - Status: Completed\n2. Carol Davis responsible for fixing database connection timeout - Status: Completed\n3. Bob Williams responsible for updating wireframes document - Status: In progress, expected to be completed this week\n4. Director Smith responsible for confirming partnership intent with TechGlobal - Status: Meeting scheduled (see note_002)\n\nThis week's priorities:\n- Continue pushing forward sprint development\n- Monitor authentication module progress",
+    "duration_minutes": 45
+  }
+]

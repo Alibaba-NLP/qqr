@@ -1,0 +1,81 @@
+[
+  {
+    "integration_id": "SS-401",
+    "name": "PayTrail Checkout",
+    "service": "paytrail",
+    "status": "active",
+    "api_key": "pt_live_4A6S8D0F2G5H7J9K1L3",
+    "api_secret": "ptsec_3P1O9I7U5Y3T1R9E7W5",
+    "webhook_url": "https://api.shopsphere.example.com/webhooks/paytrail",
+    "last_verified": "2026-08-11T09:50:00Z",
+    "monthly_calls": 421700,
+    "error_rate": 0.006,
+    "notes": "Handles the storefront checkout flow"
+  },
+  {
+    "integration_id": "SS-402",
+    "name": "ShipFast Logistics",
+    "service": "shipfast",
+    "status": "active",
+    "api_key": "sf_live_8D0F2G4H6J8K0L2Z4X6",
+    "api_secret": null,
+    "webhook_url": "https://api.shopsphere.example.com/webhooks/shipfast",
+    "last_verified": "2026-08-14T17:35:00Z",
+    "monthly_calls": 118000,
+    "error_rate": 0.013,
+    "notes": "Label printing and parcel tracking"
+  },
+  {
+    "integration_id": "SS-403",
+    "name": "ReviewSense Ratings",
+    "service": "reviewsense",
+    "status": "active",
+    "api_key": "rs_live_1Z3X5C7V9B2N4M6Q8W0",
+    "api_secret": "rssec_7A9S1D3F5G7H9J2K4L6",
+    "webhook_url": null,
+    "last_verified": "2026-08-08T12:00:00Z",
+    "monthly_calls": 63400,
+    "error_rate": 0.021,
+    "notes": "Aggregates product reviews and sentiment"
+  },
+  {
+    "integration_id": "SS-404",
+    "name": "LoyaltyLoop Points",
+    "service": "loyaltyloop",
+    "status": "active",
+    "api_key": "lp_live_5G7H9J1K3L5Z7X9C1V3",
+    "api_secret": null,
+    "webhook_url": "https://api.shopsphere.example.com/webhooks/loyaltyloop",
+    "last_verified": "2026-08-13T10:45:00Z",
+    "monthly_calls": 89200,
+    "error_rate": 0.004,
+    "notes": "Points accrual for the loyalty program"
+  },
+  {
+    "integration_id": "SS-405",
+    "name": "AdBuzz Promotions",
+    "service": "adbuzz",
+    "status": "inactive",
+    "api_key": "ab_live_0O9I8U7Y6T5R4E3W2Q1",
+    "api_secret": "absec_9S8D7F6G5H4J3K2L1Z0X",
+    "webhook_url": "https://api.shopsphere.example.com/webhooks/adbuzz",
+    "last_verified": "2026-04-30T14:20:00Z",
+    "monthly_calls": 0,
+    "error_rate": 1.0,
+    "notes": "Seasonal ad network paused after the Q1 campaign"
+  },
+  {
+    "integration_id": "SS-406",
+    "name": "Order Ledger",
+    "service": "order_ledger",
+    "status": "active",
+    "api_key": null,
+    "api_secret": null,
+    "webhook_url": null,
+    "last_verified": "2026-08-15T02:45:00Z",
+    "monthly_calls": 60,
+    "error_rate": 0.0,
+    "notes": "Order history warehouse",
+    "connection_string": "postgresql://svc_orders:Sh0p_2026_L3dger@db-orders.internal:5432/orders"
+  }
+]

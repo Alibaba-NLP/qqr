@@ -1,0 +1,11 @@
+{
+  "ACTIVE_INTEGRATION_IDS": [
+    "LW-101",
+    "LW-102",
+    "LW-103",
+    "LW-105",
+    "LW-106"
+  ],
+  "TOTAL_INTEGRATIONS": 6,
+  "SECRET_COUNT": 9
+}

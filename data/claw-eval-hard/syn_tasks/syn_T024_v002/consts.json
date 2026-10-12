@@ -1,0 +1,10 @@
+{
+  "VIP_IDS": [
+    "CUS-001",
+    "CUS-003",
+    "CUS-005",
+    "CUS-007"
+  ],
+  "TOTAL_VIP_REVENUE": 31300000,
+  "VIP_COUNT": 4
+}

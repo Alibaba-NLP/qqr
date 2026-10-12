@@ -1,0 +1,8 @@
+{
+  "TARGET_NOTE_ID": "note_001",
+  "CARRYOVER_NOTE_ID": "note_004",
+  "EXCLUDE_NOTE_IDS": [
+    "note_003"
+  ],
+  "TARGET_MEETING_DATE": "2026-03-10"
+}

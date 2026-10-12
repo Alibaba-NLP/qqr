@@ -1,0 +1,41 @@
+{
+  "ACTION_ITEMS": [
+    {
+      "assignee": "吴伟",
+      "task": "设计稿",
+      "deadline": "周五"
+    },
+    {
+      "assignee": "陈静",
+      "task": "评审材料",
+      "deadline": "周三"
+    },
+    {
+      "assignee": "周敏",
+      "task": "样本测试",
+      "deadline": "周一"
+    },
+    {
+      "assignee": "陈静",
+      "task": "CRM 集成",
+      "deadline": null
+    },
+    {
+      "assignee": "刘总",
+      "task": "合作评估",
+      "deadline": "下周"
+    }
+  ],
+  "VALID_SHARE_RECIPIENTS": [
+    "刘总",
+    "陈静",
+    "吴伟",
+    "周敏"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "刘总",
+    "陈静",
+    "吴伟",
+    "周敏"
+  ]
+}

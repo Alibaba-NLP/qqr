@@ -1,0 +1,81 @@
+[
+  {
+    "integration_id": "MS-301",
+    "name": "VitalWatch Telemetry",
+    "service": "vitalwatch",
+    "status": "active",
+    "api_key": "vw_live_7I9O1P3A5S7D9F1G3H5",
+    "api_secret": "vwsec_2Q4W6E8R0T1Y3U5I7O9",
+    "webhook_url": "https://api.medsync.example.com/webhooks/vitalwatch",
+    "last_verified": "2026-08-10T07:40:00Z",
+    "monthly_calls": 208900,
+    "error_rate": 0.005,
+    "notes": "Streams vitals from the cardiac wards"
+  },
+  {
+    "integration_id": "MS-302",
+    "name": "ClaimBridge Clearinghouse",
+    "service": "claimbridge",
+    "status": "active",
+    "api_key": "cb_live_9K1J3H5G7F9D2S4A6L8",
+    "api_secret": null,
+    "webhook_url": "https://api.medsync.example.com/webhooks/claimbridge",
+    "last_verified": "2026-08-13T15:55:00Z",
+    "monthly_calls": 76500,
+    "error_rate": 0.014,
+    "notes": "Submits insurance claims in X12 format"
+  },
+  {
+    "integration_id": "MS-303",
+    "name": "LabLink Results",
+    "service": "lablink",
+    "status": "active",
+    "api_key": "ll_live_3Z5X7C9V1B4N6M8Q2W4",
+    "api_secret": "llsec_1P3O5I7U9Y2T4R6E8W0",
+    "webhook_url": null,
+    "last_verified": "2026-08-06T11:20:00Z",
+    "monthly_calls": 53200,
+    "error_rate": 0.007,
+    "notes": "Fetches lab panels from reference labs"
+  },
+  {
+    "integration_id": "MS-304",
+    "name": "PharmaStock Inventory",
+    "service": "pharmastock",
+    "status": "degraded",
+    "api_key": "ps_live_6H8J0K2L4Z6X8C1V3B5",
+    "api_secret": null,
+    "webhook_url": "https://api.medsync.example.com/webhooks/pharmastock",
+    "last_verified": "2026-07-21T08:05:00Z",
+    "monthly_calls": 9800,
+    "error_rate": 0.16,
+    "notes": "Drug stock sync is delayed by a day"
+  },
+  {
+    "integration_id": "MS-305",
+    "name": "ConsentVault Forms",
+    "service": "consentvault",
+    "status": "active",
+    "api_key": "cv_live_2N4M6B8V1C3X5Z7A9S1",
+    "api_secret": "cvsec_8D0F2G4H6J7K9L1Z3X5",
+    "webhook_url": "https://api.medsync.example.com/webhooks/consentvault",
+    "last_verified": "2026-08-14T19:10:00Z",
+    "monthly_calls": 38700,
+    "error_rate": 0.003,
+    "notes": "Patient consent e-signatures"
+  },
+  {
+    "integration_id": "MS-306",
+    "name": "Clinical Archive",
+    "service": "clinical_archive",
+    "status": "active",
+    "api_key": null,
+    "api_secret": null,
+    "webhook_url": null,
+    "last_verified": "2026-08-15T01:30:00Z",
+    "monthly_calls": 25,
+    "error_rate": 0.0,
+    "notes": "Nightly de-identified research export",
+    "connection_string": "postgresql://svc_clinic:M3d1_2026_Archiv3@db-clinic.internal:5432/research"
+  }
+]

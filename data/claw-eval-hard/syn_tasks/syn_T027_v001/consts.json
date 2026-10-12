@@ -1,0 +1,11 @@
+{
+  "PROBLEM_INTEGRATION_IDS": [
+    "INT-004",
+    "INT-006",
+    "INT-007"
+  ],
+  "HARDCODED_SECRET": "NexusDB_R00t_2027!",
+  "DEGRADED_SERVICE": "Vonage",
+  "EXPIRED_SERVICE": "GitLab",
+  "TOTAL_INTEGRATIONS": 7
+}

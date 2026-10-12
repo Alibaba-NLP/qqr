@@ -1,0 +1,11 @@
+{
+  "ACTIVE_INTEGRATION_IDS": [
+    "SM-201",
+    "SM-202",
+    "SM-203",
+    "SM-204",
+    "SM-206"
+  ],
+  "TOTAL_INTEGRATIONS": 6,
+  "SECRET_COUNT": 9
+}

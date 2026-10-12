@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "chenming@company.com",
+    "to": "me@company.com",
+    "subject": "Q3 销售战略会议",
+    "date": "2026-03-01T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi，下周一上午十点的 Q3 销售战略会议，请王总监一起参加，我们要讨论新季度的客户拓展计划。\n\n请帮忙通知一下王总监。\n\n陈明"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "liuwei@company.com",
+    "to": "me@company.com",
+    "subject": "季度体检安排",
+    "date": "2026-03-01T10:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "你好，本季度员工体检安排已出炉，请各部门协调时间。\n\n另外，技术部的体检时间需要跟王总监确认一下，他那边的排班比较紧。\n\n刘伟"
+  }
+]

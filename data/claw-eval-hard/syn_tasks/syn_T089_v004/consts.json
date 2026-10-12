@@ -1,0 +1,11 @@
+{
+  "ACTIVE_INTEGRATION_IDS": [
+    "MS-301",
+    "MS-302",
+    "MS-303",
+    "MS-305",
+    "MS-306"
+  ],
+  "TOTAL_INTEGRATIONS": 6,
+  "SECRET_COUNT": 9
+}

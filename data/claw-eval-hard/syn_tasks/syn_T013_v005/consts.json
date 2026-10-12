@@ -1,0 +1,13 @@
+{
+  "MAIN_MEETING_ID": "note_001",
+  "CROSS_REF_ID": "note_004",
+  "SKIP_IDS": [
+    "note_003"
+  ],
+  "VALID_PARTICIPANTS": [
+    "刘总",
+    "陈工",
+    "林设计",
+    "吴测试"
+  ]
+}

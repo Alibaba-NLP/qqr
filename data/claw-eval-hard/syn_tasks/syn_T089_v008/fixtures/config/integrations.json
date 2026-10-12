@@ -1,0 +1,81 @@
+[
+  {
+    "integration_id": "FW-701",
+    "name": "SensorStream IoT",
+    "service": "sensorstream",
+    "status": "active",
+    "api_key": "ss_live_7G8H9J0K1L2Z3X4C5V6",
+    "api_secret": "sssec_3R4T5Y6U7I8O9P0A1S2",
+    "webhook_url": "https://api.forgeworks.example.com/webhooks/sensorstream",
+    "last_verified": "2026-08-11T05:55:00Z",
+    "monthly_calls": 984300,
+    "error_rate": 0.004,
+    "notes": "Machine telemetry from the shop floor"
+  },
+  {
+    "integration_id": "FW-702",
+    "name": "MES Bridge",
+    "service": "mes_bridge",
+    "status": "active",
+    "api_key": "mb_live_1Z3X5C7V9B0N2M4Q6W8",
+    "api_secret": null,
+    "webhook_url": "https://api.forgeworks.example.com/webhooks/mesbridge",
+    "last_verified": "2026-08-13T14:30:00Z",
+    "monthly_calls": 71200,
+    "error_rate": 0.009,
+    "notes": "Work-order sync with the MES"
+  },
+  {
+    "integration_id": "FW-703",
+    "name": "QualiCheck Inspections",
+    "service": "qualicheck",
+    "status": "active",
+    "api_key": "qc_live_4D5F6G7H8J9K0L1Z2X3",
+    "api_secret": "qcsec_9W8E7R5T3Y2U1I0O9P8",
+    "webhook_url": null,
+    "last_verified": "2026-08-06T10:35:00Z",
+    "monthly_calls": 36800,
+    "error_rate": 0.012,
+    "notes": "Dimensional inspection results upload"
+  },
+  {
+    "integration_id": "FW-704",
+    "name": "SupplierLink Portal",
+    "service": "supplierlink",
+    "status": "inactive",
+    "api_key": "sl_live_8K9J0H1G2F3D4S5A6Q7",
+    "api_secret": null,
+    "webhook_url": "https://api.forgeworks.example.com/webhooks/supplierlink",
+    "last_verified": "2026-05-24T11:00:00Z",
+    "monthly_calls": 0,
+    "error_rate": 1.0,
+    "notes": "Legacy supplier portal switched off in May"
+  },
+  {
+    "integration_id": "FW-705",
+    "name": "MaintTrack CMMS",
+    "service": "mainttrack",
+    "status": "active",
+    "api_key": "mt_live_2Q3W4E5R6T7Y8U9I0O1",
+    "api_secret": "mtsec_6Z5X4C3V2B1N0M9L8K7",
+    "webhook_url": "https://api.forgeworks.example.com/webhooks/mainttrack",
+    "last_verified": "2026-08-14T20:30:00Z",
+    "monthly_calls": 57400,
+    "error_rate": 0.016,
+    "notes": "Preventive maintenance scheduling"
+  },
+  {
+    "integration_id": "FW-706",
+    "name": "Plant Archive",
+    "service": "plant_archive",
+    "status": "active",
+    "api_key": null,
+    "api_secret": null,
+    "webhook_url": null,
+    "last_verified": "2026-08-15T01:45:00Z",
+    "monthly_calls": 20,
+    "error_rate": 0.0,
+    "notes": "Historical batch records retention",
+    "connection_string": "postgresql://svc_plant:F0rg3_2026_Arch1ve@db-plant.internal:5432/batches"
+  }
+]

@@ -1,0 +1,93 @@
+[
+  {
+    "article_id": "kb_001",
+    "title": "NexusCorp Remote Access Guide",
+    "category": "IT Support",
+    "tags": [
+      "VPN",
+      "remote work",
+      "network"
+    ],
+    "content": "## Remote Access Steps\n\n1. Download and install the SecureLink v2 client\n2. Open SecureLink and click [Connect]\n3. Enter server address: access.nexuscorp.io\n4. Log in with your NexusCorp email and password\n5. Select [Tunnel Mode] to connect\n\n## Common Issues\n- Connection timeout: Check network and firewall (port 443)\n- Authentication failure: Reset password at https://pwd.nexuscorp.io\n- Intranet access failed: Reconnect or call IT ext.7777\n\n## Important Notes\n- Password syncs with email, expires every 60 days\n- Overseas travel requires special permission",
+    "last_updated": "2026-01-10",
+    "views": 1450
+  },
+  {
+    "article_id": "kb_002",
+    "title": "New Hire Equipment Request",
+    "category": "IT Support",
+    "tags": [
+      "device",
+      "onboarding",
+      "request"
+    ],
+    "content": "## Request Process\n\n1. OA System - Assets - Request Device\n2. Fill form (manager approval required)\n3. IT processes within 2 days\n4. Pickup notification sent via email\n\n## Standard Kit\n- Laptop: Dell XPS 15 or MacBook Pro 14\n- Monitor: LG 27-inch 4K\n- Peripherals: Budget 600 CNY\n- Phone: Based on role\n\n## Notes\n- Return equipment upon resignation\n- Report damage immediately\n- No unauthorized software",
+    "last_updated": "2026-02-05",
+    "views": 820
+  },
+  {
+    "article_id": "kb_003",
+    "title": "Remote Work Policy and Tools",
+    "category": "Workplace Guidelines",
+    "tags": [
+      "remote work",
+      "tools",
+      "guidelines"
+    ],
+    "content": "## Requirements\n\n1. Connect via company VPN (see kb_001)\n2. Stay active on NexusChat during hours\n3. Daily standup at 09:30\n\n## Tools\n- Chat: NexusChat (mandatory), Slack (optional)\n- Docs: Notion + Google Drive\n- Code: GitHub Enterprise (VPN required)\n- Meetings: Zoom (internal), Teams (external)\n\n## Network\n- Min bandwidth: 50Mbps down / 10Mbps up\n- Stable connection required for video\n- Hotspot subsidy available (150 CNY/mo)\n\n## Security\n- No public WiFi for sensitive work\n- Auto-lock screen at 5 mins\n- No recording meetings without consent",
+    "last_updated": "2026-02-15",
+    "views": 2100
+  },
+  {
+    "article_id": "kb_004",
+    "title": "Time Off and Leave Rules",
+    "category": "HR Policies",
+    "tags": [
+      "leave",
+      "annual leave",
+      "sick leave"
+    ],
+    "content": "## Entitlement\n- 1 year: 5 days\n- 3 years: 10 days\n- 5 years: 15 days\n\n## Process\n1. OA System Request\n2. Manager Approval\n3. 3+ days needs Director approval\n\n## Notes\n- Request 3 days in advance\n- Carryover max 5 days\n- Sick leave needs medical cert",
+    "last_updated": "2026-01-25",
+    "views": 3100
+  },
+  {
+    "article_id": "kb_005",
+    "title": "Account Security and MFA",
+    "category": "IT Security",
+    "tags": [
+      "password",
+      "security",
+      "reset"
+    ],
+    "content": "## Policy\n- Min length: 14 characters\n- Must include: Upper, Lower, Number, Symbol\n- Validity: 60 days\n- History: Last 6 passwords blocked\n\n## Reset\n1. Self-service: https://pwd.nexuscorp.io\n2. NexusChat IT Bot\n3. IT Hotline ext.7777\n\n## MFA\n- Mandatory for all systems\n- App: NexusAuth recommended\n- Backup: SMS code\n\n## Lockout\n- 5 fails = 30 min lock\n- Self-unlock available or contact IT",
+    "last_updated": "2026-02-10",
+    "views": 1900
+  },
+  {
+    "article_id": "kb_006",
+    "title": "Critical VPN Client Migration",
+    "category": "IT Support",
+    "tags": [
+      "VPN",
+      "update",
+      "client"
+    ],
+    "content": "## Security Advisory\n\nThe IT Security Board has deprecated SecureLink v2 effective April 1, 2026.\n\n**New Standard:**\nMigrate to CloudGate v3 (Zscaler).\n\n**Steps:**\n1. Uninstall SecureLink\n2. Download CloudGate from https://access.nexuscorp.io/dl\n3. Login with same credentials\n\n**Priority:** This notice overrides kb_001. Contact IT ext.7777 for help.\n\nNote: kb_001 will be archived after migration.",
+    "last_updated": "2026-03-01",
+    "views": 500
+  },
+  {
+    "article_id": "kb_007",
+    "title": "Remote Connectivity Troubleshooting",
+    "category": "IT Support",
+    "tags": [
+      "remote work",
+      "troubleshooting",
+      "network"
+    ],
+    "content": "## Common Fixes\n\n1. Check physical connection\n2. Restart router\n3. Verify VPN client status (see kb_003 for policy)\n4. Flush DNS\n\n## Performance\n- High latency: Close background apps\n- Packet loss: Switch to wired connection\n- Video lag: Lower resolution in settings\n\n## Escalation\n- If steps fail, open ticket via OA\n- Include screenshot of error\n- Reference kb_003 for policy compliance",
+    "last_updated": "2026-02-20",
+    "views": 1200
+  }
+]

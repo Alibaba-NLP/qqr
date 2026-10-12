@@ -1,0 +1,11 @@
+{
+  "ACTIVE_INTEGRATION_IDS": [
+    "SS-401",
+    "SS-402",
+    "SS-403",
+    "SS-404",
+    "SS-406"
+  ],
+  "TOTAL_INTEGRATIONS": 6,
+  "SECRET_COUNT": 9
+}

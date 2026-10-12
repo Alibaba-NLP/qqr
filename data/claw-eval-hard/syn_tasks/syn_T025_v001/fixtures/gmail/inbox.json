@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "liumei@company.com",
+    "to": "me@company.com",
+    "subject": "年度审计会议",
+    "date": "2026-03-01T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi，下周二上午十点的年度审计会议，请王总一起参加，我们要讨论 Q1 的财务合规情况。\n\n请帮忙通知一下王总。\n\n刘梅"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "zhaoqiang@company.com",
+    "to": "me@company.com",
+    "subject": "新员工入职安排",
+    "date": "2026-03-01T10:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "你好，下周一有两位新员工入职，请安排好工位和设备。\n\n另外，入职培训的日程需要跟王总确认一下，他那边的技术培训部分还没定。\n\n赵强"
+  }
+]

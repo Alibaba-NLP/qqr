@@ -1,0 +1,9 @@
+{
+  "subject": "从图片识别《千里江山图》",
+  "oracle": {
+    "canonical_answer": "《千里江山图》",
+    "aliases": [
+      "千里江山图"
+    ]
+  }
+}

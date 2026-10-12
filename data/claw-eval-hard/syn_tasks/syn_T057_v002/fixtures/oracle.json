@@ -1,0 +1,10 @@
+{
+  "canonical_answer": "OpenAI",
+  "required_entities": [
+    "OpenAI"
+  ],
+  "aliases": [
+    "OpenAI",
+    "Open AI"
+  ]
+}

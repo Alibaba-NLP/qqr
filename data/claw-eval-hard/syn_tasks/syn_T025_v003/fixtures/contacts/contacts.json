@@ -1,0 +1,56 @@
+[
+  {
+    "contact_id": "CTX-101",
+    "name": "王强",
+    "department": "销售部",
+    "title": "销售总监",
+    "email": "wangqiang@techcorp.com",
+    "phone": "13900220001",
+    "location": "北京总部"
+  },
+  {
+    "contact_id": "CTX-102",
+    "name": "王强",
+    "department": "研发部",
+    "title": "研发总监",
+    "email": "wangqiang.rd@techcorp.com",
+    "phone": "13900220002",
+    "location": "上海分部"
+  },
+  {
+    "contact_id": "CTX-103",
+    "name": "王芳",
+    "department": "运营部",
+    "title": "运营总监",
+    "email": "wangfang.ops@techcorp.com",
+    "phone": "13900220003",
+    "location": "北京总部"
+  },
+  {
+    "contact_id": "CTX-104",
+    "name": "陈明",
+    "department": "产品部",
+    "title": "产品总监",
+    "email": "chenming@techcorp.com",
+    "phone": "13900220004",
+    "location": "北京总部"
+  },
+  {
+    "contact_id": "CTX-105",
+    "name": "李娜",
+    "department": "人力资源部",
+    "title": "HR总监",
+    "email": "lina@techcorp.com",
+    "phone": "13900220005",
+    "location": "北京总部"
+  },
+  {
+    "contact_id": "CTX-106",
+    "name": "刘伟",
+    "department": "研发部",
+    "title": "高级架构师",
+    "email": "liuwei@techcorp.com",
+    "phone": "13900220006",
+    "location": "深圳分部"
+  }
+]

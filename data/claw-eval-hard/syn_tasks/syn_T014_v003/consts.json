@@ -1,0 +1,53 @@
+{
+  "VALID_SHARE_RECIPIENTS": [
+    "Emily Zhang",
+    "Alex Chen",
+    "Sarah Liu",
+    "David Wang"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "Emily Zhang",
+    "Alex Chen",
+    "Sarah Liu",
+    "David Wang"
+  ],
+  "ACTION_ITEMS": [
+    {
+      "assignee": "David Wang",
+      "task": "security audit",
+      "deadline": "Thursday"
+    },
+    {
+      "assignee": "Alex Chen",
+      "task": "API documentation",
+      "deadline": "Tuesday"
+    },
+    {
+      "assignee": "Sarah Liu",
+      "task": "risk assessment",
+      "deadline": "Monday"
+    },
+    {
+      "assignee": "Alex Chen",
+      "task": "SSO specification",
+      "deadline": null
+    },
+    {
+      "assignee": "Emily Zhang",
+      "task": "onboarding plan",
+      "deadline": "next week"
+    }
+  ],
+  "CARRYOVER_ITEM": {
+    "assignee": "Sarah Liu",
+    "task": "user authentication module",
+    "status": "In progress"
+  },
+  "CASUAL_NOTE_ID": "note_003",
+  "WORK_NOTE_IDS": [
+    "note_001",
+    "note_002",
+    "note_004"
+  ],
+  "REFERENCED_NOTE_ID": "note_004"
+}

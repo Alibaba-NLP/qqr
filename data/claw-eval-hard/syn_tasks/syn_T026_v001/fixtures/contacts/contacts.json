@@ -1,0 +1,56 @@
+[
+  {
+    "contact_id": "CTX-101",
+    "name": "Alice Wang",
+    "department": "Engineering",
+    "title": "Engineering Director",
+    "email": "awang@company.com",
+    "phone": "13900110001",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-102",
+    "name": "Bob Wang",
+    "department": "Security",
+    "title": "Security Director",
+    "email": "bwang@company.com",
+    "phone": "13900110002",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-103",
+    "name": "Carol Wang",
+    "department": "Operations",
+    "title": "Operations Director",
+    "email": "cwang@company.com",
+    "phone": "13900110003",
+    "location": "Shanghai Branch"
+  },
+  {
+    "contact_id": "CTX-104",
+    "name": "David Lee",
+    "department": "Product",
+    "title": "Product Manager",
+    "email": "dlee@company.com",
+    "phone": "13900110004",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-105",
+    "name": "Emma Wu",
+    "department": "Human Resources",
+    "title": "HR Director",
+    "email": "ewu@company.com",
+    "phone": "13900110005",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-106",
+    "name": "Frank Zhao",
+    "department": "Sales",
+    "title": "Sales Manager",
+    "email": "fzhao@company.com",
+    "phone": "13900110006",
+    "location": "Shenzhen Branch"
+  }
+]

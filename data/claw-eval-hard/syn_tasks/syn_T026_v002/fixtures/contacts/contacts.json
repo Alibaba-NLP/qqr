@@ -1,0 +1,56 @@
+[
+  {
+    "contact_id": "CTX-101",
+    "name": "Jing Liu",
+    "department": "IT",
+    "title": "IT Manager",
+    "email": "jliu.it@corp.com",
+    "phone": "13900220001",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-102",
+    "name": "Jing Liu",
+    "department": "Sales",
+    "title": "Sales Manager",
+    "email": "jliu.sales@corp.com",
+    "phone": "13900220002",
+    "location": "Shanghai Branch"
+  },
+  {
+    "contact_id": "CTX-103",
+    "name": "Jing Liu",
+    "department": "Compliance",
+    "title": "Compliance Manager",
+    "email": "jliu.comp@corp.com",
+    "phone": "13900220003",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-104",
+    "name": "Alex Kim",
+    "department": "Product",
+    "title": "Product Director",
+    "email": "kimalex@corp.com",
+    "phone": "13900220004",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-105",
+    "name": "Maria Garcia",
+    "department": "Human Resources",
+    "title": "HR Manager",
+    "email": "garciam@corp.com",
+    "phone": "13900220005",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-106",
+    "name": "Tom Brown",
+    "department": "Operations",
+    "title": "Ops Lead",
+    "email": "brownt@corp.com",
+    "phone": "13900220006",
+    "location": "Shenzhen Branch"
+  }
+]

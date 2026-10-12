@@ -1,0 +1,17 @@
+{
+  "RELEVANT_ARTICLES": [
+    "kb_101",
+    "kb_103",
+    "kb_105",
+    "kb_106",
+    "kb_107"
+  ],
+  "CONTRADICTION_PAIR": [
+    "kb_101",
+    "kb_106"
+  ],
+  "IRRELEVANT_ARTICLES": [
+    "kb_102",
+    "kb_104"
+  ]
+}

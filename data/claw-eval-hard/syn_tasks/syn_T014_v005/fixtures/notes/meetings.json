@@ -1,0 +1,51 @@
+[
+  {
+    "note_id": "note_001",
+    "title": "Sprint Planning - 2026-03-10",
+    "created_at": "2026-03-10T10:00:00Z",
+    "participants": [
+      "Alex Rivera",
+      "Sarah Chen",
+      "David Kim",
+      "Dr. Emily Watson"
+    ],
+    "content": "Alex Rivera opened the sprint planning session.\n\nFirst, technical debt was addressed. David Kim reported the login authentication bug is critical and must be fixed by Thursday. Alex Rivera noted he needs to prepare the architecture documentation by Tuesday for the review board.\n\nNext, compliance requirements were discussed. Sarah Chen must complete the compliance audit by Monday. Alex Rivera also mentioned he is handling the API integration task, no specific deadline yet.\n\nDr. Emily Watson said she will send the stakeholder update next week. Additionally, refer to note_004 for Sarah's ongoing database migration plan.\n\nAlex Rivera concluded: 'Please have the assistant compile these action items and share them directly with all attendees.'",
+    "duration_minutes": 50
+  },
+  {
+    "note_id": "note_002",
+    "title": "Client Kickoff - Omega Industries",
+    "created_at": "2026-03-11T14:00:00Z",
+    "participants": [
+      "Alex Rivera",
+      "John Doe"
+    ],
+    "content": "Kickoff meeting with Omega Industries. John Doe outlined their expectations. Alex Rivera promised to send a proposal.",
+    "duration_minutes": 60
+  },
+  {
+    "note_id": "note_003",
+    "title": "Team Coffee Chat",
+    "created_at": "2026-03-12T15:00:00Z",
+    "participants": [
+      "Sarah Chen",
+      "David Kim",
+      "Dr. Emily Watson"
+    ],
+    "content": "Casual conversation about recent movies and video games. Everyone enjoyed the break.",
+    "duration_minutes": 20
+  },
+  {
+    "note_id": "note_004",
+    "title": "Sprint Planning - 2026-03-03",
+    "created_at": "2026-03-03T10:00:00Z",
+    "participants": [
+      "Alex Rivera",
+      "Sarah Chen",
+      "David Kim",
+      "Dr. Emily Watson"
+    ],
+    "content": "Previous sprint notes:\n\n1. Sarah Chen responsible for database migration plan - Status: In progress\n2. David Kim responsible for unit tests - Status: Completed\n\nThis week's priorities:\n- Continue migration\n- Start new features",
+    "duration_minutes": 45
+  }
+]

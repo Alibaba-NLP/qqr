@@ -1,0 +1,56 @@
+[
+  {
+    "contact_id": "CTX-101",
+    "name": "Wei Chen",
+    "department": "IT",
+    "title": "IT Director",
+    "email": "wei.chen@corp.com",
+    "phone": "13900220001",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-102",
+    "name": "Li Chen",
+    "department": "HR",
+    "title": "HR Director",
+    "email": "li.chen@corp.com",
+    "phone": "13900220002",
+    "location": "Shanghai Branch"
+  },
+  {
+    "contact_id": "CTX-103",
+    "name": "Fang Chen",
+    "department": "Operations",
+    "title": "Operations Director",
+    "email": "fang.chen@corp.com",
+    "phone": "13900220003",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-104",
+    "name": "Ming Li",
+    "department": "Product",
+    "title": "Product Director",
+    "email": "liming@corp.com",
+    "phone": "13900220004",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-105",
+    "name": "Fang Wang",
+    "department": "Human Resources",
+    "title": "HR Manager",
+    "email": "wangfang@corp.com",
+    "phone": "13900220005",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-106",
+    "name": "Lei Zhao",
+    "department": "Engineering",
+    "title": "Senior Engineer",
+    "email": "zhaolei@corp.com",
+    "phone": "13900220006",
+    "location": "Shenzhen Branch"
+  }
+]

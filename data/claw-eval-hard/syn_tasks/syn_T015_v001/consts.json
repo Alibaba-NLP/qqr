@@ -1,0 +1,26 @@
+{
+  "RELEVANT_ARTICLES": [
+    "kb_101",
+    "kb_103",
+    "kb_105",
+    "kb_106",
+    "kb_107"
+  ],
+  "CONTRADICTION_PAIR": [
+    "kb_101",
+    "kb_106"
+  ],
+  "CROSS_REFERENCE_PAIR": [
+    "kb_107",
+    "kb_103"
+  ],
+  "KEY_KEYWORDS": [
+    "内部系统",
+    "SecureTunnel",
+    "NetGuard",
+    "钉钉",
+    "MFA",
+    "设备",
+    "密码"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "subject": "从图片识别《洛神赋图》",
+  "oracle": {
+    "canonical_answer": "《洛神赋图》",
+    "aliases": [
+      "洛神赋图"
+    ]
+  }
+}

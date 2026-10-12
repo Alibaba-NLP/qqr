@@ -1,0 +1,52 @@
+[
+  {
+    "note_id": "note_001",
+    "title": "Phoenix Platform Sprint Review - 2026-03-10",
+    "created_at": "2026-03-10T09:30:00Z",
+    "participants": [
+      "Emily Zhang",
+      "Alex Chen",
+      "Sarah Liu",
+      "David Wang"
+    ],
+    "content": "The sprint review began with Emily Zhang outlining this week's accomplishments.\n\nFirst, the authentication module progress was discussed. Alex Chen mentioned that the OAuth integration is complete, but the two-factor authentication still needs one more week. Sarah Liu said the user profile pages are ready for testing and the frontend team can begin QA tomorrow.\n\nNext, security concerns were addressed. David Wang reported that he has finished resolving last sprint's SQL injection vulnerability (see previous sprint notes note_004) and can now focus on the penetration testing. David Wang said there are three critical security items that need attention before launch: 1) session timeout configuration; 2) password encryption strength; 3) API rate limiting implementation. Alex Chen said he will handle the session timeout this week, and Sarah Liu will assist with API rate limiting.\n\nEmily Zhang asked David Wang to complete the security audit report for all items by Thursday and distribute it to the team. Additionally, Emily Zhang asked Alex Chen to prepare the API documentation for next Tuesday, focusing on the new authentication endpoints.\n\nSarah Liu suggested upgrading the database connection pool, which might require some downtime. Emily Zhang agreed but asked Sarah Liu to do a risk assessment first, to be submitted by Monday.\n\nBefore the meeting ended, Emily Zhang reminded everyone that next Friday is the stakeholder demo, and each person needs to prepare their feature walkthrough.\n\nEmily Zhang concluded: 'Please have the assistant compile these action items and share them directly with all attendees.'",
+    "duration_minutes": 50
+  },
+  {
+    "note_id": "note_002",
+    "title": "Enterprise Client Onboarding - TechCorp Inc",
+    "created_at": "2026-03-11T15:00:00Z",
+    "participants": [
+      "Emily Zhang",
+      "Client Johnson",
+      "Alex Chen"
+    ],
+    "content": "Had an onboarding discussion with VP Johnson from TechCorp Inc.\n\nVP Johnson outlined several integration requirements: First, they need single sign-on support for their existing Active Directory - this is high priority and they want it deployed within three weeks. Second, they require custom reporting dashboards for their operations team. Third, they want webhook notifications for all system events.\n\nAlex Chen explained the technical implementation. For SSO, the basic integration can be completed within ten days. For dashboards, they first need to confirm which KPIs they want to track - Alex Chen will prepare a KPI catalog for VP Johnson to review. Webhook implementation is straightforward but requires their IT team's firewall configuration first.\n\nEmily Zhang committed to sending a formal onboarding plan to TechCorp Inc next week, including milestones and resource allocation. Additionally, Emily Zhang asked Alex Chen to complete the SSO technical specification this week.\n\nVP Johnson also mentioned that their pilot program ends next month and they would like to discuss full deployment. Emily Zhang said she would coordinate with the sales team to schedule a follow-up.",
+    "duration_minutes": 55
+  },
+  {
+    "note_id": "note_003",
+    "title": "Team Coffee Break Chat",
+    "created_at": "2026-03-12T10:30:00Z",
+    "participants": [
+      "Alex Chen",
+      "Sarah Liu",
+      "David Wang"
+    ],
+    "content": "Everyone gathered for morning coffee. Alex Chen mentioned he just finished reading a great book on system design. Sarah Liu shared recipes from her baking hobby. David Wang talked about his new gaming setup.\n\nLater the conversation shifted to the upcoming company retreat, and everyone is excited about it. Sarah Liu suggested organizing a team building activity with escape rooms.",
+    "duration_minutes": 25
+  },
+  {
+    "note_id": "note_004",
+    "title": "Phoenix Platform Sprint Review - 2026-03-03",
+    "created_at": "2026-03-03T09:30:00Z",
+    "participants": [
+      "Emily Zhang",
+      "Alex Chen",
+      "Sarah Liu",
+      "David Wang"
+    ],
+    "content": "Previous sprint meeting minutes:\n\n1. Alex Chen responsible for completing the OAuth integration document - Status: Completed\n2. David Wang responsible for fixing SQL injection vulnerability - Status: Completed\n3. Sarah Liu responsible for user authentication module - Status: In progress, expected to be completed this week\n4. Emily Zhang responsible for confirming TechCorp Inc partnership - Status: Meeting scheduled (see note_002)\n\nThis sprint's priorities:\n- Continue advancing platform stability\n- Monitor authentication module integration progress",
+    "duration_minutes": 45
+  }
+]

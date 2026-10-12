@@ -1,0 +1,94 @@
+[
+ {
+  "event_id": "evt_001",
+  "title": "早会同步",
+  "start_time": "2026-03-12T09:00:00Z",
+  "end_time": "2026-03-12T09:30:00Z",
+  "attendees": [
+   "郑总监",
+   "郑爽",
+   "赵强"
+  ],
+  "location": "会议室A",
+  "recurring": true
+ },
+ {
+  "event_id": "evt_002",
+  "title": "产品评审会",
+  "start_time": "2026-03-12T10:00:00Z",
+  "end_time": "2026-03-12T11:30:00Z",
+  "attendees": [
+   "郑总监",
+   "陈总监"
+  ],
+  "location": "线上会议",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_003",
+  "title": "午餐",
+  "start_time": "2026-03-12T12:00:00Z",
+  "end_time": "2026-03-12T13:00:00Z",
+  "attendees": [],
+  "location": "会议室A",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_004",
+  "title": "郑爽 - 外部客户会议",
+  "start_time": "2026-03-12T13:00:00Z",
+  "end_time": "2026-03-12T14:00:00Z",
+  "attendees": [
+   "郑爽",
+   "外部客户"
+  ],
+  "location": "大会议室",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_005",
+  "title": "1:1 与郑总监",
+  "start_time": "2026-03-12T14:00:00Z",
+  "end_time": "2026-03-12T14:30:00Z",
+  "attendees": [
+   "郑总监"
+  ],
+  "location": "大会议室",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_006",
+  "title": "郑爽 - 用户测试会",
+  "start_time": "2026-03-12T14:30:00Z",
+  "end_time": "2026-03-12T15:30:00Z",
+  "attendees": [
+   "郑爽",
+   "测试团队"
+  ],
+  "location": "小会议室B",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_007",
+  "title": "赵强 - 跨团队协作",
+  "start_time": "2026-03-12T14:30:00Z",
+  "end_time": "2026-03-12T15:30:00Z",
+  "attendees": [
+   "赵强",
+   "协作团队"
+  ],
+  "location": "洽谈室",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_008",
+  "title": "技术分享会",
+  "start_time": "2026-03-12T17:00:00Z",
+  "end_time": "2026-03-12T17:30:00Z",
+  "attendees": [
+   "全体技术团队"
+  ],
+  "location": "洽谈室",
+  "recurring": false
+ }
+]

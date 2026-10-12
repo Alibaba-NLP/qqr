@@ -1,0 +1,52 @@
+[
+  {
+    "note_id": "note_001",
+    "title": "Nexus Dynamics Weekly - 2026-03-10",
+    "created_at": "2026-03-10T10:00:00Z",
+    "participants": [
+      "Sarah Connor",
+      "John Doe",
+      "Jane Smith",
+      "Alex Johnson"
+    ],
+    "content": "The meeting began with Sarah Connor introducing this week's agenda.\n\nFirst, the new release timeline was discussed. John Doe mentioned that the backend API still needs two more weeks to complete, mainly because the payment module integration is more complex than expected. Jane Smith said the design mockups are all finished and the frontend can start developing non-payment-related pages first.\n\nNext, customer-reported issues were discussed. Alex Johnson said he has finished resolving last week's homepage performance issue (see last week's meeting notes note_004) and can now focus on new bugs. Alex Johnson said there are three high-priority bugs that need to be fixed before the release: 1) login authentication fails occasionally; 2) mobile page loading is too slow; 3) the PDF export feature occasionally crashes. John Doe said he will work on the login bug this week, and Jane Smith will help optimize mobile performance.\n\nSarah Connor asked Alex Johnson to complete the bug fix assessment for all bugs by Thursday and send an email to the team. Additionally, Sarah Connor asked John Doe to prepare the security audit materials for next Tuesday, focusing on the payment module architecture design.\n\nJane Smith suggested updating the API documentation version, which might affect some page styles. Sarah Connor agreed but asked Jane Smith to do an impact assessment first, to be submitted by Monday.\n\nBefore the meeting ended, Sarah Connor reminded everyone that next Friday is the quarterly review, and each person needs to prepare their work summary presentation.\n\nSarah Connor concluded: 'Please have the assistant compile these action items and share them directly with all attendees.'",
+    "duration_minutes": 45
+  },
+  {
+    "note_id": "note_002",
+    "title": "Client Requirements Meeting - XYZ Corp",
+    "created_at": "2026-03-11T14:00:00Z",
+    "participants": [
+      "Sarah Connor",
+      "Client Brown",
+      "John Doe"
+    ],
+    "content": "Had a requirements discussion with Director Brown from XYZ Corp.\n\nDirector Brown raised several new requirements: First, they want to add a data export feature supporting Excel and CSV formats - this is quite urgent and they hope it can go live next month. Second, they want an admin dashboard that shows key metrics in real time. Third, they want to integrate with their ERP system for data synchronization.\n\nJohn Doe explained the technical approach. For data export, the basic functionality can be completed within two weeks. For the dashboard, they first need to confirm which metrics they want to see - John Doe will prepare a metrics checklist for Director Brown to select from. ERP integration is more complex and requires a technical feasibility study first.\n\nSarah Connor promised to send a formal requirements review document to XYZ Corp next week, including a timeline and quote. Additionally, Sarah Connor asked John Doe to complete the ERP integration technical feasibility analysis this week.\n\nDirector Brown also mentioned that their contract expires next month and they would like to discuss renewal. Sarah Connor said she would arrange for the business team to contact him.",
+    "duration_minutes": 60
+  },
+  {
+    "note_id": "note_003",
+    "title": "Team Lunch Casual Chat",
+    "created_at": "2026-03-12T12:00:00Z",
+    "participants": [
+      "John Doe",
+      "Jane Smith",
+      "Alex Johnson"
+    ],
+    "content": "Everyone chatted over lunch. John Doe said he's been learning Go recently and finds it quite interesting. Jane Smith shared photos from her weekend skiing trip. Alex Johnson said his dog knocked over a lamp again.\n\nLater the conversation turned to the company's annual party, and everyone is looking forward to it. Jane Smith suggested adding a karaoke segment this year.",
+    "duration_minutes": 30
+  },
+  {
+    "note_id": "note_004",
+    "title": "Nexus Dynamics Weekly - 2026-03-03",
+    "created_at": "2026-03-03T10:00:00Z",
+    "participants": [
+      "Sarah Connor",
+      "John Doe",
+      "Jane Smith",
+      "Alex Johnson"
+    ],
+    "content": "Last week's meeting minutes:\n\n1. John Doe responsible for completing the payment module technical proposal document - Status: Completed\n2. Alex Johnson responsible for fixing homepage performance issue - Status: Completed\n3. Jane Smith responsible for database migration plan - Status: In progress, expected to be completed this week\n4. Sarah Connor responsible for confirming cooperation intent with XYZ Corp - Status: Meeting scheduled (see note_002)\n\nThis week's priorities:\n- Continue pushing forward new version development\n- Monitor payment module integration progress",
+    "duration_minutes": 40
+  }
+]

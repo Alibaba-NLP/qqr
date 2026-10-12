@@ -1,0 +1,41 @@
+{
+  "ACTION_ITEMS": [
+    {
+      "assignee": "吴测试",
+      "task": "bug",
+      "deadline": "周五"
+    },
+    {
+      "assignee": "陈工",
+      "task": "技术评审",
+      "deadline": "下周二"
+    },
+    {
+      "assignee": "林设计师",
+      "task": "影响范围评估",
+      "deadline": "下周一"
+    },
+    {
+      "assignee": "陈工",
+      "task": "ERP",
+      "deadline": null
+    },
+    {
+      "assignee": "刘总监",
+      "task": "需求评估",
+      "deadline": "下周"
+    }
+  ],
+  "VALID_SHARE_RECIPIENTS": [
+    "刘总监",
+    "陈工",
+    "林设计师",
+    "吴测试"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "刘总监",
+    "陈工",
+    "林设计师",
+    "吴测试"
+  ]
+}

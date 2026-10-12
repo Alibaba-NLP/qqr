@@ -1,0 +1,56 @@
+[
+  {
+    "contact_id": "CTX-101",
+    "name": "王磊",
+    "department": "工程部",
+    "title": "工程总监",
+    "email": "wanglei@company.com",
+    "phone": "13900110001",
+    "location": "北京总部"
+  },
+  {
+    "contact_id": "CTX-102",
+    "name": "王磊",
+    "department": "销售部",
+    "title": "销售总监",
+    "email": "wanglei.sales@company.com",
+    "phone": "13900110002",
+    "location": "上海分部"
+  },
+  {
+    "contact_id": "CTX-103",
+    "name": "王静",
+    "department": "财务部",
+    "title": "财务总监",
+    "email": "wangjing@company.com",
+    "phone": "13900110003",
+    "location": "北京总部"
+  },
+  {
+    "contact_id": "CTX-104",
+    "name": "刘梅",
+    "department": "产品部",
+    "title": "产品总监",
+    "email": "liumei@company.com",
+    "phone": "13900110004",
+    "location": "北京总部"
+  },
+  {
+    "contact_id": "CTX-105",
+    "name": "赵强",
+    "department": "人力资源部",
+    "title": "HR 经理",
+    "email": "zhaoqiang@company.com",
+    "phone": "13900110005",
+    "location": "北京总部"
+  },
+  {
+    "contact_id": "CTX-106",
+    "name": "孙丽",
+    "department": "技术部",
+    "title": "高级工程师",
+    "email": "sunli@company.com",
+    "phone": "13900110006",
+    "location": "深圳分部"
+  }
+]

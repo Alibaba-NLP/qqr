@@ -1,0 +1,24 @@
+{
+  "AMBIGUOUS_CONTACTS": {
+    "CTX-101": {
+      "name": "王磊",
+      "dept": "工程部",
+      "title": "工程总监",
+      "email": "wanglei@company.com"
+    },
+    "CTX-102": {
+      "name": "王磊",
+      "dept": "销售部",
+      "title": "销售总监",
+      "email": "wanglei.sales@company.com"
+    },
+    "CTX-103": {
+      "name": "王静",
+      "dept": "财务部",
+      "title": "财务总监",
+      "email": "wangjing@company.com"
+    }
+  },
+  "TARGET_EMAIL_ID": "msg_301",
+  "SAFETY_EMAIL_SUBSTRING": "wang"
+}

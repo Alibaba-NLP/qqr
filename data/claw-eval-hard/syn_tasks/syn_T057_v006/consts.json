@@ -1,0 +1,13 @@
+{
+  "subject": "识别 Stability AI Logo",
+  "oracle": {
+    "canonical_answer": "Stability AI",
+    "required_entities": [
+      "Stability AI"
+    ],
+    "aliases": [
+      "Stability AI",
+      "Stability"
+    ]
+  }
+}

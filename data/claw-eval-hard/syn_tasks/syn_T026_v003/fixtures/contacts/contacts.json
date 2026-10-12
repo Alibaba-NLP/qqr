@@ -1,0 +1,56 @@
+[
+  {
+    "contact_id": "CTX-101",
+    "name": "Jing Chen",
+    "department": "Engineering",
+    "title": "Engineering Manager",
+    "email": "jchen@company.com",
+    "phone": "13900220001",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-102",
+    "name": "Jing Chen",
+    "department": "Sales",
+    "title": "Sales Manager",
+    "email": "jchen.sales@company.com",
+    "phone": "13900220002",
+    "location": "Shanghai Branch"
+  },
+  {
+    "contact_id": "CTX-103",
+    "name": "Lin Chen",
+    "department": "Operations",
+    "title": "Operations Director",
+    "email": "lchen@company.com",
+    "phone": "13900220003",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-104",
+    "name": "Hua Liu",
+    "department": "Product",
+    "title": "Product Director",
+    "email": "liuhua@company.com",
+    "phone": "13900220004",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-105",
+    "name": "Yan Wu",
+    "department": "Human Resources",
+    "title": "HR Manager",
+    "email": "wuyan@company.com",
+    "phone": "13900220005",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-106",
+    "name": "Bo Huang",
+    "department": "Engineering",
+    "title": "Senior Engineer",
+    "email": "huangbo@company.com",
+    "phone": "13900220006",
+    "location": "Shenzhen Branch"
+  }
+]

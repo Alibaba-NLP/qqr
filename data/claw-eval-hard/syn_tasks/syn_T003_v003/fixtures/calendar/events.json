@@ -1,0 +1,94 @@
+[
+ {
+  "event_id": "evt_001",
+  "title": "早会同步",
+  "start_time": "2026-03-05T09:00:00Z",
+  "end_time": "2026-03-05T09:30:00Z",
+  "attendees": [
+   "陈主管",
+   "王芳",
+   "赵强"
+  ],
+  "location": "大会议室",
+  "recurring": true
+ },
+ {
+  "event_id": "evt_002",
+  "title": "王芳 - 用户测试会",
+  "start_time": "2026-03-05T13:00:00Z",
+  "end_time": "2026-03-05T14:00:00Z",
+  "attendees": [
+   "王芳",
+   "测试团队"
+  ],
+  "location": "大会议室",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_003",
+  "title": "产品评审会",
+  "start_time": "2026-03-05T13:30:00Z",
+  "end_time": "2026-03-05T14:00:00Z",
+  "attendees": [
+   "陈主管",
+   "陈总监"
+  ],
+  "location": "洽谈室",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_004",
+  "title": "赵强 - 跨团队协作",
+  "start_time": "2026-03-05T14:30:00Z",
+  "end_time": "2026-03-05T15:30:00Z",
+  "attendees": [
+   "赵强",
+   "协作团队"
+  ],
+  "location": "会议室A",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_005",
+  "title": "午餐",
+  "start_time": "2026-03-05T15:00:00Z",
+  "end_time": "2026-03-05T16:00:00Z",
+  "attendees": [],
+  "location": "会议室C",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_006",
+  "title": "1:1 与陈主管",
+  "start_time": "2026-03-05T16:00:00Z",
+  "end_time": "2026-03-05T17:00:00Z",
+  "attendees": [
+   "陈主管"
+  ],
+  "location": "会议室A",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_007",
+  "title": "技术分享会",
+  "start_time": "2026-03-05T17:00:00Z",
+  "end_time": "2026-03-05T17:30:00Z",
+  "attendees": [
+   "全体技术团队"
+  ],
+  "location": "线上会议",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_008",
+  "title": "王芳 - 外部客户会议",
+  "start_time": "2026-03-05T17:00:00Z",
+  "end_time": "2026-03-05T18:00:00Z",
+  "attendees": [
+   "王芳",
+   "外部客户"
+  ],
+  "location": "洽谈室",
+  "recurring": false
+ }
+]

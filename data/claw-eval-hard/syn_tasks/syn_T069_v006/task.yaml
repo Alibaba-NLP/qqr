@@ -1,0 +1,181 @@
+task_id: syn_T069_v006
+task_name: Micron FY2025 Geographic Fab Expansion Analysis
+version: '1.0'
+category: finance
+difficulty: easy
+tags:
+- general
+services:
+- name: web_real
+  command: python mock_services/web_real/server.py
+  port: 9114
+  health_check: http://localhost:9114/web/health
+  health_check_method: GET
+  ready_timeout: 10
+  reset_endpoint: http://localhost:9114/web/reset
+prompt:
+  text: 'Micron Technology is undertaking its largest geographic expansion in company
+    history, with major fab investments in both Idaho (Boise) and New York (Clay/Syracuse
+    area), alongside existing operations in Asia. This expansion is central to the
+    company''s FY2025-2027 capital expenditure plan.
+
+
+    As a facilities and geographic strategy analyst, evaluate Micron''s expansion
+    economics using FY2025 financial data and publicly available information. Complete
+    the following:
+
+
+    1. Idaho vs New York Fab Economics: Compare the two major US fab projects. The
+    Idaho expansion focuses on existing site brownfield development while New York
+    represents a greenfield megasite. Analyze the investment scale, expected capacity,
+    and timeline for each. How do these fit within the $13.8B FY2025 CapEx and the
+    $20B FY2026 guidance?
+
+
+    2. International Footprint Context: Micron maintains significant manufacturing
+    in Asia (Singapore, Japan, China). How does the US expansion complement or duplicate
+    existing international capacity? Consider the role of CHIPS Act subsidies in the
+    geographic decision. With OCF of $17.5B funding much of the expansion, assess
+    the geographic diversification strategy.
+
+
+    3. Capacity Timeline and Financial Impact: New fabs have long lead times — capacity
+    from Idaho and New York is not expected until 2027 or later. Calculate the breakeven
+    revenue ($42.6B at $20B CapEx / 47% OCF margin) needed to sustain spending during
+    the construction phase. How does the 10% NAND capacity reduction relate to resource
+    allocation for these new facilities? Assess whether the geographic expansion represents
+    prudent long-term positioning or over-investment risk.'
+  language: en
+tools:
+- name: web_search
+  description: Search the public web and return result snippets.
+  input_schema:
+    type: object
+    properties:
+      query:
+        type: string
+        description: Search query
+      max_results:
+        type: integer
+        description: Maximum number of results
+        default: 10
+    required:
+    - query
+- name: web_fetch
+  description: Fetch full webpage content for a URL.
+  input_schema:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Target URL
+      timeout_seconds:
+        type: integer
+        description: Request timeout in seconds
+        default: 30
+    required:
+    - url
+tool_endpoints:
+- tool_name: web_search
+  url: http://localhost:9114/web/search
+  method: POST
+- tool_name: web_fetch
+  url: http://localhost:9114/web/fetch
+  method: POST
+environment:
+  timeout_seconds: 1800
+  max_turns: 50
+scoring_components:
+- name: web_search
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_search
+    min_calls: 1
+- name: web_fetch
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_fetch
+    min_calls: 1
+- name: anchor_literals
+  weight: 0.35
+  check:
+    type: keywords_present
+    keywords:
+    - '17.5'
+    - '13.8'
+    - '3.7'
+    - '1.27'
+    - '42.6'
+- name: length
+  weight: 0.25
+  check:
+    type: min_length
+    min_length: 400
+- name: report_length
+  weight: 0.2
+  check:
+    type: min_length
+    min_length: 400
+safety_checks: []
+expected_actions: []
+judge_rubric: 'Evaluate the Micron geographic expansion analysis against the following
+  rubric:
+
+
+  POSITIVE SCORING ITEMS (total 100%):
+
+  1. [Weight 12%] Idaho fab project details (brownfield, Boise site, timeline, investment)
+
+  2. [Weight 12%] New York fab project details (greenfield, Clay/Syracuse, megasite
+  scale)
+
+  3. [Weight 10%] Comparison of Idaho vs New York investment economics and capacity
+  plans
+
+  4. [Weight 10%] Integration of both projects within $13.8B FY2025 and $20B FY2026
+  CapEx framework
+
+  5. [Weight 10%] International footprint analysis (Singapore, Japan, China operations)
+
+  6. [Weight 8%] CHIPS Act subsidy role in geographic decision-making
+
+  7. [Weight 8%] OCF ($17.5B) as funding source for geographic expansion
+
+  8. [Weight 8%] Long lead time analysis — post-2027 capacity release
+
+  9. [Weight 8%] $42.6B breakeven revenue during construction phase
+
+  10. [Weight 7%] 10% NAND reduction as resource reallocation to support new fabs
+
+  11. [Weight 7%] Clear conclusion on prudent positioning vs over-investment risk
+
+
+  NEGATIVE SCORING ITEMS (deduct when present):
+
+  12. [Deduct 5%] Confusing Idaho and New York project characteristics
+
+  13. [Deduct 4%] Ignoring CHIPS Act impact on economics
+
+  14. [Deduct 4%] Missing currency units or timeline inconsistencies'
+reference_solution: '1. Idaho: Brownfield expansion at Boise; lower risk, faster ramp;
+  focused on DRAM. Fab economics favor lower upfront cost.
+
+  2. New York: Greenfield megasite in Clay; larger investment, longer timeline; multiple
+  cleanrooms.
+
+  3. Combined investment fits within $13.8B FY2025 and $20B FY2026 CapEx guidance.
+
+  4. International: Singapore (NAND/DRAM), Japan (DRAM), China (legacy) — US adds
+  geographic diversification.
+
+  5. CHIPS Act subsidies offset ~10-15% of US fab costs; critical to fab economics.
+
+  6. Post-2027 capacity release means $42.6B breakeven must be met with existing facilities
+  during construction; OCF of $17.5B supports this.
+
+  7. 10% NAND reduction frees capital and management bandwidth for new fab projects.'
+primary_dimensions:
+- completion
+- communication

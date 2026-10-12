@@ -1,0 +1,179 @@
+task_id: syn_T069_v008
+task_name: Micron FY2025 Shareholder Return Capacity Analysis
+version: '1.0'
+category: finance
+difficulty: easy
+tags:
+- general
+services:
+- name: web_real
+  command: python mock_services/web_real/server.py
+  port: 9114
+  health_check: http://localhost:9114/web/health
+  health_check_method: GET
+  ready_timeout: 10
+  reset_endpoint: http://localhost:9114/web/reset
+prompt:
+  text: 'Micron Technology has historically been inconsistent in returning cash to
+    shareholders, given the volatile nature of memory chip profitability. With FY2025
+    generating strong operating cash flow, investors are evaluating the sustainability
+    of Micron''s shareholder return program.
+
+
+    As an equity research analyst, analyze Micron''s capacity to return cash to shareholders
+    using FY2025 financial data. Complete the following:
+
+
+    1. Buyback Capacity Assessment: With operating cash flow of $17.5B and capital
+    expenditures of $13.8B, Micron generated $3.7B in free cash flow during FY2025.
+    Calculate the FCF payout ratio if the company maintains its current dividend and
+    buyback pace. Assess how much capacity exists for accelerated repurchases without
+    jeopardizing the balance sheet.
+
+
+    2. Dividend Sustainability: Analyze Micron''s current dividend yield and payout
+    ratio relative to FCF. Given that CapEx is guided to rise to $20B in FY2026, evaluate
+    whether the dividend is sustainable through the cycle. At what FCF level would
+    the dividend become at risk?
+
+
+    3. Total Shareholder Return Framework: Construct a framework showing how Micron''s
+    shareholder returns (dividends + buybacks) compare to FCF across the cycle. With
+    the breakeven revenue of $42.6B needed for FCF >= 0 at $20B CapEx and 47% OCF
+    margin, assess the risk that shareholder returns could be suspended in a downturn.
+    How does the 10% NAND capacity reduction and HBM packaging investment strategy
+    affect the long-term FCF trajectory and therefore the sustainable level of shareholder
+    returns?'
+  language: en
+tools:
+- name: web_search
+  description: Search the public web and return result snippets.
+  input_schema:
+    type: object
+    properties:
+      query:
+        type: string
+        description: Search query
+      max_results:
+        type: integer
+        description: Maximum number of results
+        default: 10
+    required:
+    - query
+- name: web_fetch
+  description: Fetch full webpage content for a URL.
+  input_schema:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Target URL
+      timeout_seconds:
+        type: integer
+        description: Request timeout in seconds
+        default: 30
+    required:
+    - url
+tool_endpoints:
+- tool_name: web_search
+  url: http://localhost:9114/web/search
+  method: POST
+- tool_name: web_fetch
+  url: http://localhost:9114/web/fetch
+  method: POST
+environment:
+  timeout_seconds: 1800
+  max_turns: 50
+scoring_components:
+- name: web_search
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_search
+    min_calls: 1
+- name: web_fetch
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_fetch
+    min_calls: 1
+- name: anchor_literals
+  weight: 0.35
+  check:
+    type: keywords_present
+    keywords:
+    - '17.5'
+    - '13.8'
+    - '3.7'
+    - '1.27'
+    - '42.6'
+- name: length
+  weight: 0.25
+  check:
+    type: min_length
+    min_length: 400
+- name: report_length
+  weight: 0.2
+  check:
+    type: min_length
+    min_length: 400
+safety_checks: []
+expected_actions: []
+judge_rubric: 'Evaluate the Micron shareholder return analysis against the following
+  rubric:
+
+
+  POSITIVE SCORING ITEMS (total 100%):
+
+  1. [Weight 12%] FCF calculation: $17.5B OCF - $13.8B CapEx = $3.7B FCF
+
+  2. [Weight 12%] FCF payout ratio calculation (dividends + buybacks / FCF)
+
+  3. [Weight 10%] Buyback capacity assessment — how much room for acceleration
+
+  4. [Weight 10%] Dividend yield and payout ratio relative to FCF
+
+  5. [Weight 10%] Dividend sustainability analysis under $20B FY2026 CapEx scenario
+
+  6. [Weight 8%] FCF threshold analysis — at what level does dividend become at risk
+
+  7. [Weight 8%] Total shareholder return framework across the cycle
+
+  8. [Weight 8%] $42.6B breakeven analysis and its implications for return suspension
+  risk
+
+  9. [Weight 7%] Impact of 10% NAND reduction on long-term FCF trajectory
+
+  10. [Weight 7%] HBM packaging investment effect on future FCF and return capacity
+
+  11. [Weight 8%] Clear conclusion on sustainable level of shareholder returns
+
+
+  NEGATIVE SCORING ITEMS (deduct when present):
+
+  12. [Deduct 5%] Confusing stock-based compensation with shareholder returns
+
+  13. [Deduct 4%] Missing currency units or inconsistent period comparisons
+
+  14. [Deduct 4%] Ignoring the cyclical nature of memory profitability in return sustainability'
+reference_solution: '1. FCF: $17.5B OCF - $13.8B CapEx = $3.7B available for shareholders.
+
+  2. Payout Ratio: Dividends + buybacks vs $3.7B FCF; payout ratio elevated but manageable.
+
+  3. Buyback Capacity: Limited acceleration room with $3.7B FCF; FY2026 $20B CapEx
+  will further constrain.
+
+  4. Dividend Sustainability: Current dividend modest; sustainable if FCF stays above
+  ~$2B.
+
+  5. Breakeven Risk: At $42.6B revenue with $20B CapEx, FCF = 0; shareholder returns
+  would be suspended.
+
+  6. Long-term: 10% NAND reduction + HBM investment should improve FCF quality, supporting
+  higher sustainable returns.
+
+  7. Cycle Risk: Memory downturns historically force return suspensions; current CapEx
+  cycle increases this risk near-term.'
+primary_dimensions:
+- completion
+- communication

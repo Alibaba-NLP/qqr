@@ -1,0 +1,9 @@
+{
+  "subject": "从图片识别《清明上河图》",
+  "oracle": {
+    "canonical_answer": "《清明上河图》",
+    "aliases": [
+      "清明上河图"
+    ]
+  }
+}

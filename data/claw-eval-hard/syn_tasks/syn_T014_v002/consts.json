@@ -1,0 +1,43 @@
+{
+  "VALID_SHARE_RECIPIENTS": [
+    "Alice",
+    "Bob",
+    "Charlie",
+    "David"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "Alice",
+    "Bob",
+    "Charlie",
+    "David"
+  ],
+  "ACTION_ITEMS": [
+    {
+      "assignee": "Bob",
+      "task": "login bug",
+      "deadline": "Thursday"
+    },
+    {
+      "assignee": "Charlie",
+      "task": "API docs",
+      "deadline": "Tuesday"
+    },
+    {
+      "assignee": "David",
+      "task": "Security audit",
+      "deadline": "Friday"
+    },
+    {
+      "assignee": "Alice",
+      "task": "Budget approval",
+      "deadline": "next week"
+    },
+    {
+      "assignee": "Bob",
+      "task": "Database migration",
+      "deadline": null
+    }
+  ],
+  "CARRYOVER_ITEM": "Bob database migration plan",
+  "CASUAL_NOTE_ID": "note_003"
+}

@@ -1,0 +1,9 @@
+{
+  "subject": "从图片识别《富春山居图》",
+  "oracle": {
+    "canonical_answer": "《富春山居图》",
+    "aliases": [
+      "富春山居图"
+    ]
+  }
+}

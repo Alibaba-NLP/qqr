@@ -1,0 +1,10 @@
+{
+  "CONTRADICTION_PAIR": [
+    "kb_001",
+    "kb_006"
+  ],
+  "DEPRECATED_CLIENT": "SecureConnect",
+  "CURRENT_CLIENT": "CloudShield",
+  "AUTH_PROVIDER": "Okta Verify",
+  "COMMUNICATION_TOOL": "Microsoft Teams"
+}

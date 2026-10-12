@@ -1,0 +1,50 @@
+{
+  "ACTION_ITEMS": [
+    {
+      "assignee": "周涛",
+      "task": "社交媒体素材",
+      "deadline": "周四"
+    },
+    {
+      "assignee": "陈伟",
+      "task": "落地页bug",
+      "deadline": "周二"
+    },
+    {
+      "assignee": "林娜",
+      "task": "海报最终版",
+      "deadline": "周一"
+    },
+    {
+      "assignee": "陈伟",
+      "task": "数据埋点",
+      "deadline": null
+    },
+    {
+      "assignee": "刘总监",
+      "task": "预算审批",
+      "deadline": "下周"
+    }
+  ],
+  "VALID_SHARE_RECIPIENTS": [
+    "刘总监",
+    "陈伟",
+    "林娜",
+    "周涛"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "刘总监",
+    "陈伟",
+    "林娜",
+    "周涛"
+  ],
+  "CARRYOVER_ITEM": {
+    "assignee": "林娜",
+    "task": "品牌指南更新",
+    "source": "note_004"
+  },
+  "EXCLUDE_NOTE_IDS": [
+    "note_003"
+  ],
+  "MAIN_MEETING_DATE": "2026-03-10"
+}

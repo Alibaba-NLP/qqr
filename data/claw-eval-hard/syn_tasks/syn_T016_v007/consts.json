@@ -1,0 +1,18 @@
+{
+  "OLD_CLIENT": "SecureTunnel",
+  "NEW_CLIENT": "CloudConnect Pro",
+  "CONTRADICTION_PAIR": [
+    "kb_001",
+    "kb_006"
+  ],
+  "SERVER_URL": "access.nexuscorp.io",
+  "COMM_TOOL": "TeamSync",
+  "MFA_TOOL": "Authy",
+  "REQUIRED_ARTICLES": [
+    "kb_001",
+    "kb_003",
+    "kb_005",
+    "kb_006",
+    "kb_007"
+  ]
+}

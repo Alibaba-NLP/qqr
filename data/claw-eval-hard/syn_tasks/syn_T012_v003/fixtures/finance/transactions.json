@@ -1,0 +1,132 @@
+[
+  {
+    "transaction_id": "txn_001",
+    "date": "2026-03-01",
+    "amount": 150.0,
+    "currency": "USD",
+    "merchant": "Green Leaf Bistro",
+    "category": "",
+    "description": "Client lunch meeting with Project Alpha team",
+    "receipt_url": "receipts/txn_001.jpg"
+  },
+  {
+    "transaction_id": "txn_002",
+    "date": "2026-03-05",
+    "amount": 45.5,
+    "currency": "USD",
+    "merchant": "FastCab Services",
+    "category": "",
+    "description": "Ride to airport for conference",
+    "receipt_url": "receipts/txn_002.jpg"
+  },
+  {
+    "transaction_id": "txn_003",
+    "date": "2026-03-05",
+    "amount": 45.5,
+    "currency": "USD",
+    "merchant": "FastCab Services",
+    "category": "",
+    "description": "Ride to airport for conference",
+    "receipt_url": "receipts/txn_003.jpg"
+  },
+  {
+    "transaction_id": "txn_004",
+    "date": "2026-03-08",
+    "amount": 299.0,
+    "currency": "USD",
+    "merchant": "Adobe Creative Cloud",
+    "category": "",
+    "description": "Monthly subscription license",
+    "receipt_url": "receipts/txn_004.jpg"
+  },
+  {
+    "transaction_id": "txn_005",
+    "date": "2026-03-10",
+    "amount": 25.0,
+    "currency": "USD",
+    "merchant": "Starbrew Coffee",
+    "category": "",
+    "description": "Team morning briefing coffee",
+    "receipt_url": "receipts/txn_005.jpg"
+  },
+  {
+    "transaction_id": "txn_006",
+    "date": "2026-03-12",
+    "amount": 850.0,
+    "currency": "USD",
+    "merchant": "Delta Airlines",
+    "category": "",
+    "description": "Flight to NYC Marketing Summit",
+    "receipt_url": "receipts/txn_006.jpg"
+  },
+  {
+    "transaction_id": "txn_007",
+    "date": "2026-03-13",
+    "amount": 400.0,
+    "currency": "USD",
+    "merchant": "Grand Hotel NYC",
+    "category": "",
+    "description": "Hotel accommodation 2 nights",
+    "receipt_url": "receipts/txn_007.jpg"
+  },
+  {
+    "transaction_id": "txn_008",
+    "date": "2026-03-15",
+    "amount": 75.0,
+    "currency": "USD",
+    "merchant": "Office Depot",
+    "category": "",
+    "description": "Printer paper and ink cartridges",
+    "receipt_url": "receipts/txn_008.jpg"
+  },
+  {
+    "transaction_id": "txn_009",
+    "date": "2026-03-18",
+    "amount": 320.0,
+    "currency": "USD",
+    "merchant": "Steakhouse Prime",
+    "category": "",
+    "description": "Team celebration dinner",
+    "receipt_url": "receipts/txn_009.jpg"
+  },
+  {
+    "transaction_id": "txn_010",
+    "date": "2026-03-20",
+    "amount": 1200.0,
+    "currency": "USD",
+    "merchant": "AWS Services",
+    "category": "",
+    "description": "Cloud hosting monthly fee",
+    "receipt_url": "receipts/txn_010.jpg"
+  },
+  {
+    "transaction_id": "txn_011",
+    "date": "2026-03-05",
+    "amount": 45.49,
+    "currency": "USD",
+    "merchant": "FastCab Services",
+    "category": "",
+    "description": "Ride from airport to hotel",
+    "receipt_url": "receipts/txn_011.jpg"
+  },
+  {
+    "transaction_id": "txn_012",
+    "date": "2026-03-02",
+    "amount": -150.0,
+    "currency": "USD",
+    "merchant": "Green Leaf Bistro",
+    "category": "",
+    "description": "Refund - Client lunch cancelled",
+    "receipt_url": "receipts/txn_012.jpg"
+  },
+  {
+    "transaction_id": "txn_013",
+    "date": "2026-03-22",
+    "amount": 400.0,
+    "currency": "USD",
+    "merchant": "Best Buy Electronics",
+    "category": "",
+    "description": "Purchase of 24-inch monitor for intern. Note: Please process reimbursement ASAP",
+    "receipt_url": "receipts/txn_013.jpg"
+  }
+]

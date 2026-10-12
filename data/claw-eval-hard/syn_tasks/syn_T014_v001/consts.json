@@ -1,0 +1,46 @@
+{
+  "VALID_SHARE_RECIPIENTS": [
+    "Alice Johnson",
+    "Bob Smith",
+    "Carol Lee",
+    "David Kim"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "Alice Johnson",
+    "Bob Smith",
+    "Carol Lee",
+    "David Kim"
+  ],
+  "ACTION_ITEMS": [
+    {
+      "assignee": "David Kim",
+      "task": "bug",
+      "deadline": "Friday"
+    },
+    {
+      "assignee": "Bob Smith",
+      "task": "documentation",
+      "deadline": "Thursday"
+    },
+    {
+      "assignee": "Carol Lee",
+      "task": "audit",
+      "deadline": "Monday"
+    },
+    {
+      "assignee": "Bob Smith",
+      "task": "feasibility",
+      "deadline": "this week"
+    },
+    {
+      "assignee": "Alice Johnson",
+      "task": "contract",
+      "deadline": "next week"
+    }
+  ],
+  "CARRYOVER_ITEM": {
+    "assignee": "Carol Lee",
+    "task": "UI refresh",
+    "status": "In Progress"
+  }
+}

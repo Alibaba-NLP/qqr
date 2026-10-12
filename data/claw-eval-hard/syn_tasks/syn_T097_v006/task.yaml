@@ -1,0 +1,109 @@
+task_id: syn_T097_v006
+task_name: Pinbench GPT-4 Numbered Key Points v6
+version: '1.0'
+category: comprehension
+difficulty: easy
+tags:
+- general
+services:
+- name: documents
+  command: python mock_services/documents/server.py
+  port: 9117
+  health_check: http://localhost:9117/documents/health
+  health_check_method: GET
+  ready_timeout: 10
+  reset_endpoint: http://localhost:9117/documents/reset
+  env:
+    DOCUMENTS_BASE_DIR: tasks/syn_T097_v006
+    PORT: '9117'
+prompt:
+  text: 'Use the PDF parsing tool to read `fixtures/docs/GPT4.pdf`, then list the
+    top 5
+
+    key points about GPT-4 as a numbered list (1. through 5.). Focus on what is NEW
+
+    compared to GPT-3.5 — what improvements and new abilities does GPT-4 bring?
+
+
+    Each numbered point should be 1-3 sentences.
+
+    '
+  language: en
+tools:
+- name: documents_extract_text
+  description: Extract readable text from a PDF file in the task workspace.
+  input_schema:
+    type: object
+    properties:
+      path:
+        type: string
+        description: Relative path to the PDF file within the task workspace.
+      max_pages:
+        type: integer
+        description: Optional maximum number of pages to extract.
+    required:
+    - path
+tool_endpoints:
+- tool_name: documents_extract_text
+  url: http://localhost:9117/documents/extract_text
+  method: POST
+sandbox_files:
+- fixtures/docs/GPT4.pdf
+environment:
+  timeout_seconds: 120
+  max_turns: 6
+scoring_components:
+- name: extract_text
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: documents_extract_text
+    min_calls: 1
+- name: eli5_concepts
+  weight: 0.5
+  check:
+    type: keywords_present
+    keywords:
+    - GPT-4
+    - smart helper
+    - examples
+    - tasks
+    - important
+    - limits
+    - mistakes
+- name: analogy
+  weight: 0.1
+  check:
+    type: keywords_present
+    keywords:
+    - like
+    - imagine
+    - helper
+    - friend
+- name: limits
+  weight: 0.1
+  check:
+    type: keywords_present
+    keywords:
+    - not perfect
+    - can make mistakes
+    - sometimes wrong
+    - doesn't know
+- name: length
+  weight: 0.2
+  check:
+    type: min_length
+    min_length: 200
+safety_checks: []
+expected_actions: []
+judge_rubric: 'Reward a numbered list of exactly 5 points highlighting GPT-4 improvements
+  over GPT-3.5: better reasoning, multimodality, higher benchmark scores, reduced
+  hallucination, improved instruction following. Penalize wrong count or missing comparison
+  angle.'
+reference_solution: 'Numbered list of 5: 1) Multimodal input (images + text); 2) Much
+  higher benchmark scores; 3) Better reasoning and math; 4) Less likely to hallucinate;
+  5) Better at following detailed instructions.'
+primary_dimensions:
+- completion
+- communication
+- safety

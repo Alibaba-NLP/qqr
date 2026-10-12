@@ -1,0 +1,52 @@
+[
+  {
+    "note_id": "note_001",
+    "title": "Engineering Weekly Sync - 2026-03-10",
+    "created_at": "2026-03-10T09:00:00Z",
+    "participants": [
+      "Director Smith",
+      "Alice Johnson",
+      "Bob Chen",
+      "Carol Davis"
+    ],
+    "content": "The meeting began with Director Smith reviewing the sprint goals.\n\nFirst, the authentication module was discussed. Bob Chen mentioned that the login bug reported by QA is critical and needs immediate attention. Bob Chen said he will fix the login bug by Thursday. Alice Johnson noted that the frontend is ready for testing once the backend is stable.\n\nNext, the client demo preparation was reviewed. Alice Johnson said she will prepare the demo slides and environment by Tuesday. Director Smith emphasized that the XYZ Industries stakeholders are visiting next week.\n\nCarol Davis reported on the documentation update. She said the API docs are outdated and she will update docs by Monday. Director Smith agreed this is high priority.\n\nDirector Smith asked Alice Johnson to handle the API integration with the new payment gateway. No specific deadline was set, but it should be done before the next sprint planning.\n\nAdditionally, Director Smith said he will send the proposal to XYZ Industries by next week.\n\nDirector Smith referenced last week's notes (note_004) regarding the database migration script.\n\nBefore closing, Director Smith reminded everyone that the quarterly review is upcoming.\n\nDirector Smith concluded: 'Please have the assistant compile these action items and share them directly with all attendees.'",
+    "duration_minutes": 50
+  },
+  {
+    "note_id": "note_002",
+    "title": "Stakeholder Review - XYZ Industries",
+    "created_at": "2026-03-11T14:00:00Z",
+    "participants": [
+      "Director Smith",
+      "Client Brown",
+      "Alice Johnson"
+    ],
+    "content": "Met with Client Brown from XYZ Industries to discuss project milestones.\n\nClient Brown requested a detailed timeline for the payment gateway integration. Alice Johnson explained the technical dependencies.\n\nDirector Smith promised to provide a cost estimate by the end of the week.\n\nClient Brown also asked for a security audit report. Director Smith said the security team will handle this separately.\n\nThe meeting ended with a agreement to meet again next month.",
+    "duration_minutes": 45
+  },
+  {
+    "note_id": "note_003",
+    "title": "Friday Coffee Break",
+    "created_at": "2026-03-13T15:30:00Z",
+    "participants": [
+      "Alice Johnson",
+      "Bob Chen",
+      "Carol Davis"
+    ],
+    "content": "The team gathered for coffee. Alice Johnson talked about her new puppy. Bob Chen shared recommendations for sci-fi movies. Carol Davis mentioned she is planning a hiking trip for the weekend.\n\nThey also discussed the best lunch spots near the office. Bob Chen suggested trying the new Italian place.",
+    "duration_minutes": 20
+  },
+  {
+    "note_id": "note_004",
+    "title": "Engineering Weekly Sync - 2026-03-03",
+    "created_at": "2026-03-03T09:00:00Z",
+    "participants": [
+      "Director Smith",
+      "Alice Johnson",
+      "Bob Chen",
+      "Carol Davis"
+    ],
+    "content": "Last week's meeting minutes:\n\n1. Alice Johnson responsible for frontend mockups - Status: Completed\n2. Bob Chen responsible for unit test coverage - Status: Completed\n3. Carol Davis responsible for database migration script - Status: In progress, expected to be completed this week\n4. Director Smith responsible for budget approval - Status: Approved\n\nThis week's priorities:\n- Focus on authentication module\n- Prepare for client demo",
+    "duration_minutes": 40
+  }
+]

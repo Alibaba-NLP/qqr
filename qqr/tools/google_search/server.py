@@ -9,6 +9,8 @@ from datetime import datetime
 from urllib.parse import urlencode
 
 import httpx
+from mcp.client.session import ClientSession
+from mcp.client.streamable_http import streamable_http_client
 from mcp.server.fastmcp import FastMCP
 from openai import OpenAI
 
@@ -18,10 +20,13 @@ logger = logging.getLogger(__name__)
 
 mcp = FastMCP("WebSearch", log_level="WARNING")
 
-# Google Search 网关配置（论文实现基于 Google Custom Search API；
-# 通过 SEARCH_API_URL / SEARCH_API_KEY 指定兼容的搜索网关）
-SEARCH_API_KEY = os.getenv("SEARCH_API_KEY", "")
-SEARCH_API_URL = os.getenv("SEARCH_API_URL", "")
+# IdeaLab Google Search 配置
+IDEALAB_API_KEY = os.getenv("IDEALAB_API_KEY", "")
+IDEALAB_API_URL = os.getenv("IDEALAB_API_URL", "")
+
+# Bailian/DashScope MCP WebSearch 配置（IdeaLab 配额耗尽时的备用）
+BAILIAN_WEB_SEARCH_API_KEY = os.getenv("BAILIAN_WEB_SEARCH_API_KEY", "")
+BAILIAN_MCP_URL = "https://dashscope.aliyuncs.com/api/v1/mcps/WebSearch/mcp"
 
 # AIData 网页抓取配置 (Taobao TOP API)
 TOP_APP_KEY = os.getenv("TOP_APP_KEY", "")
@@ -65,55 +70,87 @@ def _gen_sign_hmac(params: dict, secret: str) -> str:
 # ────────────────────────── 搜索 ──────────────────────────
 
 
+async def _bailian_search(query: str) -> dict:
+    """通过 Bailian/DashScope MCP 执行单条搜索（IdeaLab 配额耗尽时的备用）"""
+    try:
+        headers = {"Authorization": f"Bearer {BAILIAN_WEB_SEARCH_API_KEY}"}
+        async with httpx.AsyncClient(headers=headers, timeout=60) as http_client:
+            async with streamable_http_client(BAILIAN_MCP_URL, http_client=http_client) as (read, write, _):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    result = await session.call_tool("bailian_web_search", {"query": query})
+                    text = result.content[0].text if result.content else ""
+                    if not text:
+                        return {"search_query": query, "docs": []}
+                    return {
+                        "search_query": query,
+                        "docs": [{"title": "Web Search Result", "text": text, "link": "", "date": "", "source": "bailian"}],
+                    }
+    except Exception as e:
+        logger.warning(f"Bailian search for '{query}' failed: {e}")
+        return {"search_query": query, "docs": []}
+
+
 async def single_search(client: httpx.AsyncClient, query: str, num: int) -> dict:
-    """通过 IdeaLab 执行单条 Google 搜索（带持久化缓存）"""
+    """通过 Bailian MCP 执行单条搜索（带持久化缓存）。IdeaLab 已暂时禁用。"""
     # 查缓存
     cached = _cache.get_search(query, num)
     if cached is not None:
         return cached
 
-    headers = {"X-AK": SEARCH_API_KEY}
-    payload = {
-        "query": query,
-        "num": num,
-        "extendParams": {"country": "cn", "page": 1},
-        "platformInput": {"model": "google-search"},
-    }
+    # ── IdeaLab 已暂时注释，直接使用 Bailian ──
+    # headers = {"X-AK": IDEALAB_API_KEY}
+    # payload = {
+    #     "query": query,
+    #     "num": num,
+    #     "extendParams": {"country": "cn", "page": 1},
+    #     "platformInput": {"model": "google-search"},
+    # }
+    #
+    # idealab_result = None
+    # if IDEALAB_API_KEY:
+    #     for attempt in range(MAX_RETRIES):
+    #         try:
+    #             resp = await client.post(IDEALAB_API_URL, json=payload, headers=headers, timeout=30.0)
+    #             resp.raise_for_status()
+    #
+    #             content_type = resp.headers.get("content-type", "")
+    #             if "application/json" not in content_type:
+    #                 raise ValueError(f"API returned non-JSON response (content-type: {content_type})")
+    #
+    #             resp_json = resp.json()
+    #             if not resp_json.get("data") or not resp_json["data"].get("originalOutput"):
+    #                 logger.warning(f"Query '{query}' IdeaLab returned no data, will try Bailian fallback")
+    #                 break
+    #
+    #             organic = resp_json["data"]["originalOutput"].get("organic", [])
+    #             docs = []
+    #             for page in organic:
+    #                 docs.append({
+    #                     "title": page.get("title", "Untitled"),
+    #                     "text": page.get("snippet", ""),
+    #                     "link": page.get("link", "#"),
+    #                     "date": page.get("date", ""),
+    #                     "source": page.get("source", ""),
+    #                 })
+    #             idealab_result = {"search_query": query, "docs": docs}
+    #             if docs:
+    #                 _cache.put_search(query, num, idealab_result)
+    #                 return idealab_result
+    #             # docs empty — fall through to Bailian
+    #             break
+    #
+    #         except Exception as e:
+    #             logger.warning(f"Query '{query}' IdeaLab attempt {attempt + 1} failed: {e}")
+    #             if attempt < MAX_RETRIES - 1:
+    #                 await asyncio.sleep(RETRY_DELAYS[attempt])
 
-    for attempt in range(MAX_RETRIES):
-        try:
-            resp = await client.post(SEARCH_API_URL, json=payload, headers=headers, timeout=30.0)
-            resp.raise_for_status()
-
-            content_type = resp.headers.get("content-type", "")
-            if "application/json" not in content_type:
-                raise ValueError(f"API returned non-JSON response (content-type: {content_type})")
-
-            resp_json = resp.json()
-            if not resp_json.get("data") or not resp_json["data"].get("originalOutput"):
-                logger.warning(f"Query '{query}' returned no data")
-                return {"search_query": query, "docs": []}
-
-            organic = resp_json["data"]["originalOutput"].get("organic", [])
-            docs = []
-            for page in organic:
-                docs.append({
-                    "title": page.get("title", "Untitled"),
-                    "text": page.get("snippet", ""),
-                    "link": page.get("link", "#"),
-                    "date": page.get("date", ""),
-                    "source": page.get("source", ""),
-                })
-            result = {"search_query": query, "docs": docs}
-            # 写缓存（只缓存有结果的）
-            if docs:
-                _cache.put_search(query, num, result)
-            return result
-
-        except Exception as e:
-            logger.warning(f"Query '{query}' attempt {attempt + 1} failed: {e}")
-            if attempt < MAX_RETRIES - 1:
-                await asyncio.sleep(RETRY_DELAYS[attempt])
+    # Bailian MCP search
+    if BAILIAN_WEB_SEARCH_API_KEY:
+        result = await _bailian_search(query)
+        if result["docs"]:
+            _cache.put_search(query, num, result)
+        return result
 
     return {"search_query": query, "docs": []}
 
@@ -365,11 +402,9 @@ async def web_search(
     Args:
         query: 搜索关键词，例如 "2024年中国GDP增长率"。
     """
-    num = 3
+    num = 2
     fetch_content = True
     summarize = True
-    if not SEARCH_API_KEY:
-        raise ValueError("SEARCH_API_KEY environment variable is not set")
 
     queries = [query]
 

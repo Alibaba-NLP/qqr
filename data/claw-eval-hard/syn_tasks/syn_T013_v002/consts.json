@@ -1,0 +1,15 @@
+{
+  "MAIN_MEETING_NOTE_ID": "note_001",
+  "MAIN_MEETING_DATE": "2026-03-10",
+  "CARRYOVER_NOTE_ID": "note_004",
+  "CARRYOVER_TASK": "品牌指南文档",
+  "CARRYOVER_ASSIGNEE": "林雪",
+  "EXCLUDE_NOTE_ID": "note_003",
+  "TOTAL_ACTION_ITEMS": 5,
+  "VALID_RECIPIENTS": [
+    "刘总",
+    "陈浩",
+    "林雪",
+    "吴伟"
+  ]
+}

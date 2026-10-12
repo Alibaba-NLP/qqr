@@ -1,0 +1,9 @@
+{
+  "subject": "从图片识别《韩熙载夜宴图》",
+  "oracle": {
+    "canonical_answer": "《韩熙载夜宴图》",
+    "aliases": [
+      "韩熙载夜宴图"
+    ]
+  }
+}

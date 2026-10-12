@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_501",
+    "from": "cfo@corp.com",
+    "to": "me@corp.com",
+    "subject": "Q3 Audit Preparation Meeting",
+    "date": "2026-03-01T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi, for the Q3 audit preparation meeting on Thursday at 3 PM, please have Manager Liu join us. We need to discuss the compliance documentation and regulatory filings.\n\nPlease notify Manager Liu.\n\nCFO Office"
+  },
+  {
+    "message_id": "msg_502",
+    "from": "hr@corp.com",
+    "to": "me@corp.com",
+    "subject": "Annual Holiday Party Planning",
+    "date": "2026-03-01T10:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hello, we are planning the annual holiday party for next month. Please submit your team's headcount by Friday.\n\nAlso, the venue booking needs to be confirmed with the Operations team.\n\nHR Department"
+  }
+]

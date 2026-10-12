@@ -1,0 +1,170 @@
+task_id: syn_T069_v002
+task_name: Micron FY2025 Debt Service Capacity Analysis
+version: '1.0'
+category: finance
+difficulty: easy
+tags:
+- general
+services:
+- name: web_real
+  command: python mock_services/web_real/server.py
+  port: 9114
+  health_check: http://localhost:9114/web/health
+  health_check_method: GET
+  ready_timeout: 10
+  reset_endpoint: http://localhost:9114/web/reset
+prompt:
+  text: 'Micron Technology has historically carried significant debt load given the
+    capital-intensive nature of semiconductor manufacturing. In FY2025, the company
+    undertook a major capital expenditure program exceeding $13 billion to support
+    HBM and advanced DRAM nodes.
+
+
+    As a credit analyst, you are asked to evaluate Micron''s debt service capacity
+    and refinancing risk profile. Using Micron Technology''s FY2025 (full year) financial
+    data, complete the following analyses:
+
+
+    1. Interest Coverage Ratio: Using FY2025 operating income and interest expense
+    data, calculate the interest coverage ratio (Operating Income / Interest Expense).
+    Assess whether the coverage is adequate relative to investment-grade thresholds.
+
+
+    2. Debt-to-OCF Ratio: Calculate the ratio of total debt to operating cash flow.
+    Compare this to the company''s historical leverage levels and peer averages. With
+    $17.5B in OCF, evaluate whether the company is on a sustainable deleveraging trajectory.
+
+
+    3. Maturity Schedule and Refinancing Risk: Identify Micron''s major debt maturity
+    dates over the next 3-5 years. Assess the refinancing risk given the current interest
+    rate environment. With the company''s CapEx guidance of $20B for FY2026, analyze
+    whether free cash flow of $3.7B (OCF $17.5B less CapEx $13.8B) provides sufficient
+    buffer for debt repayment alongside ongoing investment needs.'
+  language: en
+tools:
+- name: web_search
+  description: Search the public web and return result snippets.
+  input_schema:
+    type: object
+    properties:
+      query:
+        type: string
+        description: Search query
+      max_results:
+        type: integer
+        description: Maximum number of results
+        default: 10
+    required:
+    - query
+- name: web_fetch
+  description: Fetch full webpage content for a URL.
+  input_schema:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Target URL
+      timeout_seconds:
+        type: integer
+        description: Request timeout in seconds
+        default: 30
+    required:
+    - url
+tool_endpoints:
+- tool_name: web_search
+  url: http://localhost:9114/web/search
+  method: POST
+- tool_name: web_fetch
+  url: http://localhost:9114/web/fetch
+  method: POST
+environment:
+  timeout_seconds: 1800
+  max_turns: 50
+scoring_components:
+- name: web_search
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_search
+    min_calls: 1
+- name: web_fetch
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_fetch
+    min_calls: 1
+- name: anchor_literals
+  weight: 0.35
+  check:
+    type: keywords_present
+    keywords:
+    - '17.5'
+    - '13.8'
+    - '3.7'
+    - '1.27'
+    - '42.6'
+- name: length
+  weight: 0.25
+  check:
+    type: min_length
+    min_length: 400
+- name: report_length
+  weight: 0.2
+  check:
+    type: min_length
+    min_length: 400
+safety_checks: []
+expected_actions: []
+judge_rubric: 'Evaluate the Micron FY2025 debt service capacity analysis against the
+  following rubric:
+
+
+  POSITIVE SCORING ITEMS (total 100%):
+
+  1. [Weight 15%] Accurate extraction of FY2025 operating cash flow ($17.5B) and total
+  debt figures
+
+  2. [Weight 15%] Interest coverage ratio calculation with appropriate benchmarking
+
+  3. [Weight 12%] Debt-to-OCF ratio calculation and historical comparison
+
+  4. [Weight 12%] Free cash flow calculation ($17.5B - $13.8B = $3.7B) and its implications
+  for debt service
+
+  5. [Weight 10%] Identification of major debt maturity dates in the 3-5 year window
+
+  6. [Weight 10%] Assessment of refinancing risk given current rate environment
+
+  7. [Weight 8%] Analysis of whether $20B FY2026 CapEx guidance creates additional
+  refinancing pressure
+
+  8. [Weight 8%] Comparison of leverage metrics to semiconductor peer averages
+
+  9. [Weight 10%] Overall credit quality assessment with forward-looking perspective
+
+
+  NEGATIVE SCORING ITEMS (deduct when present):
+
+  10. [Deduct 6%] Confusing stock-based compensation adjustments with operating cash
+  flow
+
+  11. [Deduct 4%] Missing currency units or inconsistent time periods
+
+  12. [Deduct 4%] Ignoring the interaction between CapEx commitments and debt service
+  obligations
+
+  13. [Deduct 4%] Emotive language or unsupported conclusions about default risk'
+reference_solution: '1. Interest Coverage: OCF $17.5B supports strong interest coverage;
+  total debt declining from peak levels.
+
+  2. Debt-to-OCF: With $17.5B OCF, leverage ratio improving; FCF of $3.7B ($17.5B
+  - $13.8B) provides debt repayment capacity.
+
+  3. Maturity Schedule: Major maturities spread across 2026-2030; refinancing risk
+  moderate given improving credit metrics.
+
+  4. FY2026 CapEx of $20B will pressure FCF but OCF growth from HBM revenue should
+  offset; debt service remains manageable.'
+primary_dimensions:
+- completion
+- communication

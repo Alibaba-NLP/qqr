@@ -1,0 +1,178 @@
+task_id: syn_T069_v005
+task_name: Micron FY2025 HBM Investment Thesis Analysis
+version: '1.0'
+category: finance
+difficulty: easy
+tags:
+- general
+services:
+- name: web_real
+  command: python mock_services/web_real/server.py
+  port: 9114
+  health_check: http://localhost:9114/web/health
+  health_check_method: GET
+  ready_timeout: 10
+  reset_endpoint: http://localhost:9114/web/reset
+prompt:
+  text: 'High Bandwidth Memory (HBM) has become the critical growth driver for memory
+    semiconductor companies, fueled by AI accelerator demand from NVIDIA, AMD, and
+    custom chip designers. Micron Technology has positioned HBM as central to its
+    FY2025 capital allocation strategy.
+
+
+    As a semiconductor equity analyst, evaluate Micron''s HBM investment thesis using
+    FY2025 financial data and publicly available industry information. Complete the
+    following analyses:
+
+
+    1. HBM Revenue Contribution and ASP Premium: Estimate HBM''s contribution to Micron''s
+    FY2025 revenue. HBM commands a significant ASP premium over conventional DDR5
+    DRAM — estimate this premium (typically 3-5x). With total revenue around $37B
+    and operating cash flow of $17.5B, assess how much of the margin expansion is
+    attributable to HBM mix improvement.
+
+
+    2. Capacity Allocation Analysis: Micron has committed significant CapEx ($13.8B
+    in FY2025) to HBM-related investment, particularly in back-end packaging equipment.
+    Analyze the capacity allocation trade-off: how does the 10% NAND wafer capacity
+    reduction free up resources for HBM/DRAM? What is the opportunity cost of this
+    reallocation?
+
+
+    3. Investment Sustainability: With FY2026 CapEx guided to $20B, much of it for
+    HBM packaging and advanced nodes, assess whether the HBM revenue trajectory justifies
+    this spending. Consider the breakeven revenue of $42.6B needed to maintain FCF
+    >= 0 (at 47% OCF margin). Are HBM ASP premiums sustainable as competitors (Samsung,
+    SK Hynix) also ramp HBM capacity?'
+  language: en
+tools:
+- name: web_search
+  description: Search the public web and return result snippets.
+  input_schema:
+    type: object
+    properties:
+      query:
+        type: string
+        description: Search query
+      max_results:
+        type: integer
+        description: Maximum number of results
+        default: 10
+    required:
+    - query
+- name: web_fetch
+  description: Fetch full webpage content for a URL.
+  input_schema:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Target URL
+      timeout_seconds:
+        type: integer
+        description: Request timeout in seconds
+        default: 30
+    required:
+    - url
+tool_endpoints:
+- tool_name: web_search
+  url: http://localhost:9114/web/search
+  method: POST
+- tool_name: web_fetch
+  url: http://localhost:9114/web/fetch
+  method: POST
+environment:
+  timeout_seconds: 1800
+  max_turns: 50
+scoring_components:
+- name: web_search
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_search
+    min_calls: 1
+- name: web_fetch
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_fetch
+    min_calls: 1
+- name: anchor_literals
+  weight: 0.35
+  check:
+    type: keywords_present
+    keywords:
+    - '17.5'
+    - '13.8'
+    - '3.7'
+    - '1.27'
+    - '42.6'
+- name: length
+  weight: 0.25
+  check:
+    type: min_length
+    min_length: 400
+- name: report_length
+  weight: 0.2
+  check:
+    type: min_length
+    min_length: 400
+safety_checks: []
+expected_actions: []
+judge_rubric: 'Evaluate the Micron HBM investment thesis analysis against the following
+  rubric:
+
+
+  POSITIVE SCORING ITEMS (total 100%):
+
+  1. [Weight 12%] HBM revenue contribution estimate with methodology explanation
+
+  2. [Weight 12%] ASP premium quantification (HBM vs DDR5 comparison)
+
+  3. [Weight 10%] Analysis of how HBM mix drives margin expansion from $17.5B OCF
+
+  4. [Weight 10%] CapEx allocation breakdown showing HBM packaging investment within
+  $13.8B total
+
+  5. [Weight 10%] Back-end packaging equipment as the key bottleneck and investment
+  focus
+
+  6. [Weight 10%] 10% NAND capacity reduction as enabler for DRAM/HBM reallocation
+
+  7. [Weight 8%] Opportunity cost analysis of capacity reallocation
+
+  8. [Weight 8%] FY2026 $20B CapEx justification based on HBM revenue trajectory
+
+  9. [Weight 8%] $42.6B breakeven analysis in context of HBM-driven growth
+
+  10. [Weight 6%] Competitive sustainability assessment vs Samsung and SK Hynix HBM
+  ramps
+
+  11. [Weight 6%] Clear conclusion on whether HBM thesis justifies the investment
+  level
+
+
+  NEGATIVE SCORING ITEMS (deduct when present):
+
+  12. [Deduct 5%] Confusing HBM with conventional DRAM in the analysis
+
+  13. [Deduct 4%] Missing currency units or unrealistic ASP premium estimates
+
+  14. [Deduct 4%] Ignoring competitive dynamics in HBM market'
+reference_solution: '1. HBM ASP Premium: HBM commands 3-5x DDR5 ASP; contributes meaningfully
+  to $17.5B OCF on ~$37B revenue.
+
+  2. Capacity Allocation: 10% NAND reduction frees wafer capacity for DRAM/HBM; $13.8B
+  CapEx heavily weighted to back-end packaging.
+
+  3. Packaging Bottleneck: HBM requires advanced TSV and packaging; Micron investing
+  heavily here.
+
+  4. FY2026 $20B CapEx justified if HBM revenue grows 40-60% YoY; breakeven at $42.6B
+  achievable with HBM mix.
+
+  5. Sustainability Risk: As Samsung and SK Hynix ramp HBM, ASP premiums may compress;
+  Micron needs cost leadership.'
+primary_dimensions:
+- completion
+- communication

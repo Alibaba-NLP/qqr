@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "sarah@corp.com",
+    "to": "me@corp.com",
+    "subject": "Q3 Security Audit Preparation",
+    "date": "2026-03-01T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi, for the Q3 security audit meeting next Tuesday at 10 AM, please have Director Chen join us. We need to discuss the infrastructure compliance checks.\n\nPlease invite Director Chen.\n\nSarah"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "wangfang@corp.com",
+    "to": "me@corp.com",
+    "subject": "Team Building Event",
+    "date": "2026-03-01T11:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hello, the team building event is scheduled for next month. Please confirm attendance with your respective department heads.\n\nAlso, the venue booking needs to be confirmed with Director Chen. The logistics portion on his end hasn't been finalized yet.\n\nFang Wang"
+  }
+]

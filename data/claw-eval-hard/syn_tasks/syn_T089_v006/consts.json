@@ -1,0 +1,11 @@
+{
+  "ACTIVE_INTEGRATION_IDS": [
+    "VG-501",
+    "VG-502",
+    "VG-504",
+    "VG-505",
+    "VG-506"
+  ],
+  "TOTAL_INTEGRATIONS": 6,
+  "SECRET_COUNT": 9
+}

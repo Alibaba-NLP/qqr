@@ -1,0 +1,18 @@
+{
+  "CONTRADICTION_PAIR": [
+    "kb_101",
+    "kb_106"
+  ],
+  "PREFERRED_CLIENT": "GlobalProtect",
+  "DEPRECATED_CLIENT": "FortiClient",
+  "MIN_SEARCH_CALLS": 2,
+  "MIN_GET_CALLS": 3,
+  "REQUIRED_KEYWORDS": [
+    "VPN",
+    "FortiClient",
+    "WeCom",
+    "MFA",
+    "device",
+    "password"
+  ]
+}

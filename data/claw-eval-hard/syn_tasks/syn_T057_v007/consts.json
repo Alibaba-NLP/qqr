@@ -1,0 +1,13 @@
+{
+  "subject": "识别 Perplexity Logo",
+  "oracle": {
+    "canonical_answer": "Perplexity",
+    "required_entities": [
+      "Perplexity"
+    ],
+    "aliases": [
+      "Perplexity",
+      "Perplexity AI"
+    ]
+  }
+}

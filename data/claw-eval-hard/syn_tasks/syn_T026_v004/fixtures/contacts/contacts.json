@@ -1,0 +1,56 @@
+[
+  {
+    "contact_id": "CTX-101",
+    "name": "Li Chen",
+    "department": "Engineering",
+    "title": "Engineering Director",
+    "email": "lchen.eng@corp.com",
+    "phone": "13900220001",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-102",
+    "name": "Li Chen",
+    "department": "Sales",
+    "title": "Sales Director",
+    "email": "lchen.sales@corp.com",
+    "phone": "13900220002",
+    "location": "Shanghai Branch"
+  },
+  {
+    "contact_id": "CTX-103",
+    "name": "Li Chen",
+    "department": "Human Resources",
+    "title": "HR Director",
+    "email": "lchen.hr@corp.com",
+    "phone": "13900220003",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-104",
+    "name": "Jun Wang",
+    "department": "Product",
+    "title": "Product Director",
+    "email": "wangjun@corp.com",
+    "phone": "13900220004",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-105",
+    "name": "Hui Liu",
+    "department": "Finance",
+    "title": "Finance Manager",
+    "email": "liuhui@corp.com",
+    "phone": "13900220005",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-106",
+    "name": "Tao Zhang",
+    "department": "Engineering",
+    "title": "Senior Engineer",
+    "email": "zhangtao@corp.com",
+    "phone": "13900220006",
+    "location": "Shenzhen Branch"
+  }
+]

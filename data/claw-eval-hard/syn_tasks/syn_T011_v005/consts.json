@@ -1,0 +1,10 @@
+{
+  "DUPLICATE_PAIR": [
+    "txn_002",
+    "txn_003"
+  ],
+  "NEAR_DUPLICATE": "txn_011",
+  "REFUND_TXN": "txn_012",
+  "TOTAL_AMOUNT": 11144.99,
+  "TOTAL_EXCL_DUP": 11024.99
+}

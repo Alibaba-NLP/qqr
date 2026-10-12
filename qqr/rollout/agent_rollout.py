@@ -9,24 +9,20 @@ from collections import defaultdict
 from collections.abc import Callable
 from contextlib import contextmanager
 from copy import deepcopy
-from pprint import pformat
 from typing import Any
 
 import anyio
 import numpy as np
-from slime.backends.sglang_utils.server_control import abort_servers_until_idle
+import pybase64
+import sglang_router
+from packaging.version import parse
 from slime.rollout.base_types import RolloutFnEvalOutput, RolloutFnTrainOutput
-from slime.rollout.filter_hub.base_types import (
-    MetricGatherer,
-    call_dynamic_filter,
-    should_drop_dynamic_filter_output,
-)
+from slime.rollout.filter_hub.base_types import MetricGatherer, call_dynamic_filter
 from slime.rollout.rm_hub import async_rm, batched_async_rm
-from slime.rollout.sample_hooks import apply_rollout_sample_hooks
 from slime.utils.async_utils import run
 from slime.utils.data import Dataset
 from slime.utils.eval_config import EvalDatasetConfig
-from slime.utils.http_utils import get, get_rollout_num_engines, post
+from slime.utils.http_utils import get, post
 from slime.utils.misc import SingletonMeta, load_function
 from slime.utils.processing_utils import (
     build_processor_kwargs,
@@ -34,50 +30,14 @@ from slime.utils.processing_utils import (
     load_processor,
     load_tokenizer,
 )
-from slime.utils.trace_utils import (
-    build_sglang_meta_trace_attrs,
-    trace_function,
-    trace_span,
-)
 from tqdm.auto import tqdm
 
-from qqr.mcp import MCPServer, MCPServerManager
-from qqr.mcp.utils import get_mcp_tools
 from qqr.schemas import Sample
 from qqr.utils.envs import RETRY_STOP_AFTER_ATTEMPT, RETRY_WAIT_FIXED
 
 __all__ = ["generate_rollout", "get_model_url"]
 
 logger = logging.getLogger(__name__)
-
-_PROCESSOR_PROMPT_KEYS = {"input_ids", "attention_mask"}
-
-
-def _prepare_prompt_ids(sample: Sample, tokenizer, processor: Any) -> list[int]:
-    raw_multimodal_inputs = sample.multimodal_inputs or {}
-    has_multimodal_inputs = any(
-        value is not None for value in raw_multimodal_inputs.values()
-    )
-
-    tools = sample.train_metadata.get("tools") if sample.train_metadata else None
-    prompt_text = tokenizer.apply_chat_template(
-        sample.messages, tools=tools, tokenize=False, add_generation_prompt=True
-    )
-
-    if processor and has_multimodal_inputs:
-        processor_output = processor(
-            text=prompt_text, **build_processor_kwargs(raw_multimodal_inputs)
-        )
-        prompt_ids = processor_output["input_ids"][0]
-        if sample.multimodal_train_inputs is None:
-            sample.multimodal_train_inputs = {
-                k: v
-                for k, v in processor_output.items()
-                if k not in _PROCESSOR_PROMPT_KEYS
-            } or None
-        return prompt_ids
-
-    return tokenizer.encode(prompt_text, add_special_tokens=False)
 
 
 def get_model_url(args: Namespace, model_name: str, endpoint: str = "/generate") -> str:
@@ -111,12 +71,15 @@ class GenerateState(metaclass=SingletonMeta):
         self.processor = load_processor(args.hf_checkpoint, trust_remote_code=True)
 
         self.semaphore = asyncio.Semaphore(
-            args.sglang_server_concurrency * get_rollout_num_engines(args)
+            args.sglang_server_concurrency
+            * args.rollout_num_gpus
+            // args.rollout_num_gpus_per_engine
         )
         self.sampling_params: dict[str, Any] = dict(
             temperature=args.rollout_temperature,
             top_p=args.rollout_top_p,
             top_k=args.rollout_top_k,
+            max_context_length=args.rollout_max_context_len,
             max_new_tokens=args.rollout_max_response_len,
             stop=self.tokenizer.eos_token,
             stop_token_ids=[self.tokenizer.eos_token_id],
@@ -124,8 +87,6 @@ class GenerateState(metaclass=SingletonMeta):
             no_stop_trim=True,
             spaces_between_special_tokens=False,
         )
-        if args.rollout_top_p != 1.0:
-            self.sampling_params["custom_params"] = {"return_top_p_token_ids": True}
 
         if getattr(args, "sglang_enable_deterministic_inference", False):
             sampling_seed_base = args.rollout_seed
@@ -181,52 +142,53 @@ class MCPState(metaclass=SingletonMeta):
 
     def __init__(
         self,
-        manager: MCPServerManager,
+        manager_or_config_fn,
         max_retry_attempts: int = RETRY_STOP_AFTER_ATTEMPT,
         retry_backoff_seconds_base: float = RETRY_WAIT_FIXED,
     ):
-        """
-        Args:
-            max_retry_attempts: Number of times to retry failed list_tools/call_tool calls.
-                Defaults to 3 retries.
-            retry_backoff_seconds_base: The base delay, in seconds, used for exponential
-                backoff between retries.
-        """
-
         self._server_lock = asyncio.Lock()
 
-        self.servers: list[MCPServer] = None
+        self.servers: list[Any] = None
         self.server_versions = defaultdict(int)
-        self.manager = manager
+        self._config_fn = manager_or_config_fn if callable(manager_or_config_fn) else None
+        self.manager = manager_or_config_fn if not callable(manager_or_config_fn) else None
 
         self.tools = []
-        self.tool_to_server: dict[str, MCPServer] = {}
+        self.tool_to_server: dict[str, Any] = {}
 
         self.max_retry_attempts = max_retry_attempts
         self.retry_backoff_seconds_base = retry_backoff_seconds_base
 
-    async def get_servers(self) -> list[MCPServer]:
-        """
-        Thread-safe lazy initialization of the MCP server.
-        """
-        # Double-checked locking pattern for async init
+    async def get_servers(self) -> list[Any]:
         if self.servers is None:
             async with self._server_lock:
                 if self.servers is not None:
                     return self.servers
 
                 try:
-                    await self.manager.connect_all()
-                    for server in self.manager.active_servers:
-                        converted_tools = await get_mcp_tools(server)
-                        self.tools += converted_tools
-                        for tool in converted_tools:
-                            self.tool_to_server[tool["function"]["name"]] = server
+                    from qqr.mcp.utils import get_mcp_tools
 
-                        self.server_versions[server.name] += 1
-                        logger.info(f"MCP Server {server.name} connected successfully.")
-
-                    self.servers = self.manager.active_servers
+                    if self._config_fn is not None:
+                        servers = self._config_fn()
+                        for server in servers:
+                            await server.connect()
+                            converted_tools = await get_mcp_tools(server)
+                            self.tools += converted_tools
+                            for tool in converted_tools:
+                                self.tool_to_server[tool["function"]["name"]] = server
+                            self.server_versions[server.name] += 1
+                            logger.info(f"MCP Server {server.name} connected successfully.")
+                        self.servers = servers
+                    else:
+                        await self.manager.connect_all()
+                        for server in self.manager.active_servers:
+                            converted_tools = await get_mcp_tools(server)
+                            self.tools += converted_tools
+                            for tool in converted_tools:
+                                self.tool_to_server[tool["function"]["name"]] = server
+                            self.server_versions[server.name] += 1
+                            logger.info(f"MCP Server {server.name} connected successfully.")
+                        self.servers = self.manager.active_servers
 
                 except Exception as e:
                     logger.error(f"Failed to initialize MCP Servers: {e}")
@@ -251,12 +213,13 @@ class MCPState(metaclass=SingletonMeta):
                 "tool_call_id": tool_call_id,
             }
 
-        tool_arguments_str = tool_call["function"]["arguments"]
+        tool_arguments_raw = tool_call["function"]["arguments"]
         try:
-            tool_arguments = (
-                json.loads(tool_arguments_str) if tool_arguments_str else {}
-            )
-        except json.JSONDecodeError as e:
+            if isinstance(tool_arguments_raw, dict):
+                tool_arguments = tool_arguments_raw
+            else:
+                tool_arguments = json.loads(tool_arguments_raw) if tool_arguments_raw else {}
+        except (json.JSONDecodeError, TypeError) as e:
             return {
                 "role": "tool",
                 "content": f"[Error] Invalid JSON arguments: {e}",
@@ -313,6 +276,10 @@ async def generate(
     args: Namespace, sample: Sample, sampling_params: dict[str, Any]
 ) -> Sample:
     """Generate using traditional SGLang router with token-based workflow"""
+    if getattr(args, "rollout_backend", "sglang") == "api":
+        from qqr.api.generate import api_generate
+        return await api_generate(args, sample, sampling_params)
+
     state = GenerateState(args)
     url = f"http://{args.sglang_router_ip}:{args.sglang_router_port}/generate"
 
@@ -320,12 +287,32 @@ async def generate(
         sample.status == Sample.Status.PENDING or sample.status == Sample.Status.ABORTED
     ), f"Sample status is {sample.status}"
 
-    prompt_ids = _prepare_prompt_ids(sample, state.tokenizer, state.processor)
+    tools = sample.train_metadata.get("tools") if sample.train_metadata else None
+    prompt_text = state.tokenizer.apply_chat_template(
+        sample.messages, tools=tools, tokenize=False, add_generation_prompt=True
+    )
+
+    if (
+        state.processor
+        and sample.multimodal_inputs
+        and any(v is not None for v in sample.multimodal_inputs.values())
+    ):
+        processor_kwargs = build_processor_kwargs(sample.multimodal_inputs)
+        processor_output = state.processor(text=prompt_text, **processor_kwargs)
+        prompt_ids = processor_output["input_ids"][0]
+        sample.multimodal_train_inputs = {
+            k: v
+            for k, v in processor_output.items()
+            if k not in ["input_ids", "attention_mask"]
+            and not (k == "mm_token_type_ids" and np.max(v) == 0)
+        } or None
+    else:
+        prompt_ids = state.tokenizer.encode(prompt_text, add_special_tokens=False)
 
     current_sampling_params = deepcopy(sampling_params)
     current_sampling_params["max_new_tokens"] = min(
         sampling_params["max_new_tokens"],
-        args.rollout_max_context_len - len(prompt_ids),
+        sampling_params["max_context_length"] - len(prompt_ids),
     )
 
     if current_sampling_params["max_new_tokens"] <= 100:
@@ -352,71 +339,79 @@ async def generate(
     if args.use_rollout_routing_replay:
         payload["return_routed_experts"] = True
 
-    images = (
-        sample.multimodal_inputs.get("images") if sample.multimodal_inputs else None
-    )
-    if images:
+    if sample.multimodal_inputs and sample.multimodal_inputs["images"]:
+        image_data = sample.multimodal_inputs["images"]
         payload["image_data"] = [
-            encode_image_for_rollout_engine(image) for image in images
+            encode_image_for_rollout_engine(image) for image in image_data
         ]
-        # For single-turn multimodal requests, send text so SGLang expands the
-        # image placeholders with its own processor rules.
-        payload["text"] = sample.prompt
+
+    # Use existing tokens for multi-turn or tokenize the new prompt
+    if len(sample.response) > 0:
+        payload["input_ids"] = sample.tokens
     else:
         payload["input_ids"] = prompt_ids
+        if not sample.tokens:  # Initialize sample.tokens for the first turn
+            sample.tokens = prompt_ids
 
-    if not sample.tokens:
-        sample.tokens = prompt_ids
-
-    # Use session_id for consistent hashing routing (SGLang Model Gateway)
+    # Use session_id for consistent hashing routing if router uses consistent_hashing policy
     headers = None
-    if sample.session_id:
-        if getattr(args, "router_policy", None) == "consistent_hashing":
-            headers = {"X-SMG-Routing-Key": sample.session_id}
+    if (
+        getattr(args, "router_policy", None) == "consistent_hashing"
+        and sample.session_id
+    ):
+        headers = {"X-SMG-Routing-Key": sample.session_id}
 
-    with trace_span(
-        sample,
-        "sglang_generate",
-        attrs={"max_new_tokens": sampling_params["max_new_tokens"]},
-    ) as span:
-        output = await post(url, payload, headers=headers)
-        span.update(build_sglang_meta_trace_attrs(output["meta_info"]))
+    output = await post(url, payload, headers=headers)
 
-    if "output_token_logprobs" in output["meta_info"]:
-        new_response_tokens = [
-            item[1] for item in output["meta_info"]["output_token_logprobs"]
-        ]
-        new_response_log_probs = [
-            item[0] for item in output["meta_info"]["output_token_logprobs"]
-        ]
+    if (
+        args.use_slime_router
+        and "RadixTreeMiddleware" in args.slime_router_middleware_paths
+    ):
+        from slime.router.middleware_hub.radix_tree_middleware import (
+            postprocess_sample_with_radix_tree,
+        )
+
+        sample = await postprocess_sample_with_radix_tree(args, sample, output)
     else:
-        new_response_tokens, new_response_log_probs = [], []
+        if "output_token_logprobs" in output["meta_info"]:
+            new_response_tokens = [
+                item[1] for item in output["meta_info"]["output_token_logprobs"]
+            ]
+            new_response_log_probs = [
+                item[0] for item in output["meta_info"]["output_token_logprobs"]
+            ]
+        else:
+            new_response_tokens, new_response_log_probs = [], []
 
-    # Keep the agent overwrite (`=`) semantics: each turn re-derives the prompt
-    # from messages, so the response-side fields must describe only this turn's
-    # output. Reset them before append_response_tokens, which appends.
-    if sample.loss_mask is not None:
-        assert args.partial_rollout and args.mask_offpolicy_in_partial_rollout
-    sample.response = ""
-    sample.response_length = 0
-    sample.loss_mask = None
-    sample.rollout_log_probs = None
-    sample.rollout_top_p_token_ids = None
-    sample.rollout_top_p_token_offsets = None
+        # Update sample with tokens directly - avoiding re-tokenization
+        sample.tokens = sample.tokens + new_response_tokens
+        sample.response_length = len(new_response_tokens)
+        sample.response = output["text"]
 
-    sample.append_response_tokens(
-        args,
-        tokens=new_response_tokens,
-        log_probs=new_response_log_probs,
-        trainable=True,
-        meta_info=output["meta_info"],
-        text=output["text"],
-    )
+        # When partial rollout and masking off policy is enabled, update the loss mask
+        if sample.loss_mask is not None:
+            assert args.partial_rollout and args.mask_offpolicy_in_partial_rollout
+            sample.loss_mask = [1] * len(new_response_tokens)
+
+        if sample.rollout_log_probs is None:
+            sample.rollout_log_probs = []
+        sample.rollout_log_probs = new_response_log_probs
+
+    if "routed_experts" in output["meta_info"]:
+        sample.rollout_routed_experts = np.frombuffer(
+            pybase64.b64decode(output["meta_info"]["routed_experts"].encode("ascii")),
+            dtype=np.int32,
+        ).reshape(
+            len(sample.tokens) - 1,
+            args.num_layers,
+            args.moe_router_topk,
+        )
+
+    sample.update_from_meta_info(args, output["meta_info"])
 
     return sample
 
 
-@trace_function("generate_and_rm", target="sample")
 async def generate_and_rm(
     args: Namespace,
     sample: Sample | list[Sample],
@@ -468,54 +463,43 @@ async def generate_and_rm(
             else:
                 sample = await generate(args, sample, sampling_params)
 
-    sample = await apply_rollout_sample_hooks(args, sample, evaluation=evaluation)
-
     # for the rm that need the whole group, we will not do the rm here
     if args.group_rm:
         return sample
 
+    # multi samples
     if isinstance(sample, list):
         samples = sample
-        if any(sample.status == Sample.Status.ABORTED for sample in samples):
+        if any([sample.status == Sample.Status.ABORTED for sample in samples]):
             return samples
 
+        # for multi agent system, the reward of some sample is calculated during generation.
         samples_need_reward = [sample for sample in samples if sample.reward is None]
-        with trace_span(samples_need_reward, "reward_model"):
-            rewards = await batched_async_rm(args, samples_need_reward)
+        rewards = await batched_async_rm(args, samples_need_reward)
         for sample, reward in zip(samples_need_reward, rewards, strict=False):
             sample.reward = reward
         return samples
     else:
         if sample.status == Sample.Status.ABORTED:
             return sample
-        # Some custom generate paths may have already filled the reward.
+        # for multi-turn environment, a reward could be assigned to the agent.
         if sample.reward is None:
-            with trace_span(sample, "reward_model"):
-                sample.reward = await async_rm(args, sample)
+            sample.reward = await async_rm(args, sample)
 
     return sample
 
 
-@trace_function(
-    "generate_and_rm_group",
-    target="group",
-    attrs_getter=lambda args, group, sampling_params, evaluation=False: {
-        "group_size": len(group)
-    },
-)
 async def generate_and_rm_group(
     args: Namespace,
     group: list[Sample],
     sampling_params: dict[str, Any],
     evaluation: bool = False,
-) -> list[Sample] | list[list[Sample]]:
-    # ``generate_and_rm`` may return either a ``Sample`` or a ``list[Sample]``
-    # depending on whether the ``--custom-generate-function-path`` callable
-    # emits one trainable sample or several (e.g. multi-turn agent rollouts
-    # that fan out into multiple prefix-chained samples). The asyncio.gather
-    # below preserves whichever shape each task produced, so the group is
-    # ``list[Sample]`` for plain rollouts and ``list[list[Sample]]`` for
-    # the fan-out case.
+) -> list[Sample]:
+    custom_group_fn_path = getattr(args, "custom_group_rollout_function_path", None)
+    if custom_group_fn_path is not None:
+        custom_group_fn = load_function(custom_group_fn_path)
+        return await custom_group_fn(args, group, sampling_params, evaluation=evaluation)
+
     state = GenerateState(args)
 
     if state.aborted:
@@ -544,8 +528,7 @@ async def generate_and_rm_group(
 
     # for the rm that need the whole group, we will do the rm here
     if not state.aborted and args.group_rm:
-        with trace_span(group, "group_reward_model"):
-            rewards = await batched_async_rm(args, group)
+        rewards = await batched_async_rm(args, group)
 
     return group
 
@@ -557,12 +540,23 @@ async def abort(args: Namespace, rollout_id: int) -> list[list[Sample]]:
     assert not state.aborted
     state.aborted = True
 
-    response = await get(
-        f"http://{args.sglang_router_ip}:{args.sglang_router_port}/workers"
-    )
-    urls = [worker["url"] for worker in response["workers"]]
+    if parse(sglang_router.__version__) <= parse("0.2.1") or args.use_slime_router:
+        response = await get(
+            f"http://{args.sglang_router_ip}:{args.sglang_router_port}/list_workers"
+        )
+        urls = response["urls"]
+    else:
+        response = await get(
+            f"http://{args.sglang_router_ip}:{args.sglang_router_port}/workers"
+        )
+        urls = [worker["url"] for worker in response["workers"]]
 
-    await abort_servers_until_idle(urls)
+    logger.info(f"Abort request for {urls}")
+    abort_tasks = [post(f"{url}/abort_request", {"abort_all": True}) for url in urls]
+    abort_results = await asyncio.gather(*abort_tasks, return_exceptions=True)
+    for url, result in zip(urls, abort_results, strict=False):
+        if isinstance(result, Exception):
+            logger.warning(f"Failed to abort worker at {url}: {result}")
 
     # make sure all the pending tasks are finished
     count = 0
@@ -606,6 +600,8 @@ async def generate_rollout_async(
     """
     assert args.rollout_global_dataset
 
+    args._current_rollout_id = rollout_id
+
     state = GenerateState(args)
 
     # instantiate data filters
@@ -628,8 +624,15 @@ async def generate_rollout_async(
     )
     while len(data) < target_data_size:
         while state.remaining_batch_size < target_data_size:
+            if getattr(args, "inspector_enabled", False):
+                # RTI: fetch only the deficit to avoid launching excess
+                # groups that would abort in-flight Stage-2 RTI tasks.
+                deficit = target_data_size - state.remaining_batch_size
+                fetch_size = min(deficit, args.over_sampling_batch_size)
+            else:
+                fetch_size = args.over_sampling_batch_size
             # get samples from the buffer and submit the generation requests.
-            samples = data_source(args.over_sampling_batch_size)
+            samples = data_source(fetch_size)
             if isinstance(samples[0], list):
                 samples = [[Sample(**_s.__dict__.copy()) for _s in s] for s in samples]
             else:
@@ -646,19 +649,14 @@ async def generate_rollout_async(
             if do_print:
                 sample = group[0][-1] if isinstance(group[0], list) else group[0]
                 logger.info(
-                    f"First rollout sample:\nmessages:\n{pformat(sample.messages, sort_dicts=False)}\nreward: {sample.reward}"
+                    f"First rollout sample:\nmessages: {sample.messages}\nreward: {sample.reward}"
                 )
                 do_print = False
 
             assert len(group) == args.n_samples_per_prompt
             all_data.append(group)
-
             dynamic_filter_output = call_dynamic_filter(dynamic_filter, args, group)
-            if should_drop_dynamic_filter_output(
-                dynamic_filter_output,
-                remaining_batch_size=state.remaining_batch_size,
-                target_data_size=target_data_size,
-            ):
+            if not dynamic_filter_output.keep:
                 metric_gatherer.on_dynamic_filter_drop(
                     reason=dynamic_filter_output.reason
                 )
@@ -674,7 +672,7 @@ async def generate_rollout_async(
     pbar.close()
     sample = data[-1][0][-1] if isinstance(data[-1][0], list) else data[-1][0]
     logger.info(
-        f"Finish rollout:\nmessages:\n{pformat(sample.messages, sort_dicts=False)}\nreward: {sample.reward}"
+        f"Finish rollout:\nmessages: {sample.messages}\nreward: {sample.reward}"
     )
 
     # there are still some unfinished requests, abort them
@@ -704,6 +702,7 @@ async def generate_rollout_async(
 
     # There can be circumstances where users want to process all samples including filtered ones.
     if args.rollout_all_samples_process_path is not None:
+        args._current_rollout_id = rollout_id
         process_func = load_function(args.rollout_all_samples_process_path)
         process_func(args, all_samples, data_source)
 
@@ -740,34 +739,9 @@ async def eval_rollout_single_dataset(
     """
     global EVAL_PROMPT_DATASET
 
-    eval_multimodal_keys = (
-        dataset_cfg.multimodal_keys
-        if dataset_cfg.multimodal_keys is not None
-        else args.multimodal_keys
-    )
-    eval_apply_chat_template = (
-        dataset_cfg.apply_chat_template
-        if dataset_cfg.apply_chat_template is not None
-        else args.apply_chat_template
-    )
-    eval_apply_chat_template_kwargs = (
-        dataset_cfg.apply_chat_template_kwargs
-        if dataset_cfg.apply_chat_template_kwargs is not None
-        else args.apply_chat_template_kwargs
-    )
+    args._current_rollout_id = rollout_id
 
-    cache_key = dataset_cfg.cache_key + (
-        args.hf_checkpoint,
-        eval_apply_chat_template,
-        json.dumps(eval_multimodal_keys, sort_keys=True)
-        if eval_multimodal_keys is not None
-        else None,
-        (
-            json.dumps(eval_apply_chat_template_kwargs, sort_keys=True)
-            if eval_apply_chat_template_kwargs is not None
-            else None
-        ),
-    )
+    cache_key = dataset_cfg.cache_key + (args.hf_checkpoint, args.apply_chat_template)
     if cache_key not in EVAL_PROMPT_DATASET:
         tokenizer = load_tokenizer(args.hf_checkpoint, trust_remote_code=True)
         processor = load_processor(args.hf_checkpoint, trust_remote_code=True)
@@ -778,11 +752,11 @@ async def eval_rollout_single_dataset(
             max_length=args.eval_max_prompt_len,
             prompt_key=dataset_cfg.input_key,
             label_key=dataset_cfg.label_key,
-            multimodal_keys=eval_multimodal_keys,
+            multimodal_keys=args.multimodal_keys,
             metadata_key=dataset_cfg.metadata_key,
             tool_key=dataset_cfg.tool_key,
-            apply_chat_template=eval_apply_chat_template,
-            apply_chat_template_kwargs=eval_apply_chat_template_kwargs,
+            apply_chat_template=args.apply_chat_template,
+            apply_chat_template_kwargs=args.apply_chat_template_kwargs,
         )
     dataset = EVAL_PROMPT_DATASET[cache_key]
 
@@ -790,21 +764,14 @@ async def eval_rollout_single_dataset(
         temperature=dataset_cfg.temperature,
         top_p=dataset_cfg.top_p,
         top_k=dataset_cfg.top_k,
+        max_context_length=args.eval_max_context_len,
         max_new_tokens=dataset_cfg.max_response_len,
         stop=args.rollout_stop,
         stop_token_ids=args.rollout_stop_token_ids,
-        skip_special_tokens=(
-            dataset_cfg.skip_special_tokens
-            if dataset_cfg.skip_special_tokens is not None
-            else args.rollout_skip_special_tokens
-        ),
-        no_stop_trim=dataset_cfg.no_stop_trim
-        if dataset_cfg.no_stop_trim is not None
-        else True,
+        skip_special_tokens=args.rollout_skip_special_tokens,
+        no_stop_trim=True,
         spaces_between_special_tokens=False,
     )
-    if dataset_cfg.repetition_penalty is not None:
-        base_sampling_params["repetition_penalty"] = dataset_cfg.repetition_penalty
 
     tasks = []
     # do multiple samples for eval prompts
@@ -818,7 +785,6 @@ async def eval_rollout_single_dataset(
             sample.metadata = dataset_cfg.inject_metadata(
                 getattr(sample, "metadata", None)
             )
-            sample.custom_rm_path = dataset_cfg.custom_rm_path
             sample.generate_function_path = getattr(
                 dataset_cfg, "custom_generate_function_path", None
             )
@@ -843,11 +809,8 @@ async def eval_rollout_single_dataset(
     for coro in asyncio.as_completed(tasks):
         sample = await coro
         if do_print:
-            logged_sample = sample[0] if isinstance(sample, list) else sample
             logger.info(
-                f"eval_rollout_single_dataset example data:\n"
-                f"messages:\n{pformat(logged_sample.messages, sort_dicts=False)}\n"
-                f"reward: {logged_sample.reward}"
+                f"eval_rollout_single_dataset example data:\nmessages: {sample.messages}\nreward: {sample.reward}"
             )
             do_print = False
         if isinstance(sample, list):
@@ -894,6 +857,5 @@ def generate_rollout(
     output, aborted_samples = run(
         generate_rollout_async(args, rollout_id, data_source.get_samples)
     )
-    if aborted_samples:
-        data_source.add_samples(aborted_samples)
+    data_source.add_samples(aborted_samples)
     return output

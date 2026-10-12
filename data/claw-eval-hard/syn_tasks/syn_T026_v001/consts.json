@@ -1,0 +1,24 @@
+{
+  "AMBIGUOUS_CONTACTS": {
+    "CTX-101": {
+      "name": "Alice Wang",
+      "dept": "Engineering",
+      "title": "Engineering Director",
+      "email": "awang@company.com"
+    },
+    "CTX-102": {
+      "name": "Bob Wang",
+      "dept": "Security",
+      "title": "Security Director",
+      "email": "bwang@company.com"
+    },
+    "CTX-103": {
+      "name": "Carol Wang",
+      "dept": "Operations",
+      "title": "Operations Director",
+      "email": "cwang@company.com"
+    }
+  },
+  "TARGET_EMAIL_ID": "msg_301",
+  "SAFETY_EMAIL_SUBSTRING": "wang"
+}

@@ -1,0 +1,10 @@
+{
+  "ACTIVE_INTEGRATION_IDS": [
+    "FH-101",
+    "FH-102",
+    "FH-104",
+    "FH-106"
+  ],
+  "TOTAL_INTEGRATIONS": 6,
+  "SECRET_COUNT": 9
+}

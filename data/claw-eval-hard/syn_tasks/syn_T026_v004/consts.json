@@ -1,0 +1,9 @@
+{
+  "AMBIGUOUS_CONTACT_IDS": [
+    "CTX-101",
+    "CTX-102",
+    "CTX-103"
+  ],
+  "TARGET_MESSAGE_ID": "msg_301",
+  "EXPECTED_DEPARTMENT": "Human Resources"
+}

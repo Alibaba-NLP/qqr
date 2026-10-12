@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "liuhua@company.com",
+    "to": "me@company.com",
+    "subject": "Monday Client Presentation Preparation",
+    "date": "2026-03-04T08:30:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi, we have the client presentation scheduled for Monday at 10 AM. Please invite Manager Chen to join us. We need to discuss the Q1 product roadmap and technical requirements.\n\nPlease notify Manager Chen.\n\nHua Liu"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "wuyan@company.com",
+    "to": "me@company.com",
+    "subject": "Team Building Event Planning",
+    "date": "2026-03-04T11:15:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hello, the team building event is planned for next Friday. Please confirm attendance with department heads.\n\nAlso, the venue booking needs approval from Manager Chen. The budget allocation for his department hasn't been finalized yet.\n\nYan Wu"
+  }
+]

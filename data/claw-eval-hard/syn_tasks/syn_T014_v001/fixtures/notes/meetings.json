@@ -1,0 +1,52 @@
+[
+  {
+    "note_id": "note_001",
+    "title": "Engineering Weekly Sync - 2026-03-02",
+    "created_at": "2026-03-02T10:00:00Z",
+    "participants": [
+      "Alice Johnson",
+      "Bob Smith",
+      "Carol Lee",
+      "David Kim"
+    ],
+    "content": "The meeting began with Alice Johnson outlining the sprint goals.\n\nFirst, the authentication module was discussed. David Kim mentioned that the login bug reported last week (see note_004) is now being addressed. David Kim said he will complete the bug fix assessment by Friday and notify the team.\n\nNext, documentation standards were reviewed. Bob Smith said the API documentation needs updating to reflect recent endpoint changes. Bob Smith will have the draft ready by Thursday.\n\nCarol Lee raised concerns about the upcoming security audit. She needs to prepare the compliance reports. Carol Lee said she will submit the initial audit prep documents by Monday.\n\nAlice Johnson reminded everyone that the quarterly stakeholder report is due next week, and she will compile the final version.\n\nBefore adjourning, Alice Johnson noted that the UI refresh task from last week (note_004) is still pending completion by Carol Lee.\n\nAlice Johnson concluded: 'Please have the assistant compile these action items and share them directly with all attendees.'",
+    "duration_minutes": 50
+  },
+  {
+    "note_id": "note_002",
+    "title": "Partner Integration - TechCorp",
+    "created_at": "2026-03-03T14:00:00Z",
+    "participants": [
+      "Alice Johnson",
+      "Partner Tom",
+      "Bob Smith"
+    ],
+    "content": "Met with Partner Tom from TechCorp to discuss API integration.\n\nPartner Tom requested a feasibility analysis for the new data pipeline. Bob Smith explained the technical constraints. Bob Smith will complete the feasibility analysis this week.\n\nAlice Johnson promised to send the updated contract document to TechCorp next week, including pricing and SLA details.\n\nPartner Tom mentioned their renewal decision is pending the contract review. Alice Johnson said she would follow up personally.",
+    "duration_minutes": 45
+  },
+  {
+    "note_id": "note_003",
+    "title": "Team Coffee Break",
+    "created_at": "2026-03-04T15:00:00Z",
+    "participants": [
+      "Bob Smith",
+      "Carol Lee",
+      "David Kim"
+    ],
+    "content": "Team took a break in the lounge. Bob Smith talked about his new gaming setup. Carol Lee shared recipes from her cooking class. David Kim mentioned his plan to visit Japan next month.\n\nThey discussed the office ping-pong tournament scheduled for next Friday. Everyone agreed to participate.",
+    "duration_minutes": 20
+  },
+  {
+    "note_id": "note_004",
+    "title": "Engineering Weekly Sync - 2026-02-23",
+    "created_at": "2026-02-23T10:00:00Z",
+    "participants": [
+      "Alice Johnson",
+      "Bob Smith",
+      "Carol Lee",
+      "David Kim"
+    ],
+    "content": "Previous week's meeting minutes:\n\n1. David Kim responsible for investigating login bug - Status: In Progress\n2. Bob Smith responsible for code refactoring - Status: Completed\n3. Carol Lee responsible for UI refresh prototype - Status: In Progress, expected to be completed soon\n4. Alice Johnson responsible for budget approval - Status: Completed\n\nThis week's priorities:\n- Focus on sprint deliverables\n- Prepare for security audit",
+    "duration_minutes": 40
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "CONTRADICTION_PAIR": [
+    "kb_101",
+    "kb_106"
+  ],
+  "EXPECTED_CLIENT_OLD": "FortiClient",
+  "EXPECTED_CLIENT_NEW": "GlobalProtect",
+  "ARTICLE_COUNT": 7,
+  "HOTLINE": "ext.9999",
+  "SERVER_URL": "vpn.omniglobal.io"
+}

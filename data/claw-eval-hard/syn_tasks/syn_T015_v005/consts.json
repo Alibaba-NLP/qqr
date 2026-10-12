@@ -1,0 +1,17 @@
+{
+  "RELEVANT_ARTICLES": [
+    "kb_001",
+    "kb_003",
+    "kb_005",
+    "kb_006",
+    "kb_007"
+  ],
+  "CONTRADICTION_PAIR": [
+    "kb_001",
+    "kb_006"
+  ],
+  " CROSS_REF_PAIR": [
+    "kb_007",
+    "kb_003"
+  ]
+}

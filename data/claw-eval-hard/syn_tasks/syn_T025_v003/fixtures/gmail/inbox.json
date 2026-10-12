@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "chenming@techcorp.com",
+    "to": "me@techcorp.com",
+    "subject": "下周产品评审会议",
+    "date": "2026-03-05T14:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "你好，下周三上午十点的产品评审会议，请王总一起参加，我们要讨论新版本的架构设计和技术方案。\n\n请帮忙通知一下王总。\n\n陈明"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "lina@techcorp.com",
+    "to": "me@techcorp.com",
+    "subject": "年度培训计划",
+    "date": "2026-03-05T16:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "你好，年度员工培训计划需要各部门总监确认时间安排。\n\n另外，技术团队的培训需要跟王总协调一下，他那边的课程还没确定。\n\n李娜"
+  }
+]

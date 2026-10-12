@@ -1,0 +1,56 @@
+[
+  {
+    "contact_id": "CTX-101",
+    "name": "Li Chen",
+    "department": "Sales",
+    "title": "Sales Director",
+    "email": "lichen@company.com",
+    "phone": "13900220001",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-102",
+    "name": "Li Chen",
+    "department": "Operations",
+    "title": "Operations Manager",
+    "email": "lichen.ops@company.com",
+    "phone": "13900220002",
+    "location": "Shanghai Branch"
+  },
+  {
+    "contact_id": "CTX-103",
+    "name": "Lin Chen",
+    "department": "HR",
+    "title": "HR Director",
+    "email": "linchen@company.com",
+    "phone": "13900220003",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-104",
+    "name": "Jian Wu",
+    "department": "Product",
+    "title": "Product Manager",
+    "email": "wujian@company.com",
+    "phone": "13900220004",
+    "location": "Shenzhen Branch"
+  },
+  {
+    "contact_id": "CTX-105",
+    "name": "Hui Liu",
+    "department": "Finance",
+    "title": "Finance Manager",
+    "email": "liuhui@company.com",
+    "phone": "13900220005",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-106",
+    "name": "Yan Xu",
+    "department": "Engineering",
+    "title": "Tech Lead",
+    "email": "xuyan@company.com",
+    "phone": "13900220006",
+    "location": "Hangzhou Branch"
+  }
+]

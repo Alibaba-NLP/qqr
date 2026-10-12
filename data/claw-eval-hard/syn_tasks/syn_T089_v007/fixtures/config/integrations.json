@@ -1,0 +1,81 @@
+[
+  {
+    "integration_id": "IA-601",
+    "name": "PipeDream ETL",
+    "service": "pipedream",
+    "status": "active",
+    "api_key": "pd_live_3D5F7G9H1J4K6L8Z0X2",
+    "api_secret": "pdsec_8I7U6Y5T4R3E2W1Q0P9O",
+    "webhook_url": "https://api.insightly.example.com/webhooks/pipedream",
+    "last_verified": "2026-08-10T06:45:00Z",
+    "monthly_calls": 189200,
+    "error_rate": 0.007,
+    "notes": "Batch ELT from operational databases"
+  },
+  {
+    "integration_id": "IA-602",
+    "name": "ChartMuse Dashboards",
+    "service": "chartmuse",
+    "status": "active",
+    "api_key": "cm_live_6F7G8H9J0K1L2Z3X4C5",
+    "api_secret": null,
+    "webhook_url": "https://api.insightly.example.com/webhooks/chartmuse",
+    "last_verified": "2026-08-13T15:20:00Z",
+    "monthly_calls": 92600,
+    "error_rate": 0.005,
+    "notes": "Embeds live charts in customer portals"
+  },
+  {
+    "integration_id": "IA-603",
+    "name": "AlertPing Anomalies",
+    "service": "alertping",
+    "status": "active",
+    "api_key": "ap_live_9N8B7V6C5X4Z3A2S1D0",
+    "api_secret": "apsec_4E5R6T7Y8U9I0O1P2A3",
+    "webhook_url": null,
+    "last_verified": "2026-08-07T09:00:00Z",
+    "monthly_calls": 41500,
+    "error_rate": 0.019,
+    "notes": "Anomaly detection on metric streams"
+  },
+  {
+    "integration_id": "IA-604",
+    "name": "SegmentHub CDP",
+    "service": "segmenthub",
+    "status": "active",
+    "api_key": "sh_live_2A3S4D5F6G7H8J9K0L1",
+    "api_secret": null,
+    "webhook_url": "https://api.insightly.example.com/webhooks/segmenthub",
+    "last_verified": "2026-08-12T18:40:00Z",
+    "monthly_calls": 134800,
+    "error_rate": 0.006,
+    "notes": "Customer event forwarding to warehouses"
+  },
+  {
+    "integration_id": "IA-605",
+    "name": "LookFrame BI",
+    "service": "lookframe",
+    "status": "degraded",
+    "api_key": "lf_live_5K4J3H2G1F0D9S8A7Q6",
+    "api_secret": "lfsec_1Z2X3C4V5B6N7M8Q9W0",
+    "webhook_url": "https://api.insightly.example.com/webhooks/lookframe",
+    "last_verified": "2026-07-19T13:10:00Z",
+    "monthly_calls": 22800,
+    "error_rate": 0.14,
+    "notes": "Scheduled report renders are timing out"
+  },
+  {
+    "integration_id": "IA-606",
+    "name": "Metrics Vault",
+    "service": "metrics_vault",
+    "status": "active",
+    "api_key": null,
+    "api_secret": null,
+    "webhook_url": null,
+    "last_verified": "2026-08-15T02:20:00Z",
+    "monthly_calls": 33,
+    "error_rate": 0.0,
+    "notes": "Cold store for rollup aggregates",
+    "connection_string": "postgresql://svc_metrics:1nsightly_2026_Vault@db-metrics.internal:5432/rollups"
+  }
+]

@@ -1,0 +1,93 @@
+[
+  {
+    "article_id": "kb_001",
+    "title": "Employee Portal Access Guide",
+    "category": "IT Support",
+    "tags": [
+      "Portal",
+      "SSO",
+      "login"
+    ],
+    "content": "## Portal Login Steps\n\n1. Navigate to https://portal.nexuscorp.io\n2. Click [Sign In] and select Okta Connect\n3. Enter your corporate email and password\n4. Complete MFA verification if prompted\n\n## Common Issues\n- Page not loading: Clear browser cache\n- Login failed: Check password expiration\n- MFA error: Contact IT helpdesk ext. 5555\n\n## Notes\n- Okta Connect is the default SSO provider\n- Session timeout is 8 hours",
+    "last_updated": "2026-01-10",
+    "views": 1200
+  },
+  {
+    "article_id": "kb_002",
+    "title": "Hardware Procurement Policy",
+    "category": "IT Support",
+    "tags": [
+      "device",
+      "hardware",
+      "request"
+    ],
+    "content": "## Requesting Equipment\n\n1. Submit ticket via ServiceNow\n2. Manager approval required\n3. Delivery within 3 business days\n\n## Standard Kit\n- Laptop: Dell Latitude or MacBook Air\n- Monitor: 24-inch HD\n- Peripherals: Standard keyboard/mouse\n\n## Returns\n- Return all items within 5 days of resignation",
+    "last_updated": "2026-01-20",
+    "views": 850
+  },
+  {
+    "article_id": "kb_003",
+    "title": "Remote Work Standards",
+    "category": "HR Policies",
+    "tags": [
+      "remote",
+      "policy",
+      "portal"
+    ],
+    "content": "## Expectations\n\n1. Log into Portal daily (see kb_001)\n2. Available on Slack during core hours\n3. Weekly team sync via Zoom\n\n## Tools\n- Chat: Slack\n- Docs: Notion\n- Code: GitHub Enterprise\n\n## Network\n- Minimum 25Mbps download\n- Use wired connection if possible",
+    "last_updated": "2026-02-01",
+    "views": 1500
+  },
+  {
+    "article_id": "kb_004",
+    "title": "Vacation Request Workflow",
+    "category": "HR Policies",
+    "tags": [
+      "leave",
+      "vacation",
+      "hr"
+    ],
+    "content": "## Submitting Leave\n\n1. Log into HRIS\n2. Select dates\n3. Manager approval\n\n## Balances\n- Accrual: 1.5 days per month\n- Carryover: Max 5 days\n\n## Notes\n- Blackout dates apply in Q4",
+    "last_updated": "2026-01-15",
+    "views": 2000
+  },
+  {
+    "article_id": "kb_005",
+    "title": "Account Security Standards",
+    "category": "IT Security",
+    "tags": [
+      "password",
+      "security",
+      "MFA"
+    ],
+    "content": "## Password Rules\n- Length: 14 characters minimum\n- Complexity: Upper, lower, number, symbol\n- Rotation: Every 60 days\n\n## MFA Requirements\n- Mandatory for all systems\n- App: Microsoft Authenticator\n- Backup: SMS code\n\n## Lockout\n- 3 failed attempts = 15 min lock",
+    "last_updated": "2026-02-10",
+    "views": 1100
+  },
+  {
+    "article_id": "kb_006",
+    "title": "SSO Provider Migration Notice",
+    "category": "IT Support",
+    "tags": [
+      "SSO",
+      "migration",
+      "Azure"
+    ],
+    "content": "## Urgent Update\n\nNexus Corp is migrating from Okta Connect to Azure Entra ID effective March 15, 2026.\n\n## Action Required\n1. Do not use Okta Connect after migration date\n2. Download Azure Authenticator\n3. Login via https://portal.nexuscorp.io using Azure SSO\n\n## Priority\nThis notice supersedes kb_001. Contact ext. 5555 for issues.",
+    "last_updated": "2026-02-20",
+    "views": 300
+  },
+  {
+    "article_id": "kb_007",
+    "title": "Portal Troubleshooting Checklist",
+    "category": "IT Support",
+    "tags": [
+      "troubleshooting",
+      "portal",
+      "error"
+    ],
+    "content": "## Common Errors\n\n- 403 Forbidden: Check permissions (see kb_003)\n- 500 Error: Wait 5 mins and retry\n- SSO Loop: Clear cookies\n\n## References\n- For login steps see kb_001\n- For security policy see kb_005\n- For migration info see kb_006",
+    "last_updated": "2026-02-22",
+    "views": 950
+  }
+]

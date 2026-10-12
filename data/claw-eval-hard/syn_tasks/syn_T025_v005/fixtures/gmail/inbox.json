@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "chenming@company.com",
+    "to": "me@company.com",
+    "subject": "周五安全合规审查会议",
+    "date": "2026-02-27T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi，周五下午两点的安全合规审查会议，请刘经理一起参加，我们要讨论 Q2 的系统安全漏洞修复计划。\n\n请帮忙通知一下刘经理。\n\n陈明"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "wangfang@company.com",
+    "to": "me@company.com",
+    "subject": "新员工入职安排",
+    "date": "2026-02-27T10:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "你好，下周一有两位新员工入职，请安排好工位和设备。\n\n另外，入职培训的日程需要跟刘经理确认一下，他那边的背景调查部分还没定。\n\n王芳"
+  }
+]

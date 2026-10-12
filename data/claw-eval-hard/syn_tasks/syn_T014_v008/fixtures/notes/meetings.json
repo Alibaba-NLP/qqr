@@ -1,0 +1,52 @@
+[
+  {
+    "note_id": "note_001",
+    "title": "Engineering Weekly Sync - 2026-03-10",
+    "created_at": "2026-03-10T09:00:00Z",
+    "participants": [
+      "Director Liu",
+      "Chen Wei",
+      "Sun Li",
+      "Wu Jing"
+    ],
+    "content": "Director Liu opened the weekly sync.\n\nFirst, infrastructure updates. Chen Wei reported that the database migration is scheduled for this week. He needs to finalize the migration plan by Tuesday to minimize downtime. Wu Jing mentioned the security audit is pending. Director Liu asked Wu Jing to complete the security audit report by Thursday.\n\nNext, design updates. Sun Li said the new branding guidelines are ready for review. Director Liu asked Sun Li to finalize the brand guideline update by Monday.\n\nThen, external partnerships. Chen Wei mentioned the integration with Omega Solutions (see meeting note_002). He needs to complete the API integration work this week.\n\nDirector Liu noted that the contract with Omega Solutions expires soon. He will handle the contract renewal discussion next week.\n\nReference was made to last week's notes (note_004) regarding the icon set redesign.\n\nDirector Liu concluded: 'Please have the assistant compile these action items and share them directly with all attendees.'",
+    "duration_minutes": 50
+  },
+  {
+    "note_id": "note_002",
+    "title": "Partner Integration - Omega Solutions",
+    "created_at": "2026-03-11T15:00:00Z",
+    "participants": [
+      "Director Liu",
+      "Partner Zhang",
+      "Chen Wei"
+    ],
+    "content": "Met with Partner Zhang from Omega Solutions.\n\nDiscussed API integration specifics. Omega needs real-time data sync. Chen Wei outlined the technical requirements.\n\nPartner Zhang requested a demo by end of month. Director Liu agreed to coordinate.\n\nLegal terms were briefly discussed. Director Liu will follow up on the contract renewal.",
+    "duration_minutes": 45
+  },
+  {
+    "note_id": "note_003",
+    "title": "Team Bowling Night",
+    "created_at": "2026-03-12T19:00:00Z",
+    "participants": [
+      "Chen Wei",
+      "Sun Li",
+      "Wu Jing"
+    ],
+    "content": "Team went bowling after work.\n\nWu Jing got the highest score with 210 points. Sun Li ordered pizza for everyone. Chen Wei joked about his gutter balls.\n\nThey discussed upcoming holidays and plans for a summer trip.",
+    "duration_minutes": 120
+  },
+  {
+    "note_id": "note_004",
+    "title": "Engineering Weekly Sync - 2026-03-03",
+    "created_at": "2026-03-03T09:00:00Z",
+    "participants": [
+      "Director Liu",
+      "Chen Wei",
+      "Sun Li",
+      "Wu Jing"
+    ],
+    "content": "Last week's meeting minutes:\n\n1. Chen Wei responsible for server setup - Status: Completed\n2. Wu Jing responsible for firewall config - Status: Completed\n3. Sun Li responsible for icon set redesign - Status: In progress, expected to be completed this week\n4. Director Liu responsible for budget approval - Status: Completed\n\nThis week's priorities:\n- Prepare for weekly sync\n- Review pending design assets",
+    "duration_minutes": 40
+  }
+]

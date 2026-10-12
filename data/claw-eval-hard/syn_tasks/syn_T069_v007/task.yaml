@@ -1,0 +1,177 @@
+task_id: syn_T069_v007
+task_name: Micron FY2025 NAND vs DRAM Capacity Allocation Analysis
+version: '1.0'
+category: finance
+difficulty: easy
+tags:
+- general
+services:
+- name: web_real
+  command: python mock_services/web_real/server.py
+  port: 9114
+  health_check: http://localhost:9114/web/health
+  health_check_method: GET
+  ready_timeout: 10
+  reset_endpoint: http://localhost:9114/web/reset
+prompt:
+  text: 'Micron Technology operates as a dual-product memory company, generating revenue
+    from both DRAM and NAND flash semiconductors. The allocation of wafer capacity
+    and capital expenditure between these two segments is a critical strategic decision
+    that directly impacts profitability.
+
+
+    As a memory sector analyst, analyze Micron''s NAND vs DRAM allocation strategy
+    using FY2025 data. Complete the following:
+
+
+    1. Wafer Capacity Split: Determine Micron''s current wafer capacity allocation
+    between DRAM and NAND. Management has announced a 10% reduction in NAND wafer
+    capacity — analyze what this means for the DRAM/NAND split. With total CapEx of
+    $13.8B in FY2025, how is investment distributed between the two segments?
+
+
+    2. Pricing Trends and Revenue Contribution: Compare DRAM vs NAND pricing trends
+    in FY2025. DRAM typically represents 65-75% of Micron''s revenue. How does the
+    10% NAND reduction affect the revenue mix? With operating cash flow of $17.5B,
+    assess which segment is the primary cash generator and how the allocation supports
+    margin expansion.
+
+
+    3. Margin Contribution by Segment: Analyze the margin differential between DRAM
+    and NAND. HBM (a DRAM product) commands significant ASP premiums. How does shifting
+    capacity from NAND to DRAM/HBM impact blended margins? Evaluate whether the $3.7B
+    FCF ($17.5B OCF - $13.8B CapEx) reflects the improved segment mix. For FY2026
+    with $20B CapEx and $42.6B breakeven revenue, assess whether the DRAM-heavy allocation
+    strategy is sustainable.'
+  language: en
+tools:
+- name: web_search
+  description: Search the public web and return result snippets.
+  input_schema:
+    type: object
+    properties:
+      query:
+        type: string
+        description: Search query
+      max_results:
+        type: integer
+        description: Maximum number of results
+        default: 10
+    required:
+    - query
+- name: web_fetch
+  description: Fetch full webpage content for a URL.
+  input_schema:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Target URL
+      timeout_seconds:
+        type: integer
+        description: Request timeout in seconds
+        default: 30
+    required:
+    - url
+tool_endpoints:
+- tool_name: web_search
+  url: http://localhost:9114/web/search
+  method: POST
+- tool_name: web_fetch
+  url: http://localhost:9114/web/fetch
+  method: POST
+environment:
+  timeout_seconds: 1800
+  max_turns: 50
+scoring_components:
+- name: web_search
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_search
+    min_calls: 1
+- name: web_fetch
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_fetch
+    min_calls: 1
+- name: anchor_literals
+  weight: 0.35
+  check:
+    type: keywords_present
+    keywords:
+    - '17.5'
+    - '13.8'
+    - '3.7'
+    - '1.27'
+    - '42.6'
+- name: length
+  weight: 0.25
+  check:
+    type: min_length
+    min_length: 400
+- name: report_length
+  weight: 0.2
+  check:
+    type: min_length
+    min_length: 400
+safety_checks: []
+expected_actions: []
+judge_rubric: 'Evaluate the Micron NAND vs DRAM allocation analysis against the following
+  rubric:
+
+
+  POSITIVE SCORING ITEMS (total 100%):
+
+  1. [Weight 12%] Current DRAM/NAND wafer capacity split identification
+
+  2. [Weight 12%] 10% NAND reduction impact on capacity split analysis
+
+  3. [Weight 10%] CapEx distribution between DRAM and NAND within $13.8B total
+
+  4. [Weight 10%] DRAM vs NAND pricing trend comparison for FY2025
+
+  5. [Weight 10%] Revenue mix analysis (DRAM ~65-75% of total)
+
+  6. [Weight 10%] Identification of DRAM as primary cash generator within $17.5B OCF
+
+  7. [Weight 8%] Margin differential between DRAM and NAND segments
+
+  8. [Weight 8%] HBM (DRAM product) ASP premium impact on blended margins
+
+  9. [Weight 7%] FCF of $3.7B ($17.5B - $13.8B) as reflection of improved segment
+  mix
+
+  10. [Weight 7%] Sustainability assessment of DRAM-heavy strategy at $20B FY2026
+  CapEx
+
+  11. [Weight 6%] $42.6B breakeven analysis in context of segment allocation
+
+
+  NEGATIVE SCORING ITEMS (deduct when present):
+
+  12. [Deduct 5%] Confusing NAND and DRAM characteristics or market dynamics
+
+  13. [Deduct 4%] Ignoring HBM as a DRAM sub-segment in the analysis
+
+  14. [Deduct 4%] Missing currency units or inconsistent segment data'
+reference_solution: '1. Capacity Split: DRAM ~70% / NAND ~30% of wafer capacity; 10%
+  NAND reduction shifts wafer allocation toward ~75/25.
+
+  2. CapEx Distribution: Majority of $13.8B directed to DRAM/HBM; NAND investment
+  focused on maintenance.
+
+  3. Pricing: DRAM ASPs rising with HBM premium; NAND pricing relatively flat.
+
+  4. Revenue Mix: DRAM ~70% of revenue; NAND ~30%. Shift improves blended margins.
+
+  5. Margin: DRAM margins higher than NAND; HBM commands 3-5x ASP premium.
+
+  6. FCF $3.7B reflects improved mix; OCF $17.5B driven primarily by DRAM/HBM strength.
+
+  7. FY2026 $20B CapEx sustainable if DRAM-heavy mix continues; $42.6B breakeven achievable
+  with HBM revenue growth.'
+primary_dimensions:
+- completion
+- communication

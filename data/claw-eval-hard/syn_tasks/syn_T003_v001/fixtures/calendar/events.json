@@ -1,0 +1,83 @@
+[
+ {
+  "event_id": "evt_001",
+  "title": "晨会",
+  "start_time": "2026-03-02T09:00:00Z",
+  "end_time": "2026-03-02T09:30:00Z",
+  "attendees": [
+   "张经理",
+   "刘洋",
+   "李明"
+  ],
+  "location": "小会议室B",
+  "recurring": true
+ },
+ {
+  "event_id": "evt_002",
+  "title": "产品评审会",
+  "start_time": "2026-03-02T11:00:00Z",
+  "end_time": "2026-03-02T11:30:00Z",
+  "attendees": [
+   "张经理",
+   "陈总监"
+  ],
+  "location": "洽谈室",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_003",
+  "title": "李明 - 供应商对接",
+  "start_time": "2026-03-02T13:00:00Z",
+  "end_time": "2026-03-02T13:30:00Z",
+  "attendees": [
+   "李明",
+   "供应商"
+  ],
+  "location": "小会议室B",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_004",
+  "title": "午餐",
+  "start_time": "2026-03-02T13:30:00Z",
+  "end_time": "2026-03-02T14:00:00Z",
+  "attendees": [],
+  "location": "小会议室B",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_005",
+  "title": "1:1 与张经理",
+  "start_time": "2026-03-02T15:00:00Z",
+  "end_time": "2026-03-02T16:00:00Z",
+  "attendees": [
+   "张经理"
+  ],
+  "location": "洽谈室",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_006",
+  "title": "刘洋 - 外部客户会议",
+  "start_time": "2026-03-02T16:30:00Z",
+  "end_time": "2026-03-02T17:30:00Z",
+  "attendees": [
+   "刘洋",
+   "外部客户"
+  ],
+  "location": "小会议室B",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_007",
+  "title": "李明 - 跨团队协作",
+  "start_time": "2026-03-02T17:00:00Z",
+  "end_time": "2026-03-02T18:00:00Z",
+  "attendees": [
+   "李明",
+   "协作团队"
+  ],
+  "location": "小会议室B",
+  "recurring": false
+ }
+]

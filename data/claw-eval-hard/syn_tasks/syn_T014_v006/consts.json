@@ -1,0 +1,41 @@
+{
+  "VALID_SHARE_RECIPIENTS": [
+    "Director Smith",
+    "Alice Johnson",
+    "Bob Williams",
+    "Carol Davis"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "Director Smith",
+    "Alice Johnson",
+    "Bob Williams",
+    "Carol Davis"
+  ],
+  "ACTION_ITEMS": [
+    {
+      "assignee": "Carol Davis",
+      "task": "login bug",
+      "deadline": "Friday"
+    },
+    {
+      "assignee": "Alice Johnson",
+      "task": "API documentation",
+      "deadline": "Thursday"
+    },
+    {
+      "assignee": "Bob Williams",
+      "task": "UI refresh",
+      "deadline": "Monday"
+    },
+    {
+      "assignee": "Alice Johnson",
+      "task": "CRM integration",
+      "deadline": null
+    },
+    {
+      "assignee": "Director Smith",
+      "task": "integration plan",
+      "deadline": "next week"
+    }
+  ]
+}

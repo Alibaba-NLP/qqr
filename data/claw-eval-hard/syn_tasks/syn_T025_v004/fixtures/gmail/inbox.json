@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "wangqiang@company.com",
+    "to": "me@company.com",
+    "subject": "周三技术架构评审会议",
+    "date": "2026-03-01T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi，周三下午三点的技术架构评审会议，请刘总一起参加，我们要讨论新系统的技术方案。\n\n请帮忙通知一下刘总。\n\n王强"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "chenjing@company.com",
+    "to": "me@company.com",
+    "subject": "办公室搬迁通知",
+    "date": "2026-03-01T10:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "你好，下个月公司将进行办公室搬迁，请各部门统计设备需求。\n\n另外，新工位的分配方案需要跟刘总确认一下，他那边的部门人数最多。\n\n陈静"
+  }
+]

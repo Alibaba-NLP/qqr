@@ -1,0 +1,171 @@
+task_id: syn_T069_v003
+task_name: Micron FY2025 Peer CapEx Intensity Comparison
+version: '1.0'
+category: finance
+difficulty: easy
+tags:
+- general
+services:
+- name: web_real
+  command: python mock_services/web_real/server.py
+  port: 9114
+  health_check: http://localhost:9114/web/health
+  health_check_method: GET
+  ready_timeout: 10
+  reset_endpoint: http://localhost:9114/web/reset
+prompt:
+  text: 'The global memory semiconductor industry is dominated by three major players:
+    Samsung Electronics, SK Hynix, and Micron Technology. Each company has pursued
+    different capital expenditure strategies in the current AI-driven memory supercycle.
+
+
+    As an industry analyst, compare Micron''s capital allocation strategy against
+    its two major peers. Using publicly available financial data for FY2025 (or the
+    most recent fiscal year), complete the following:
+
+
+    1. CapEx Intensity Comparison: Calculate CapEx/Revenue ratio for Micron, Samsung
+    Semiconductor, and SK Hynix. Micron''s FY2025 CapEx was $13.8B against revenue
+    of approximately $37B. Compare this intensity to Samsung and SK Hynix''s equivalent
+    metrics. Who is investing most aggressively relative to size?
+
+
+    2. FCF Yield Comparison: Calculate free cash flow yield (FCF/Market Cap) for all
+    three companies. Micron''s FCF of $3.7B ($17.5B OCF minus $13.8B CapEx) should
+    be benchmarked against peers. Discuss whether the market is pricing in different
+    growth expectations.
+
+
+    3. HBM Investment Race: Compare each company''s HBM investment timeline and capacity
+    plans. How does Micron''s strategy of investing in back-end packaging equipment
+    and new fabs in Idaho and New York compare to Samsung''s and SK Hynix''s approaches?
+    Assess which company has the most sustainable CapEx trajectory given the 10% NAND
+    capacity reduction discipline maintained by Micron.'
+  language: en
+tools:
+- name: web_search
+  description: Search the public web and return result snippets.
+  input_schema:
+    type: object
+    properties:
+      query:
+        type: string
+        description: Search query
+      max_results:
+        type: integer
+        description: Maximum number of results
+        default: 10
+    required:
+    - query
+- name: web_fetch
+  description: Fetch full webpage content for a URL.
+  input_schema:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Target URL
+      timeout_seconds:
+        type: integer
+        description: Request timeout in seconds
+        default: 30
+    required:
+    - url
+tool_endpoints:
+- tool_name: web_search
+  url: http://localhost:9114/web/search
+  method: POST
+- tool_name: web_fetch
+  url: http://localhost:9114/web/fetch
+  method: POST
+environment:
+  timeout_seconds: 1800
+  max_turns: 50
+scoring_components:
+- name: web_search
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_search
+    min_calls: 1
+- name: web_fetch
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_fetch
+    min_calls: 1
+- name: anchor_literals
+  weight: 0.35
+  check:
+    type: keywords_present
+    keywords:
+    - '17.5'
+    - '13.8'
+    - '3.7'
+    - '1.27'
+    - '42.6'
+- name: length
+  weight: 0.25
+  check:
+    type: min_length
+    min_length: 400
+- name: report_length
+  weight: 0.2
+  check:
+    type: min_length
+    min_length: 400
+safety_checks: []
+expected_actions: []
+judge_rubric: 'Evaluate the Micron peer comparison analysis against the following
+  rubric:
+
+
+  POSITIVE SCORING ITEMS (total 100%):
+
+  1. [Weight 15%] Accurate CapEx/Revenue calculation for Micron ($13.8B / ~$37B)
+
+  2. [Weight 12%] Samsung Semiconductor CapEx intensity comparison with data
+
+  3. [Weight 12%] SK Hynix CapEx intensity comparison with data
+
+  4. [Weight 12%] FCF yield calculation for Micron ($3.7B FCF) and peer comparison
+
+  5. [Weight 10%] HBM investment timeline comparison across three companies
+
+  6. [Weight 10%] Analysis of Micron''s back-end packaging investment vs peers'' approaches
+
+  7. [Weight 8%] Discussion of NAND capacity discipline (10% reduction) in peer context
+
+  8. [Weight 8%] Assessment of Idaho and New York fab investments vs international
+  peer expansion
+
+  9. [Weight 8%] Overall conclusion on which company has most sustainable CapEx trajectory
+
+  10. [Weight 5%] Clear relative positioning conclusion
+
+
+  NEGATIVE SCORING ITEMS (deduct when present):
+
+  11. [Deduct 6%] Fabricating specific peer financial figures without search verification
+
+  12. [Deduct 4%] Failing to distinguish between consolidated and semiconductor-only
+  segment data
+
+  13. [Deduct 4%] Ignoring currency differences (KRW vs USD) in comparisons'
+reference_solution: '1. CapEx Intensity: Micron $13.8B/~$37B = ~37% CapEx/Revenue.
+  Samsung and SK Hynix also at elevated levels (~35-45%).
+
+  2. FCF Yield: Micron FCF $3.7B ($17.5B OCF - $13.8B CapEx); peers have varying FCF
+  profiles based on CapEx cycles.
+
+  3. HBM Race: SK Hynix leads in HBM market share; Samsung catching up; Micron investing
+  in back-end packaging.
+
+  4. Peer comparison shows Micron''s 10% NAND reduction + Idaho/NY fab investments
+  as differentiated approach vs peers'' broad expansion.
+
+  5. Sustainability: Micron''s focused CapEx on HBM/packaging may yield better returns
+  than peers'' broader capacity additions.'
+primary_dimensions:
+- completion
+- communication

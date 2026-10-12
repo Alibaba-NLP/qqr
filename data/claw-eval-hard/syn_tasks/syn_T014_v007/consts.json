@@ -1,0 +1,47 @@
+{
+  "VALID_SHARE_RECIPIENTS": [
+    "Director Smith",
+    "Alice Johnson",
+    "Bob Chen",
+    "Carol Davis"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "Director Smith",
+    "Alice Johnson",
+    "Bob Chen",
+    "Carol Davis"
+  ],
+  "ACTION_ITEMS": [
+    {
+      "assignee": "Bob Chen",
+      "task": "login bug",
+      "deadline": "Thursday"
+    },
+    {
+      "assignee": "Alice Johnson",
+      "task": "demo",
+      "deadline": "Tuesday"
+    },
+    {
+      "assignee": "Carol Davis",
+      "task": "docs",
+      "deadline": "Monday"
+    },
+    {
+      "assignee": "Alice Johnson",
+      "task": "API integration",
+      "deadline": null
+    },
+    {
+      "assignee": "Director Smith",
+      "task": "proposal",
+      "deadline": "next week"
+    }
+  ],
+  "CARRYOVER_ITEM": {
+    "assignee": "Carol Davis",
+    "task": "database migration script",
+    "status": "In progress"
+  },
+  "CASUAL_NOTE_ID": "note_003"
+}

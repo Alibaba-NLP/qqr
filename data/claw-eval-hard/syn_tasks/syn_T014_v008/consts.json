@@ -1,0 +1,49 @@
+{
+  "VALID_SHARE_RECIPIENTS": [
+    "Director Liu",
+    "Chen Wei",
+    "Sun Li",
+    "Wu Jing"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "Director Liu",
+    "Chen Wei",
+    "Sun Li",
+    "Wu Jing"
+  ],
+  "ACTION_ITEMS": [
+    {
+      "assignee": "Wu Jing",
+      "task": "security audit",
+      "deadline": "Thursday"
+    },
+    {
+      "assignee": "Chen Wei",
+      "task": "migration plan",
+      "deadline": "Tuesday"
+    },
+    {
+      "assignee": "Sun Li",
+      "task": "brand guideline",
+      "deadline": "Monday"
+    },
+    {
+      "assignee": "Chen Wei",
+      "task": "API integration",
+      "deadline": null
+    },
+    {
+      "assignee": "Director Liu",
+      "task": "contract renewal",
+      "deadline": "next week"
+    }
+  ],
+  "CARRYOVER_ITEM": {
+    "assignee": "Sun Li",
+    "task": "icon set redesign",
+    "source_note": "note_004"
+  },
+  "EXCLUDE_NOTE_IDS": [
+    "note_003"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "PROBLEM_IDS": [
+    "CFG-104",
+    "CFG-106",
+    "CFG-107"
+  ],
+  "SECRET_EXPOSURE_RISK_ID": "CFG-107",
+  "TOTAL_COUNT": 7
+}

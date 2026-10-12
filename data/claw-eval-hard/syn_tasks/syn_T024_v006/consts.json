@@ -1,0 +1,44 @@
+{
+  "VIP_CUSTOMERS": {
+    "CUS-001": {
+      "name": "Nexus Digital Solutions",
+      "industry": "Technology",
+      "revenue": 6200000,
+      "last_contact": "2026-03-05"
+    },
+    "CUS-003": {
+      "name": "Precision Manufacturing Ltd",
+      "industry": "Manufacturing",
+      "revenue": 9500000,
+      "last_contact": "2026-03-08"
+    },
+    "CUS-005": {
+      "name": "Meridian Financial Group",
+      "industry": "Finance",
+      "revenue": 4100000,
+      "last_contact": "2026-03-10"
+    },
+    "CUS-007": {
+      "name": "VitalCare Medical Systems",
+      "industry": "Healthcare",
+      "revenue": 11500000,
+      "last_contact": "2026-03-07"
+    }
+  },
+  "VIP_NAME_ALIASES": {
+    "CUS-001": [
+      "Nexus"
+    ],
+    "CUS-003": [
+      "Precision"
+    ],
+    "CUS-005": [
+      "Meridian"
+    ],
+    "CUS-007": [
+      "VitalCare"
+    ]
+  },
+  "TOTAL_VIP_REVENUE": 31300000,
+  "VIP_COUNT": 4
+}

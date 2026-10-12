@@ -1,0 +1,46 @@
+{
+  "ACTION_ITEMS": [
+    {
+      "assignee": "陈工",
+      "task": "修复登录 bug",
+      "deadline": "周五"
+    },
+    {
+      "assignee": "周员",
+      "task": "准备演示 Demo",
+      "deadline": "周三"
+    },
+    {
+      "assignee": "吴经理",
+      "task": "评估服务器成本",
+      "deadline": "周一"
+    },
+    {
+      "assignee": "陈工",
+      "task": "API 文档更新",
+      "deadline": "下周"
+    },
+    {
+      "assignee": "刘总",
+      "task": "确认合同条款",
+      "deadline": "周四"
+    }
+  ],
+  "VALID_SHARE_RECIPIENTS": [
+    "刘总",
+    "陈工",
+    "吴经理",
+    "周员"
+  ],
+  "REQUIRED_PARTICIPANTS": [
+    "刘总",
+    "陈工",
+    "吴经理",
+    "周员"
+  ],
+  "CARRY_OVER_TASK": {
+    "assignee": "吴经理",
+    "task": "数据库迁移方案",
+    "status": "进行中"
+  }
+}

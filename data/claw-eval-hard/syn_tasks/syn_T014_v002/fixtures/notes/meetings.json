@@ -1,0 +1,52 @@
+[
+  {
+    "note_id": "note_001",
+    "title": "Engineering Sprint Review - 2026-03-10",
+    "created_at": "2026-03-10T14:00:00Z",
+    "participants": [
+      "Alice",
+      "Bob",
+      "Charlie",
+      "David"
+    ],
+    "content": "The meeting began with Alice reviewing the sprint goals.\n\nFirst, the login module issues were discussed. Bob mentioned that the authentication timeout bug is critical and needs immediate attention. Bob said he will fix the login bug by Thursday. Charlie noted that the API documentation is outdated and needs to reflect the new endpoints. Charlie will update API docs by Tuesday.\n\nNext, security concerns were raised. David reported that a preliminary scan found some vulnerabilities. David said he will conduct a full security audit and report findings by Friday.\n\nAlice reminded the team about the budget review. Alice said she needs to submit the budget approval request by next week.\n\nBob also mentioned the database migration plan from last week (see note_004) is still pending and needs to be finalized.\n\nAlice concluded: 'Please have the assistant compile these action items and share them directly with all attendees.'",
+    "duration_minutes": 50
+  },
+  {
+    "note_id": "note_002",
+    "title": "Client Integration Discussion - XYZ Corp",
+    "created_at": "2026-03-11T10:00:00Z",
+    "participants": [
+      "Alice",
+      "Bob",
+      "Client Smith"
+    ],
+    "content": "Met with Client Smith to discuss API integration.\n\nClient Smith wants custom webhook support. Alice promised to send a proposal by Friday. Bob explained the technical constraints.\n\nClient Smith mentioned their budget constraints for this quarter.",
+    "duration_minutes": 45
+  },
+  {
+    "note_id": "note_003",
+    "title": "Team Coffee Break",
+    "created_at": "2026-03-12T15:30:00Z",
+    "participants": [
+      "Bob",
+      "Charlie",
+      "David"
+    ],
+    "content": "Informal chat over coffee. Bob talked about his new gaming PC. Charlie shared recipes for sourdough bread. David mentioned his marathon training progress.\n\nThey discussed the office ping pong tournament coming up.",
+    "duration_minutes": 20
+  },
+  {
+    "note_id": "note_004",
+    "title": "Engineering Sprint Review - 2026-03-03",
+    "created_at": "2026-03-03T14:00:00Z",
+    "participants": [
+      "Alice",
+      "Bob",
+      "Charlie",
+      "David"
+    ],
+    "content": "Previous sprint review minutes:\n\n1. Alice responsible for resource allocation - Status: Completed\n2. Bob responsible for database migration plan - Status: In progress, expected to be completed this sprint\n3. Charlie responsible for unit test coverage - Status: Completed\n4. David responsible for CI/CD pipeline fix - Status: Completed\n\nThis week's priorities:\n- Focus on stability and bug fixes\n- Prepare for client demo",
+    "duration_minutes": 45
+  }
+]

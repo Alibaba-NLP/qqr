@@ -1,0 +1,17 @@
+{
+  "CONTRADICTION_IDS": [
+    "kb_001",
+    "kb_006"
+  ],
+  "OLD_TOOL": "Okta Connect",
+  "NEW_TOOL": "Azure Entra ID",
+  "REQUIRED_KEYWORDS": [
+    "Portal",
+    "Okta",
+    "Azure",
+    "MFA",
+    "password",
+    "device"
+  ],
+  "HELPDESK_EXT": "5555"
+}

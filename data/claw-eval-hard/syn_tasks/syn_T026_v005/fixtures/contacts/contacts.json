@@ -1,0 +1,56 @@
+[
+  {
+    "contact_id": "CTX-101",
+    "name": "Li Na",
+    "department": "Sales",
+    "title": "Sales Director",
+    "email": "lina@company.com",
+    "phone": "13900110001",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-102",
+    "name": "Li Jun",
+    "department": "Product",
+    "title": "Product Director",
+    "email": "lijun@company.com",
+    "phone": "13900110002",
+    "location": "Shanghai Branch"
+  },
+  {
+    "contact_id": "CTX-103",
+    "name": "Li Wei",
+    "department": "Operations",
+    "title": "Ops Director",
+    "email": "liwei@company.com",
+    "phone": "13900110003",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-104",
+    "name": "Bo Chen",
+    "department": "Human Resources",
+    "title": "HR Manager",
+    "email": "chenbo@company.com",
+    "phone": "13900110004",
+    "location": "Beijing HQ"
+  },
+  {
+    "contact_id": "CTX-105",
+    "name": "Yan Wu",
+    "department": "Engineering",
+    "title": "Senior Engineer",
+    "email": "wuyan@company.com",
+    "phone": "13900110005",
+    "location": "Shenzhen Branch"
+  },
+  {
+    "contact_id": "CTX-106",
+    "name": "Tao Huang",
+    "department": "Finance",
+    "title": "Accountant",
+    "email": "huangtao@company.com",
+    "phone": "13900110006",
+    "location": "Beijing HQ"
+  }
+]

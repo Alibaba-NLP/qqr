@@ -1,0 +1,81 @@
+[
+  {
+    "integration_id": "VG-501",
+    "name": "SkyBook GDS",
+    "service": "skybook",
+    "status": "active",
+    "api_key": "sb_live_2W4E6R8T0Y3U5I7O9P1",
+    "api_secret": "sbsec_6T7Y8U9I0O1P2A3S4D5",
+    "webhook_url": "https://api.voyagr.example.com/webhooks/skybook",
+    "last_verified": "2026-08-09T08:30:00Z",
+    "monthly_calls": 276300,
+    "error_rate": 0.01,
+    "notes": "Flight availability and pricing search"
+  },
+  {
+    "integration_id": "VG-502",
+    "name": "StayNet Hotels",
+    "service": "staynet",
+    "status": "active",
+    "api_key": "sn_live_9M8N7B6V5C4X3Z1A0S2",
+    "api_secret": null,
+    "webhook_url": "https://api.voyagr.example.com/webhooks/staynet",
+    "last_verified": "2026-08-12T14:05:00Z",
+    "monthly_calls": 143500,
+    "error_rate": 0.008,
+    "notes": "Hotel room inventory and rates"
+  },
+  {
+    "integration_id": "VG-503",
+    "name": "PaxPort Documents",
+    "service": "paxport",
+    "status": "expired",
+    "api_key": "pp_live_1Q2W3E4R5T6Y7U8I9O0",
+    "api_secret": "ppsec_0P9O8I7U6Y5T4R3E2W1",
+    "webhook_url": null,
+    "last_verified": "2026-03-18T16:30:00Z",
+    "monthly_calls": 0,
+    "error_rate": 1.0,
+    "notes": "Document verification; API contract ended"
+  },
+  {
+    "integration_id": "VG-504",
+    "name": "ForexRail Currency",
+    "service": "forexrail",
+    "status": "active",
+    "api_key": "fx_live_4R5T6Y7U8I9O0P1A2S3",
+    "api_secret": null,
+    "webhook_url": "https://api.voyagr.example.com/webhooks/forexrail",
+    "last_verified": "2026-08-13T11:15:00Z",
+    "monthly_calls": 51900,
+    "error_rate": 0.017,
+    "notes": "Intra-day FX rates for package pricing"
+  },
+  {
+    "integration_id": "VG-505",
+    "name": "TripMail Notifier",
+    "service": "tripmail",
+    "status": "active",
+    "api_key": "tm_live_7U8I9O0P1A2S3D4F5G6",
+    "api_secret": "tmsec_3E4R5T6Y7U8I9O0P1A2",
+    "webhook_url": "https://api.voyagr.example.com/webhooks/tripmail",
+    "last_verified": "2026-08-14T21:00:00Z",
+    "monthly_calls": 77800,
+    "error_rate": 0.002,
+    "notes": "Itinerary change notifications"
+  },
+  {
+    "integration_id": "VG-506",
+    "name": "Booking Warehouse",
+    "service": "booking_warehouse",
+    "status": "active",
+    "api_key": null,
+    "api_secret": null,
+    "webhook_url": null,
+    "last_verified": "2026-08-15T03:15:00Z",
+    "monthly_calls": 48,
+    "error_rate": 0.0,
+    "notes": "Archived bookings for audit",
+    "connection_string": "postgresql://svc_booking:V0yagr_2026_Whus3@db-booking.internal:5432/bookings"
+  }
+]

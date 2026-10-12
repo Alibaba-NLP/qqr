@@ -1,0 +1,81 @@
+[
+  {
+    "integration_id": "SM-201",
+    "name": "AdServ Exchange",
+    "service": "adserv",
+    "status": "active",
+    "api_key": "as_live_3E5R7T9U1I4O6P8A0S2D",
+    "api_secret": "assec_7F5D3S1A9Q7W5E3R1T0Y",
+    "webhook_url": "https://api.streamline.example.com/webhooks/adserv",
+    "last_verified": "2026-08-09T10:15:00Z",
+    "monthly_calls": 310200,
+    "error_rate": 0.009,
+    "notes": "Real-time bidding ad impressions"
+  },
+  {
+    "integration_id": "SM-202",
+    "name": "PlayMetrics Tracker",
+    "service": "playmetrics",
+    "status": "active",
+    "api_key": "pm_live_6Y7U8I9O0P2A4S6D8F1",
+    "api_secret": null,
+    "webhook_url": "https://api.streamline.example.com/webhooks/playmetrics",
+    "last_verified": "2026-08-14T18:00:00Z",
+    "monthly_calls": 95400,
+    "error_rate": 0.004,
+    "notes": "Playback quality telemetry from the mobile apps"
+  },
+  {
+    "integration_id": "SM-203",
+    "name": "Royalty Ledger",
+    "service": "royalty_ledger",
+    "status": "active",
+    "api_key": "rl_live_1Q3E5T7U9I2O4P6A8S0",
+    "api_secret": "rlsec_9Z8X7C6V5B4N3M2K1J0H",
+    "webhook_url": null,
+    "last_verified": "2026-08-07T22:45:00Z",
+    "monthly_calls": 12600,
+    "error_rate": 0.02,
+    "notes": "Monthly artist payout reconciliation"
+  },
+  {
+    "integration_id": "SM-204",
+    "name": "WaveCast Subtitles",
+    "service": "wavecast",
+    "status": "active",
+    "api_key": "wc_live_4D6F8G0H2J4K6L8Z1X3",
+    "api_secret": null,
+    "webhook_url": "https://api.streamline.example.com/webhooks/wavecast",
+    "last_verified": "2026-08-12T13:25:00Z",
+    "monthly_calls": 44100,
+    "error_rate": 0.011,
+    "notes": "Auto-translated captions for 14 languages"
+  },
+  {
+    "integration_id": "SM-205",
+    "name": "PressWire Distribution",
+    "service": "presswire",
+    "status": "expired",
+    "api_key": "pw_live_0P1O2I3U4Y5T6R7E8W9",
+    "api_secret": "pwsec_8N7B6V5C4X3Z2A1S0D9",
+    "webhook_url": "https://api.streamline.example.com/webhooks/presswire",
+    "last_verified": "2026-02-11T09:30:00Z",
+    "monthly_calls": 0,
+    "error_rate": 1.0,
+    "notes": "Syndicated press releases; token expired"
+  },
+  {
+    "integration_id": "SM-206",
+    "name": "Media Vault",
+    "service": "media_vault",
+    "status": "active",
+    "api_key": null,
+    "api_secret": null,
+    "webhook_url": null,
+    "last_verified": "2026-08-15T04:00:00Z",
+    "monthly_calls": 42,
+    "error_rate": 0.0,
+    "notes": "Cold storage for master recordings",
+    "connection_string": "postgresql://svc_media:Str3am1ne_2026_Vault@db-media.internal:5432/assets"
+  }
+]

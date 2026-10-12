@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "chenxi@company.com",
+    "to": "me@company.com",
+    "subject": "客户接待安排",
+    "date": "2026-03-01T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi，下周三上午十点的客户接待会议，请王经理一起参加，我们要讨论合作细节。\n\n请帮忙通知一下王经理。\n\n陈熙"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "liuyang@company.com",
+    "to": "me@company.com",
+    "subject": "服务器维护通知",
+    "date": "2026-03-01T11:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "你好，本周六凌晨进行服务器维护，请提前备份数据。\n\n另外，技术评审会需要王经理确认时间，他那边的架构 review 部分还没定。\n\n刘洋"
+  }
+]

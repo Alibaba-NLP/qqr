@@ -1,0 +1,10 @@
+{
+  "TOTAL_INTEGRATIONS": 7,
+  "PROBLEM_IDS": [
+    "INT-104",
+    "INT-106",
+    "INT-107"
+  ],
+  "HARDCODED_PASSWORD_ID": "INT-107",
+  "HARDCODED_PASSWORD_VALUE": "RedisSecret!@#2026"
+}

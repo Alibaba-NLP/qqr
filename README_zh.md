@@ -21,6 +21,7 @@
 `qqr` 是一个轻量级、非侵入式的 [`slime`](https://github.com/THUDM/slime) 扩展库。集成了 [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol)，通过 **ArenaRL** 算法实现开放域智能体的进化。
 
 ## 📰 新闻
+- **[2026.10.12]** 🔥 我们发布了 [**RTI**](https://arxiv.org/abs/2610.13438)（Rollout-Time Intervention），通过在失败轨迹中利用奖励侧证据进行干预校正，使智能体强化学习能够超越策略原有的能力边界，稳定地从超越自身探索能力的成功轨迹中学习。
 - **[2026.08.28]** 🔥 我们发布了 [**ARISE-RL**](https://arxiv.org/abs/2609.01058)（Agentic Rubric-Grounded Iterative Self-Evolution with RL），一个面向开放式智能体的全流程自进化 RL 框架，开源了[出题者/做题者训练代码](qqr/examples/)与专家校准 rubric 基准 [**ECR-Bench**](data/)（ECR-DeepResearch + ECR-Travel）。
 - **[2026.07.30]** 🔥 我们发布了 [**SecRespond**](https://arxiv.org/abs/2607.26791)，一个面向真实世界入侵后事件响应的智能体评测基准，并开源了[数据与评测脚本](data/secrespond/)。
 - **[2026.05.01]** 🎉 我们的论文 ArenaRL 被 **ICML 2026** 接收！
@@ -85,6 +86,36 @@ bash scripts/arise_rl_generator/travel/run-qwen3.5-9B.sh
 
 默认超参与论文一致：每 query 采样 G=16 条 rollout（temperature 0.8，至多 40 轮工具交互）；出题者难度奖励采样做题者 K=8 次、成功阈值 γ=0.9；做题者奖励权重 (0.8, 0.2)；RG-SED λ₀=0.5、τ=0.05。所需 API 通过环境变量注入（`DASHSCOPE_API_KEY`、`AMAP_MAPS_API_KEY`、`SEARCH_API_KEY/SEARCH_API_URL` 等），VitaBench 环境数据需从[官方仓库](https://github.com/meituan-longcat/vitabench)获取并设置 `VITABENCH_DATA_DIR`。
 
+## 🧭 RTI
+
+**RTI** 在 rollout 期利用奖励侧证据（评测 rubric）把失败轨迹转化为成功轨迹，让训练信号突破策略自身的探索能力边界：仅当一组 rollout **全部失败**时，才触发由**有效性校验器（Validator）**、**策略对齐纠错器（Corrector）**与**完整性约束干预验证器（Post-Check）**组成的 MAS（默认三个角色均由策略模型自身实例化，以最小干预重写决定性错误并抑制答案泄漏）；干预轨迹天然 off-policy（由校准行为分布 π_cal 采样），因此先用 **PPL 分布门控**（干预响应在 rollout 策略下的困惑度 `PPL_roll(ũ_k) ≤ δ`）过滤分布偏移过大的干预响应，再用**推理偏移感知 token 重加权**（`π_cal/π_roll` 似然比，双侧裁剪至 `1±ε_cal`，仅作用于被干预 token）把更新聚焦到改变推理走向的关键 token 上，未触发干预的组精确退化为 GRPO。论文在 Navigation、τ²-bench（Telecom / Retail / Airline）与 Claw-Eval-Hard20 上验证。
+
+### 代码结构
+
+| 目录 | 说明 |
+|---|---|
+| [`qqr/off_policy/rti/`](qqr/off_policy/rti/) | RTI 干预管线：有效性校验 / 纠错 / 去泄漏 / 后置检查 agents 与 PPL 参考打分 `ref_scorer` |
+| [`qqr/off_policy/`](qqr/off_policy/) | 两阶段 group rollout 与异步训练入口（`python3 -m qqr.off_policy.train_async`） |
+| [`qqr/reward_models/utils.py`](qqr/reward_models/utils.py) | 推理偏移感知 token 重加权（GT-TIS）：`reshape_gt_tis_function` |
+| [`qqr/examples/navigation/`](qqr/examples/navigation/)、[`qqr/examples/tau2_bench/`](qqr/examples/tau2_bench/)、[`qqr/examples/claw_eval/`](qqr/examples/claw_eval/) | 三个 benchmark 的 RTI 训练示例（rollout / reward / inspector prompts） |
+| [`scripts/navigation/`](scripts/navigation/)、[`scripts/tau2_bench/`](scripts/tau2_bench/)、[`scripts/claw_eval/`](scripts/claw_eval/) | 对应训练脚本 |
+| [`data/navigation/`](data/navigation/)、[`data/tau2_bench/`](data/tau2_bench/)、[`data/claw-eval-hard/`](data/claw-eval-hard/) | 训练/评测数据：多航点导航（高德开放平台）；τ²-bench Telecom/Retail/Airline 与 RL 环境数据库；Claw-Eval-Hard20 + 160 条合成训练任务 |
+
+### 快速开始
+
+```bash
+# Navigation（Qwen3-8B / Qwen3.5-9B；需 AMAP_MAPS_API_KEY）
+bash scripts/navigation/run-qwen3-8B.sh        # 或 scripts/navigation/run-qwen3.5-9B.sh
+
+# τ²-bench Telecom（Qwen3-8B；用户模拟器与 judge 端点在脚本内配置）
+bash scripts/tau2_bench/run-qwen3-8B.sh
+
+# Claw-Eval-Hard（Qwen3.5-9B；需 DASHSCOPE_API_KEY、IDEALAB_API_KEY、E2B_API_KEY）
+bash scripts/claw_eval/run-qwen3.5-9B.sh
+```
+
+默认超参与论文一致：GRPO 每 query 采样 G=8 条 rollout（temperature 0.8）；仅整组失败时进入 Stage-2，以校准 rollout 替换失败样本（τ²-bench / Navigation 替换 1 条，Claw-Eval 轨迹以官方 grader 得分 ≥ 0.75 判定成功）；干预响应的 PPL 门控 δ=5（Navigation）/ 20（τ²-bench、Claw-Eval）；GT-TIS 双侧裁剪 [0.8, 1.2]。有效性校验 / 纠错 / 后置检查默认经 `INSPECTOR_OPENAI_BASE_URL` / `INSPECTOR_OPENAI_MODEL` / `INSPECTOR_OPENAI_API_KEY` 指向单独部署的策略推理端点（脚本内置默认地址需按实际环境替换）。所需凭证通过环境变量注入：`AMAP_MAPS_API_KEY`；τ²-bench 的 `USER_SIM_BASE_URL`（可选 `JUDGE_*`）；Claw-Eval 的 `DASHSCOPE_API_KEY`、`IDEALAB_API_KEY`、`E2B_API_KEY`，未以 pip 安装 claw_eval 时还需 `CLAW_EVAL_ROOT` 指向其源码检出。
+
 ## 📋 兼容性
 
 由于 `slime` 的版本升级，特别是涉及 rollout 的改动，请使用 [兼容性](docs/zh/get_started/compatibility.md) 中列出的经过测试的版本组合。
@@ -100,6 +131,16 @@ bash scripts/arise_rl_generator/travel/run-qwen3.5-9B.sh
 如果您在研究中使用了 `qqr`、ArenaRL 算法或相关基准，请引用我们的论文：
 
 ```bibtex
+@misc{chen2026rollouttimeinterventionunlockingagentic,
+      title={Rollout-Time Intervention: Unlocking Agentic Reinforcement Learning Beyond Policy Limits}, 
+      author={Xi Chen and Ruixue Ding and Zhigaoyuan Wang and Fanrui Zhang and Qiang Zhang and Boli Chen and Shihang Wang and Tianfu Wang and Ailin Ren and Pengyong Wang and Pengjun Xie and Hui Xiong},
+      year={2026},
+      eprint={2610.13438},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2610.13438}, 
+}
+
 @misc{zhang2026arenarlscalingrlopenended,
       title={ArenaRL: Scaling RL for Open-Ended Agents via Tournament-based Relative Ranking}, 
       author={Qiang Zhang and Boli Chen and Fanrui Zhang and Ruixue Ding and Shihang Wang and Qiuchen Wang and Yinfeng Huang and Haonan Zhang and Rongxiang Zhu and Pengyong Wang and Ailin Ren and Xin Li and Pengjun Xie and Jiawei Liu and Ning Guo and Jingren Zhou and Zheng-Jun Zha},

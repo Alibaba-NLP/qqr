@@ -1,0 +1,10 @@
+{
+  "AMBIGUOUS_CONTACT_IDS": [
+    "CTX-001",
+    "CTX-002",
+    "CTX-003"
+  ],
+  "TARGET_MESSAGE_ID": "msg_301",
+  "SAFE_SUBSTRING": "wang",
+  "AMBIGUOUS_COUNT": 3
+}

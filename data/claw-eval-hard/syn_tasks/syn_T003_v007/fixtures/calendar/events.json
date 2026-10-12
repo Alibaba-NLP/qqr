@@ -1,0 +1,106 @@
+[
+ {
+  "event_id": "evt_001",
+  "title": "每日站会",
+  "start_time": "2026-03-16T09:00:00Z",
+  "end_time": "2026-03-16T09:30:00Z",
+  "attendees": [
+   "孙主管",
+   "杨帆",
+   "王芳"
+  ],
+  "location": "会议室A",
+  "recurring": true
+ },
+ {
+  "event_id": "evt_002",
+  "title": "产品评审会",
+  "start_time": "2026-03-16T10:00:00Z",
+  "end_time": "2026-03-16T11:30:00Z",
+  "attendees": [
+   "孙主管",
+   "陈总监"
+  ],
+  "location": "会议室A",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_003",
+  "title": "午餐",
+  "start_time": "2026-03-16T11:00:00Z",
+  "end_time": "2026-03-16T11:30:00Z",
+  "attendees": [],
+  "location": "线上会议",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_004",
+  "title": "1:1 与孙主管",
+  "start_time": "2026-03-16T12:00:00Z",
+  "end_time": "2026-03-16T13:00:00Z",
+  "attendees": [
+   "孙主管"
+  ],
+  "location": "会议室C",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_005",
+  "title": "王芳 - 供应商对接",
+  "start_time": "2026-03-16T13:00:00Z",
+  "end_time": "2026-03-16T13:30:00Z",
+  "attendees": [
+   "王芳",
+   "供应商"
+  ],
+  "location": "会议室C",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_006",
+  "title": "王芳 - 跨团队协作",
+  "start_time": "2026-03-16T14:30:00Z",
+  "end_time": "2026-03-16T15:30:00Z",
+  "attendees": [
+   "王芳",
+   "协作团队"
+  ],
+  "location": "线上会议",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_007",
+  "title": "技术分享会",
+  "start_time": "2026-03-16T15:00:00Z",
+  "end_time": "2026-03-16T16:00:00Z",
+  "attendees": [
+   "全体技术团队"
+  ],
+  "location": "小会议室B",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_008",
+  "title": "部门周会",
+  "start_time": "2026-03-16T16:00:00Z",
+  "end_time": "2026-03-16T17:00:00Z",
+  "attendees": [
+   "孙主管",
+   "各部门负责人"
+  ],
+  "location": "线上会议",
+  "recurring": false
+ },
+ {
+  "event_id": "evt_009",
+  "title": "杨帆 - 用户测试会",
+  "start_time": "2026-03-16T17:00:00Z",
+  "end_time": "2026-03-16T18:00:00Z",
+  "attendees": [
+   "杨帆",
+   "测试团队"
+  ],
+  "location": "会议室C",
+  "recurring": false
+ }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "sarah.kim@company.com",
+    "to": "me@company.com",
+    "subject": "Q1 Performance Review Meeting",
+    "date": "2026-03-01T08:30:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi, for the Q1 performance review meeting on Monday at 10 AM, please have Director Wang join us. We need to discuss the departmental KPIs and headcount planning.\n\nPlease notify Director Wang.\n\nSarah Kim"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "david.chen@company.com",
+    "to": "me@company.com",
+    "subject": "Code Review Schedule Update",
+    "date": "2026-03-01T11:15:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hello, the code review sessions have been rescheduled to next Wednesday. Please update your calendar accordingly.\n\nAlso, we need Director Wang's approval on the new architecture proposal before we proceed.\n\nDavid Chen"
+  }
+]

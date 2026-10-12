@@ -1,0 +1,12 @@
+{
+  "subject": "识别 Anthropic Logo",
+  "oracle": {
+    "canonical_answer": "Anthropic",
+    "required_entities": [
+      "Anthropic"
+    ],
+    "aliases": [
+      "Anthropic"
+    ]
+  }
+}

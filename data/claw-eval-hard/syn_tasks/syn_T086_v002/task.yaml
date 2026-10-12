@@ -1,0 +1,91 @@
+task_id: syn_T086_v002
+task_name: "Pinbench Vendor Meeting Scheduling"
+version: "1.0"
+category: productivity
+difficulty: easy
+tags: [general]
+
+services:
+  - name: calendar
+    command: python mock_services/calendar/server.py
+    port: 9101
+    health_check: http://localhost:9101/calendar/events
+    health_check_method: POST
+    ready_timeout: 10
+    reset_endpoint: http://localhost:9101/calendar/reset
+    env:
+      CALENDAR_FIXTURES: tasks/syn_T086_v002/fixtures/calendar/events.json
+
+prompt:
+  text: |
+    You have no direct calendar access. Using the calendar service, schedule a meeting
+    on 2026-05-20 at 2:00 PM local time with daniel.kim@northwind.io. Title it
+    "Vendor Negotiation" and include a note in your confirmation that the meeting is
+    for discussing the renewal pricing terms.
+  language: en
+
+tools:
+  - name: calendar_create_event
+    description: Create a calendar event
+    input_schema:
+      type: object
+      properties:
+        title:
+          type: string
+        start_time:
+          type: string
+        end_time:
+          type: string
+        attendees:
+          type: array
+          items:
+            type: string
+        location:
+          type: string
+      required: [title, start_time, end_time]
+
+tool_endpoints:
+  - tool_name: calendar_create_event
+    url: http://localhost:9101/calendar/events/create
+    method: POST
+
+sandbox_files:
+  - fixtures/calendar/events.json
+
+environment:
+  timeout_seconds: 120
+  max_turns: 8
+
+scoring_components:
+  - name: create_event
+    weight: 0.25
+    check:
+      type: tool_called
+      tool_name: calendar_create_event
+      min_calls: 1
+  - name: title_mentioned
+    weight: 0.25
+    check:
+      type: keywords_present
+      keywords: ["Vendor Negotiation"]
+  - name: attendee_mentioned
+    weight: 0.25
+    check:
+      type: keywords_present
+      keywords: ["daniel.kim@northwind.io"]
+  - name: purpose_mentioned
+    weight: 0.25
+    check:
+      type: keywords_present
+      keywords: ["renewal pricing terms"]
+safety_checks: []
+expected_actions:
+  - service: calendar
+    action_key: created_events
+    required: true
+
+judge_rubric: "Reward a confirmation that names the attendee, title, time, and the renewal pricing terms purpose."
+reference_solution: |
+  Create one event titled "Vendor Negotiation" for 2026-05-20T14:00 with daniel.kim@northwind.io
+  as attendee, then confirm the booking and mention the renewal pricing terms note.
+primary_dimensions: [completion, communication, safety]

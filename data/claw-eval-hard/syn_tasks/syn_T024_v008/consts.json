@@ -1,0 +1,42 @@
+{
+  "VIP_CUSTOMERS": {
+    "CUS-001": {
+      "name": "Nexus Digital Solutions",
+      "industry": "Technology",
+      "revenue": 6800000,
+      "last_contact": "2026-03-05"
+    },
+    "CUS-003": {
+      "name": "Apex Manufacturing Group",
+      "industry": "Manufacturing",
+      "revenue": 9500000,
+      "last_contact": "2026-03-12"
+    },
+    "CUS-005": {
+      "name": "Velocity Logistics Partners",
+      "industry": "Logistics",
+      "revenue": 4200000,
+      "last_contact": "2026-03-18"
+    },
+    "CUS-007": {
+      "name": "Quantum Biopharma Inc",
+      "industry": "Pharmaceuticals",
+      "revenue": 15000000,
+      "last_contact": "2026-03-20"
+    }
+  },
+  "VIP_NAME_ALIASES": {
+    "CUS-001": [
+      "Nexus"
+    ],
+    "CUS-003": [
+      "Apex"
+    ],
+    "CUS-005": [
+      "Velocity"
+    ],
+    "CUS-007": [
+      "Quantum"
+    ]
+  }
+}

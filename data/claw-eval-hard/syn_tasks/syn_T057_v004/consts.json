@@ -1,0 +1,14 @@
+{
+  "subject": "识别 Mistral AI Logo",
+  "oracle": {
+    "canonical_answer": "Mistral AI",
+    "required_entities": [
+      "Mistral AI"
+    ],
+    "aliases": [
+      "Mistral",
+      "Mistral AI",
+      "Mistral.ai"
+    ]
+  }
+}

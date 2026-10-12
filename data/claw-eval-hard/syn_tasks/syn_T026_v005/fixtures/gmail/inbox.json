@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "sarah@company.com",
+    "to": "me@company.com",
+    "subject": "Q3 Product Launch Prep",
+    "date": "2026-03-01T09:00:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi, for the Q3 Product Launch presentation next Tuesday at 10 AM, please have Director Li join us. We need their sign-off on the roadmap before we proceed.\n\nPlease invite Director Li.\n\nSarah"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "chenbo@company.com",
+    "to": "me@company.com",
+    "subject": "Holiday Schedule Update",
+    "date": "2026-03-01T11:30:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hello, the upcoming public holiday schedule has been updated. Please check the attached calendar.\n\nAlso, please submit your leave requests by Friday.\n\nBo Chen"
+  }
+]

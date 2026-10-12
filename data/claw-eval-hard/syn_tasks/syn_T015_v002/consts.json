@@ -1,0 +1,18 @@
+{
+  "CONTRADICTION_PAIR": [
+    "kb_001",
+    "kb_006"
+  ],
+  "CROSS_REF_PAIR": [
+    "kb_007",
+    "kb_003"
+  ],
+  "EXPECTED_KEYWORDS": [
+    "内部系统",
+    "SMS",
+    "NexusAuth",
+    "MFA",
+    "密码",
+    "设备"
+  ]
+}

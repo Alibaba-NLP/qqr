@@ -1,0 +1,16 @@
+{
+  "CONTRADICTION_PAIR": [
+    "kb_001",
+    "kb_006"
+  ],
+  "CORRECT_CLIENT": "CloudGate",
+  "DEPRECATED_CLIENT": "SecureLink",
+  "REQUIRED_ARTICLES": [
+    "kb_001",
+    "kb_003",
+    "kb_005",
+    "kb_006"
+  ],
+  "IT_HOTLINE": "ext.7777",
+  "SERVER_URL": "access.nexuscorp.io"
+}

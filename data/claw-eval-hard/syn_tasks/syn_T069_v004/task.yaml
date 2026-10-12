@@ -1,0 +1,175 @@
+task_id: syn_T069_v004
+task_name: Micron Historical CapEx Cycle Analysis
+version: '1.0'
+category: finance
+difficulty: easy
+tags:
+- general
+services:
+- name: web_real
+  command: python mock_services/web_real/server.py
+  port: 9114
+  health_check: http://localhost:9114/web/health
+  health_check_method: GET
+  ready_timeout: 10
+  reset_endpoint: http://localhost:9114/web/reset
+prompt:
+  text: 'Memory semiconductor companies are notoriously cyclical, with capital expenditure
+    patterns often amplifying boom-bust dynamics. Micron Technology has been through
+    multiple CapEx cycles over the past decade, each with distinct characteristics.
+
+
+    As a cyclical industry analyst, analyze Micron''s historical CapEx patterns to
+    assess whether the current FY2025 investment cycle differs structurally from past
+    cycles. Using publicly available financial data, complete the following:
+
+
+    1. CapEx/Revenue Ratio Over Past 3 Cycles: Track Micron''s CapEx as a percentage
+    of revenue across at least 3 complete industry cycles (e.g., FY2016-FY2019, FY2020-FY2023,
+    FY2024-FY2025). Identify the peak CapEx/Revenue ratio in each cycle and the trough.
+    How does the current cycle''s peak compare?
+
+
+    2. Peak vs Trough Patterns: For each cycle, analyze what triggered the peak CapEx
+    spending and what followed (oversupply? price collapse? write-downs?). Contrast
+    the current FY2025 cycle where CapEx reached $13.8B with OCF of $17.5B — does
+    the 1.27x coverage ratio suggest a different pattern?
+
+
+    3. Structural Shift Assessment: Given the 10% NAND capacity reduction, HBM back-end
+    packaging investment, and new fab construction in Idaho and New York (with capacity
+    not expected until post-2027), argue whether this cycle represents a structural
+    break from historical patterns or merely another iteration of the memory cycle.
+    Use the $42.6B breakeven revenue calculation (at $20B CapEx / 47% OCF margin)
+    to support your assessment.'
+  language: en
+tools:
+- name: web_search
+  description: Search the public web and return result snippets.
+  input_schema:
+    type: object
+    properties:
+      query:
+        type: string
+        description: Search query
+      max_results:
+        type: integer
+        description: Maximum number of results
+        default: 10
+    required:
+    - query
+- name: web_fetch
+  description: Fetch full webpage content for a URL.
+  input_schema:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Target URL
+      timeout_seconds:
+        type: integer
+        description: Request timeout in seconds
+        default: 30
+    required:
+    - url
+tool_endpoints:
+- tool_name: web_search
+  url: http://localhost:9114/web/search
+  method: POST
+- tool_name: web_fetch
+  url: http://localhost:9114/web/fetch
+  method: POST
+environment:
+  timeout_seconds: 1800
+  max_turns: 50
+scoring_components:
+- name: web_search
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_search
+    min_calls: 1
+- name: web_fetch
+  weight: 0.1
+  check:
+    type: tool_called
+    tool_name: web_fetch
+    min_calls: 1
+- name: anchor_literals
+  weight: 0.35
+  check:
+    type: keywords_present
+    keywords:
+    - '17.5'
+    - '13.8'
+    - '3.7'
+    - '1.27'
+    - '42.6'
+- name: length
+  weight: 0.25
+  check:
+    type: min_length
+    min_length: 400
+- name: report_length
+  weight: 0.2
+  check:
+    type: min_length
+    min_length: 400
+safety_checks: []
+expected_actions: []
+judge_rubric: 'Evaluate the Micron historical cycle analysis against the following
+  rubric:
+
+
+  POSITIVE SCORING ITEMS (total 100%):
+
+  1. [Weight 15%] Identification of at least 3 distinct CapEx cycles with approximate
+  date ranges
+
+  2. [Weight 12%] CapEx/Revenue ratio tracking showing peak and trough values for
+  each cycle
+
+  3. [Weight 12%] Analysis of what triggered peak spending in each historical cycle
+
+  4. [Weight 10%] Discussion of consequences following peak CapEx (oversupply, price
+  collapse, write-downs)
+
+  5. [Weight 10%] Current cycle metrics: $13.8B CapEx, $17.5B OCF, 1.27x coverage
+  ratio
+
+  6. [Weight 10%] Comparison of current cycle''s coverage ratio to historical patterns
+
+  7. [Weight 8%] Discussion of 10% NAND capacity reduction as evidence of discipline
+
+  8. [Weight 8%] Analysis of HBM packaging investment as structural vs cyclical spending
+
+  9. [Weight 8%] Idaho/New York fab timeline (post-2027) as differentiator
+
+  10. [Weight 7%] $42.6B breakeven analysis supporting cycle sustainability argument
+
+
+  NEGATIVE SCORING ITEMS (deduct when present):
+
+  11. [Deduct 6%] Treating all cycles as identical without noting structural differences
+
+  12. [Deduct 4%] Missing currency units or inconsistent fiscal year references
+
+  13. [Deduct 4%] Failing to draw a clear conclusion about structural break vs cycle
+  repetition'
+reference_solution: '1. Three historical cycles identified: FY2016-2019 (3D NAND ramp),
+  FY2020-2023 (pandemic boom/bust), FY2024-2025 (AI/HBM).
+
+  2. Peak CapEx/Revenue ratios: ~35-40% in each cycle. Current FY2025 peak ~37% ($13.8B/~$37B).
+  Trough ratios ~15-20%.
+
+  3. Past peaks led to oversupply and price collapses; current 1.27x coverage ratio
+  is healthier than historical patterns.
+
+  4. Structural differences: 10% NAND reduction + HBM packaging focus + Idaho/NY fabs
+  with post-2027 capacity.
+
+  5. $42.6B breakeven revenue ($20B/47%) is achievable given AI demand trajectory
+  — suggests structural break from past boom-bust patterns.'
+primary_dimensions:
+- completion
+- communication

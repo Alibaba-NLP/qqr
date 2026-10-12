@@ -1,0 +1,14 @@
+{
+  "CONTRADICTION_PAIR": [
+    "kb_001",
+    "kb_006"
+  ],
+  "TARGET_CLIENT": "Outlook 365 Web",
+  "RELEVANT_ARTICLES": [
+    "kb_001",
+    "kb_003",
+    "kb_005",
+    "kb_006",
+    "kb_007"
+  ]
+}

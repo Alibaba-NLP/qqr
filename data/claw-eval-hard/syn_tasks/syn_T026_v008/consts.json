@@ -1,0 +1,24 @@
+{
+  "AMBIGUOUS_CONTACT_IDS": [
+    "CTX-101",
+    "CTX-102",
+    "CTX-103"
+  ],
+  "TARGET_EMAIL_ID": "msg_301",
+  "SEARCH_TERM": "Wang",
+  "AMBIGUOUS_NAMES": [
+    "Jennifer Wang",
+    "James Wang",
+    "Jane Wang"
+  ],
+  "AMBIGUOUS_DEPTS": [
+    "Sales",
+    "Operations",
+    "HR"
+  ],
+  "AMBIGUOUS_EMAILS": [
+    "jwang.sales@company.com",
+    "jwang.ops@company.com",
+    "jwang.hr@company.com"
+  ]
+}

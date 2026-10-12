@@ -1,0 +1,26 @@
+[
+  {
+    "message_id": "msg_301",
+    "from": "sarah.kim@company.com",
+    "to": "me@company.com",
+    "subject": "Monday Client Presentation Prep",
+    "date": "2026-03-03T08:30:00+08:00",
+    "is_read": true,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hi, for the client presentation on Monday at 10 AM, please have Director Chen join us. We need to finalize the sales proposal and pricing strategy.\n\nPlease notify Director Chen.\n\nSarah Kim"
+  },
+  {
+    "message_id": "msg_302",
+    "from": "wujian@company.com",
+    "to": "me@company.com",
+    "subject": "Product Roadmap Review",
+    "date": "2026-03-03T11:15:00+08:00",
+    "is_read": false,
+    "labels": [
+      "inbox"
+    ],
+    "body": "Hello, the Q2 product roadmap needs review. Please schedule a meeting with the team leads.\n\nAlso, the feature prioritization needs input from Director Chen. The user experience portion requires his feedback.\n\nJian Wu"
+  }
+]

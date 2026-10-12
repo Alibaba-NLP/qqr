@@ -1,0 +1,93 @@
+[
+  {
+    "article_id": "kb_101",
+    "title": "OmniTech VPN Connection Guide",
+    "category": "IT Support",
+    "tags": [
+      "VPN",
+      "remote work",
+      "network"
+    ],
+    "content": "## VPN Connection Steps\n\n1. Download and install the FortiClient VPN client\n2. Open FortiClient and click [Remote Access]\n3. Enter server address: access.omnitech.io\n4. Log in with your company email account and password\n5. Select [Full Tunnel Mode] to connect\n\n## Common Issues\n- Connection timeout: Check your network connection and ensure the firewall is not blocking VPN port (443)\n- Authentication failure: Confirm your password has not expired; you can reset it at https://pwd.omnitech.io\n- Cannot access intranet after connecting: Try disconnecting and reconnecting, or contact IT hotline ext.9999\n\n## Important Notes\n- VPN password syncs with your email password and must be changed every 90 days\n- Special VPN permissions must be requested in advance for overseas business trips",
+    "last_updated": "2027-01-15",
+    "views": 1523
+  },
+  {
+    "article_id": "kb_102",
+    "title": "New Employee IT Device Request Process",
+    "category": "IT Support",
+    "tags": [
+      "device",
+      "onboarding",
+      "request"
+    ],
+    "content": "## Request Process\n\n1. Log into the OA system - Asset Management - Device Request\n2. Fill out the request form (requires department manager approval)\n3. IT department processes the request within 2 business days\n4. You will be notified to pick up the device once it is ready\n\n## Standard Configuration\n- Laptop: Dell XPS 15 or MacBook Pro 14-inch\n- Monitor: LG 27-inch 4K\n- Keyboard & Mouse: Your choice (budget up to 600 CNY)\n- Phone: Assigned based on job level\n\n## Important Notes\n- All IT devices must be returned upon resignation\n- Damaged devices must go through the repair request process\n- Unauthorized software installation is not permitted",
+    "last_updated": "2027-02-01",
+    "views": 892
+  },
+  {
+    "article_id": "kb_103",
+    "title": "Remote Work Guidelines and Tools",
+    "category": "Workplace Guidelines",
+    "tags": [
+      "remote work",
+      "tools",
+      "guidelines"
+    ],
+    "content": "## Remote Work Basic Requirements\n\n1. You must connect via company VPN to access internal systems (see VPN Connection Guide kb_101)\n2. Stay online on WeCom during work hours\n3. Attend the daily team standup (09:30)\n\n## Recommended Tools\n- Communication & Collaboration: WeCom (required), Slack (optional)\n- Document Collaboration: Confluence + Google Docs\n- Code Collaboration: GitLab (requires VPN for intranet access)\n- Video Conferencing: Zoom (preferred), Teams (for external client meetings)\n\n## Network Requirements\n- Recommended bandwidth: Download 100Mbps+ / Upload 20Mbps+\n- Video conferencing requires a stable network environment\n- If your home network is unstable, you can apply for a mobile hotspot subsidy (150 CNY/month)\n\n## Security Reminders\n- Do not handle sensitive files on public WiFi\n- Set lock screen timeout to 5 minutes auto-lock\n- Recording or screenshotting internal company meetings is prohibited (unless approved)",
+    "last_updated": "2027-02-10",
+    "views": 2156
+  },
+  {
+    "article_id": "kb_104",
+    "title": "Business Travel Policy",
+    "category": "HR Policies",
+    "tags": [
+      "travel",
+      "expense",
+      "policy"
+    ],
+    "content": "## Travel Approval\n- Domestic travel: Manager approval\n- International travel: Director approval\n\n## Expense Limits\n- Flight: Economy class\n- Hotel: Up to 800 CNY/night\n- Meal allowance: 200 CNY/day\n\n## Important Notes\n- Submit expense reports within 5 business days of return\n- Keep all original receipts\n- Travel insurance is provided by the company",
+    "last_updated": "2027-01-20",
+    "views": 3421
+  },
+  {
+    "article_id": "kb_105",
+    "title": "Password Security Policy and Reset Guide",
+    "category": "IT Security",
+    "tags": [
+      "password",
+      "security",
+      "reset"
+    ],
+    "content": "## Password Policy\n- Minimum length: 14 characters\n- Must include: uppercase letters, lowercase letters, numbers, special characters\n- Validity period: 90 days\n- Cannot reuse the last 5 passwords\n\n## Reset Methods\n1. Self-service reset: Visit https://pwd.omnitech.io\n2. Via the WeCom IT bot\n3. Contact IT hotline ext.9999\n\n## MFA Multi-Factor Authentication\n- MFA is mandatory for all systems\n- Recommended: Microsoft Authenticator\n- Backup method: SMS verification code\n\n## Account Lockout\n- 5 consecutive failed password attempts will lock the account for 30 minutes\n- After lockout, you can self-unlock or contact IT",
+    "last_updated": "2027-02-05",
+    "views": 1876
+  },
+  {
+    "article_id": "kb_106",
+    "title": "VPN Client Update Notice",
+    "category": "IT Support",
+    "tags": [
+      "VPN",
+      "update",
+      "client"
+    ],
+    "content": "## Important Notice\n\nFollowing an assessment by the OmniTech IT Security Committee, the FortiClient VPN client will no longer be supported starting April 1, 2027.\n\n**Replacement:**\nPlease migrate to the GlobalProtect VPN client (Palo Alto Networks).\n\n**Migration Steps:**\n1. Uninstall FortiClient\n2. Download GlobalProtect from https://access.omnitech.io/downloads\n3. Connect using the same server address and credentials\n\n**Note:** This notice takes priority over the FortiClient guide in kb_101. If you have questions, contact IT hotline ext.9999.\n\nReference: The old VPN guide (kb_101) will be updated after the migration is complete.",
+    "last_updated": "2027-02-25",
+    "views": 456
+  },
+  {
+    "article_id": "kb_107",
+    "title": "Remote Work Common Troubleshooting",
+    "category": "IT Support",
+    "tags": [
+      "remote work",
+      "troubleshooting",
+      "network"
+    ],
+    "content": "## Common Issues\n\n1. Cannot connect to VPN: See kb_101 for setup instructions\n2. Slow network speed: Check bandwidth requirements in kb_103\n3. Cannot access internal sites: Ensure Full Tunnel Mode is enabled\n\n## Contact Support\n- IT Hotline: ext.9999\n- Email: support@omnitech.io\n- Hours: 09:00 - 18:00 (Mon-Fri)",
+    "last_updated": "2027-02-15",
+    "views": 1205
+  }
+]
