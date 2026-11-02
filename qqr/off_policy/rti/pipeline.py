@@ -183,8 +183,11 @@ v
                 tools=sample.train_metadata['tools'] if 'tools' in sample.train_metadata else None,
                 label=label,
             )
-            meta_j = pres.parsed if isinstance(pres.parsed, dict) else {"ok": True, "diagnosis": "postcheck_parse_fallback"}
-            ok_j = bool(meta_j.get("ok", True))
+            # Fail closed: when the LLM post-check is unavailable or unparseable,
+            # abstain from admitting the intervention (roll back to the original
+            # response) instead of letting the correction slip through the gate.
+            meta_j = pres.parsed if isinstance(pres.parsed, dict) else {"ok": False, "diagnosis": "postcheck_parse_fallback"}
+            ok_j = bool(pres.ok) and bool(meta_j.get("ok", False))
             self.trace.add(sample, step_idx, type="postcheck", role="pipeline", name="llm",
                            content=self._agent_io(pres, parsed=meta_j), meta={"ok": ok_j, "mode": mode})
 

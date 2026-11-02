@@ -15,8 +15,9 @@ class PostcheckJudgeAgent(BaseAgent):
         prompt = self.prompt.build(user_prompt, history, original, corrected, tools, label)
         res = await self.run(prompt=prompt, meta={"task": "postcheck"})
         if not res.raw:
-            res.parsed = {"ok": True, "diagnosis": "postcheck_judge_unavailable"}
-            res.ok = True
+            # Fail closed: with no verdict the intervention cannot be admitted.
+            res.parsed = {"ok": False, "diagnosis": "postcheck_judge_unavailable"}
+            res.ok = False
             return res
         try:
             parse_content = self.parse_qwen3_output(res.raw)
@@ -24,6 +25,7 @@ class PostcheckJudgeAgent(BaseAgent):
             res.parsed = j
             res.ok = True
         except Exception as e:
-            res.parsed = {"ok": True, "diagnosis": "postcheck_parse_error", "error": str(e), "raw": res.raw}
+            # Fail closed: an unparseable verdict must not be treated as a pass.
+            res.parsed = {"ok": False, "diagnosis": "postcheck_parse_error", "error": str(e), "raw": res.raw}
             res.ok = False
         return res
